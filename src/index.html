@@ -6,7 +6,29 @@
     <link rel="stylesheet" href="index.css" />
   </head>
   <body>
-    <h1>💖 Hello World!</h1>
-    <p>Welcome to your Electron application.</p>
+    <h1>💖 Hello Dan!</h1>
+    <p>Welcome to the uploader.</p>
+
+    <section id="root-folder-section">
+      <h2>Root folder</h2>
+      <p id="root-folder-display">No folder selected.</p>
+      <button id="choose-folder-btn">Choose folder…</button>
+    </section>
+
+    <script>
+      (async () => {
+        const display = document.getElementById("root-folder-display");
+        const btn = document.getElementById("choose-folder-btn");
+
+        // Load any previously saved folder
+        const saved = await window.api.getRootFolder();
+        if (saved) display.textContent = saved;
+
+        btn.addEventListener("click", async () => {
+          const chosen = await window.api.chooseRootFolder();
+          if (chosen) display.textContent = chosen;
+        });
+      })();
+    </script>
   </body>
 </html>
