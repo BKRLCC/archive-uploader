@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Uploader Settings</title>
+    <link rel="stylesheet" href="index.css" />
+  </head>
+  <body>
+    <p><a href="index.html">← Back</a></p>
+    <h1>Uploader Settings</h1>
+
+    <section id="root-folder-section">
+      <h2>Root folder</h2>
+      <p id="root-folder-display">No folder selected.</p>
+      <button id="choose-folder-btn">Choose folder…</button>
+    </section>
+
+    <script>
+      (async () => {
+        const display = document.getElementById("root-folder-display");
+        const btn = document.getElementById("choose-folder-btn");
+
+        const saved = await window.api.getRootFolder();
+        if (saved) display.textContent = saved;
+
+        btn.addEventListener("click", async () => {
+          const chosen = await window.api.chooseRootFolder();
+          if (chosen) display.textContent = chosen;
+        });
+      })();
+    </script>
+  </body>
+</html>

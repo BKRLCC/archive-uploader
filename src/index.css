@@ -1,8 +1,84 @@
+@font-face {
+  font-family: 'Meloso';
+  src: url('./fonts/meloso/MelosoVariable-Regular.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Meloso';
+  src: url('./fonts/meloso/Meloso-Italic.otf') format('opentype');
+  font-weight: 400;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Muli';
+  src: url('./fonts/muli/Muli.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Muli';
+  src: url('./fonts/muli/Muli-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+}
+@font-face {
+  font-family: 'Muli';
+  src: url('./fonts/muli/Muli-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Muli';
+  src: url('./fonts/muli/Muli-LightItalic.ttf') format('truetype');
+  font-weight: 300;
+  font-style: italic;
+}
+@font-face {
+  font-family: 'Muli';
+  src: url('./fonts/muli/Muli-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Muli';
+  src: url('./fonts/muli/Muli-Semi-BoldItalic.ttf') format('truetype');
+  font-weight: 600;
+  font-style: italic;
+}
+@font-face {
+  font-family: 'Muli';
+  src: url('./fonts/muli/Muli-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Muli';
+  src: url('./fonts/muli/Muli-BoldItalic.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+}
+@font-face {
+  font-family: 'Muli';
+  src: url('./fonts/muli/Muli-ExtraLight.ttf') format('truetype');
+  font-weight: 200;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Muli';
+  src: url('./fonts/muli/Muli-ExtraLightItalic.ttf') format('truetype');
+  font-weight: 200;
+  font-style: italic;
+}
+
 body {
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
-    sans-serif;
+  font-family: 'Muli', sans-serif;
   margin: auto;
   max-width: 38rem;
   padding: 2rem;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Meloso', sans-serif;
 }
