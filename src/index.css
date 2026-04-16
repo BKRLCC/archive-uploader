@@ -250,6 +250,41 @@ body.browser #populate-feedback {
 
 /* ── Sheet table ────────────────────────────────────────── */
 
+#items-area {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+}
+
+#items-table-wrap {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+#edit-drawer {
+  width: 0;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: width 0.2s ease;
+  border-left: 1px solid transparent;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+#edit-drawer.open {
+  width: 320px;
+  border-left-color: rgba(0, 0, 0, 0.1);
+}
+
+#edit-drawer-inner {
+  width: 320px;
+  padding: 1em;
+  box-sizing: border-box;
+}
+
 .sheet-table {
   border-collapse: collapse;
   width: 100%;
@@ -263,6 +298,9 @@ body.browser #populate-feedback {
   text-align: left;
   vertical-align: top;
   white-space: nowrap;
+  max-width: 400px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sheet-table th {
@@ -281,4 +319,24 @@ h4,
 h5,
 h6 {
   font-family: "Meloso", sans-serif;
+}
+
+button {
+  font-family: "Meloso", sans-serif;
+  background-color: #a62b2b;
+  color: #fff;
+  border: none;
+  padding: 0.5em 1em;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+input,
+textarea {
+  font-family: "Muli", sans-serif;
+  padding: 0.4em 0.75em;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  transition: border-color 0.2s ease;
 }

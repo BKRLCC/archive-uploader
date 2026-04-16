@@ -12,4 +12,6 @@ contextBridge.exposeInMainWorld("api", {
     ipcRenderer.invoke("populate-files-tab", folderPath, rootFolder),
   readSheet: (xlsxPath, sheetName) =>
     ipcRenderer.invoke("read-sheet", xlsxPath, sheetName),
+  updateSheetRow: (xlsxPath, rowIndex, updatedValues) =>
+    ipcRenderer.invoke("update-sheet-row", xlsxPath, rowIndex, updatedValues),
 });
