@@ -2,6 +2,7 @@ const { app, BrowserWindow, dialog, ipcMain } = require("electron");
 const path = require("node:path");
 const fs = require("node:fs/promises");
 const Store = require("electron-store");
+const ExcelJS = require("exceljs");
 
 const store = new Store();
 
@@ -55,6 +56,119 @@ ipcMain.handle("list-folder", async (_event, folderPath) => {
       if (a.isDirectory !== b.isDirectory) return a.isDirectory ? -1 : 1;
       return a.name.localeCompare(b.name);
     });
+});
+
+// MIME type map for encodingFormat
+const MIME_TYPES = {
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  gif: "image/gif",
+  webp: "image/webp",
+  svg: "image/svg+xml",
+  mp3: "audio/mpeg",
+  wav: "audio/wav",
+  flac: "audio/flac",
+  aac: "audio/aac",
+  ogg: "audio/ogg",
+  m4a: "audio/mp4",
+  mp4: "video/mp4",
+  mov: "video/quicktime",
+  avi: "video/x-msvideo",
+  mkv: "video/x-matroska",
+  webm: "video/webm",
+  pdf: "application/pdf",
+  txt: "text/plain",
+  html: "text/html",
+  css: "text/css",
+  js: "text/javascript",
+  json: "application/json",
+  xml: "application/xml",
+  md: "text/markdown",
+  zip: "application/zip",
+  gz: "application/gzip",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+};
+
+// IPC: populate (or replace) the "Files" sheet in archive.xlsx
+ipcMain.handle("populate-files-tab", async (_event, folderPath, rootFolder) => {
+  const xlsxPath = path.join(folderPath, "archive.xlsx");
+
+  // Read all direct children of the folder
+  const allEntries = await fs.readdir(folderPath, { withFileTypes: true });
+  const files = allEntries.filter(
+    (e) =>
+      e.isFile() &&
+      !e.name.startsWith(".") &&
+      !e.name.startsWith("~$") &&
+      e.name !== "archive.xlsx",
+  );
+
+  // Build rows
+  const rows = await Promise.all(
+    files.map(async (e) => {
+      const filePath = path.join(folderPath, e.name);
+      const stat = await fs.stat(filePath);
+      const relPath = path
+        .relative(rootFolder, filePath)
+        .split(path.sep)
+        .join("/");
+      const ext = path.extname(e.name).toLowerCase().slice(1);
+      return {
+        "@id": relPath,
+        "@type": "File",
+        contentSize: stat.size,
+        dateCreated: stat.birthtime.toISOString(),
+        dateModified: stat.mtime.toISOString(),
+        encodingFormat: MIME_TYPES[ext] || "",
+      };
+    }),
+  );
+
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.readFile(xlsxPath);
+
+  // Remove existing "Files" sheet if present, then add a fresh one
+  const existing = workbook.getWorksheet("Files");
+  if (existing) workbook.removeWorksheet(existing.id);
+  const sheet = workbook.addWorksheet("Files");
+
+  const COLUMNS = [
+    "@id",
+    "@type",
+    "contentSize",
+    "dateCreated",
+    "dateModified",
+    "encodingFormat",
+  ];
+  sheet.columns = COLUMNS.map((key) => ({ header: key, key }));
+
+  // Style header row: 16pt bold
+  const headerRow = sheet.getRow(1);
+  headerRow.font = { size: 16, bold: true };
+  headerRow.commit();
+
+  // Add data rows with 16pt font
+  for (const row of rows) {
+    const r = sheet.addRow(row);
+    r.font = { size: 16 };
+    r.commit();
+  }
+
+  // Auto-fit column widths based on content
+  sheet.columns.forEach((col) => {
+    let maxLen = col.header ? col.header.length : 0;
+    col.eachCell({ includeEmpty: false }, (cell) => {
+      const val = cell.value == null ? "" : String(cell.value);
+      if (val.length > maxLen) maxLen = val.length;
+    });
+    col.width = maxLen + 2;
+  });
+
+  await workbook.xlsx.writeFile(xlsxPath);
+  return { count: rows.length };
 });
 
 // IPC: return stat metadata for a file or folder

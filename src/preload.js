@@ -8,4 +8,6 @@ contextBridge.exposeInMainWorld("api", {
   chooseRootFolder: () => ipcRenderer.invoke("choose-root-folder"),
   listFolder: (folderPath) => ipcRenderer.invoke("list-folder", folderPath),
   getFileInfo: (filePath) => ipcRenderer.invoke("get-file-info", filePath),
+  populateFilesTab: (folderPath, rootFolder) =>
+    ipcRenderer.invoke("populate-files-tab", folderPath, rootFolder),
 });

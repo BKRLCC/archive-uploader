@@ -4,134 +4,8 @@
     <meta charset="UTF-8" />
     <title>File Browser</title>
     <link rel="stylesheet" href="index.css" />
-    <style>
-      html,
-      body {
-        height: 100%;
-        margin: 0;
-        box-sizing: border-box;
-      }
-      body {
-        padding: 1em;
-        display: flex;
-        flex-direction: column;
-      }
-      #browser {
-        flex: 1;
-      }
-      #breadcrumb {
-        font-size: 0.9em;
-        margin-bottom: 1em;
-      }
-      #breadcrumb span {
-        cursor: pointer;
-        color: #0070f3;
-        text-decoration: underline;
-      }
-      #breadcrumb span:last-child {
-        color: inherit;
-        text-decoration: none;
-        cursor: default;
-      }
-      #breadcrumb .sep {
-        margin: 0 0.3em;
-        cursor: default;
-        color: inherit;
-        text-decoration: none;
-      }
-      #browser {
-        display: flex;
-        align-items: stretch;
-        gap: 0;
-        min-height: 100%;
-      }
-      #browser-left {
-        flex: 1;
-        min-width: 0;
-      }
-      #file-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-      }
-      #file-list li {
-        padding: 0.35em 0.5em;
-        cursor: default;
-        border-radius: 4px;
-        user-select: none;
-      }
-      #file-list li.folder {
-        cursor: pointer;
-      }
-      #file-list li:hover {
-        background: rgba(0, 0, 0, 0.05);
-      }
-      #file-list li.selected {
-        background: #0070f3;
-        color: #fff;
-      }
-      #file-list li.selected:hover {
-        background: #005ecf;
-      }
-      #empty-state {
-        color: #666;
-      }
-      #detail-panel {
-        width: 0;
-        overflow: hidden;
-        flex-shrink: 0;
-        transition: width 0.2s ease;
-        border-left: 1px solid transparent;
-        position: sticky;
-        top: 0;
-        height: 100vh;
-        overflow-y: auto;
-      }
-      #detail-panel.open {
-        width: 280px;
-        border-left-color: rgba(0, 0, 0, 0.1);
-      }
-      #detail-inner {
-        width: 280px;
-        padding: 1em;
-        box-sizing: border-box;
-      }
-      #preview {
-        width: 100%;
-        max-height: 200px;
-        object-fit: contain;
-        display: block;
-        margin-bottom: 0.75em;
-        border-radius: 4px;
-        background: rgba(0, 0, 0, 0.04);
-      }
-      #detail-name {
-        font-weight: bold;
-        margin: 0 0 0.2em;
-        word-break: break-word;
-      }
-      #detail-type {
-        font-size: 0.85em;
-        color: #555;
-        margin: 0 0 0.75em;
-      }
-      #detail-meta {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.8em;
-      }
-      #detail-meta td {
-        padding: 0.3em 0;
-        vertical-align: top;
-      }
-      #detail-meta td:first-child {
-        color: #888;
-        width: 45%;
-        padding-right: 0.5em;
-      }
-    </style>
   </head>
-  <body>
+  <body class="browser">
     <p><a href="index.html">← Main screen</a></p>
 
     <div id="no-root" style="display: none">
@@ -143,6 +17,10 @@
     <div id="browser" style="display: none">
       <div id="browser-left">
         <nav id="breadcrumb"></nav>
+        <div id="populate-bar">
+          <button id="populate-btn">📋 Update Files tab</button>
+          <span id="populate-feedback"></span>
+        </div>
         <ul id="file-list"></ul>
       </div>
       <div id="detail-panel">
@@ -295,6 +173,14 @@
         const entries = await window.api.listFolder(folderPath);
         renderBreadcrumb();
         renderList(entries);
+
+        // Show the populate button only if this folder contains archive.xlsx
+        const hasXlsx = entries.some(
+          (e) => !e.isDirectory && e.name === "archive.xlsx",
+        );
+        const bar = document.getElementById("populate-bar");
+        bar.classList.toggle("visible", hasXlsx);
+        document.getElementById("populate-feedback").textContent = "";
       }
 
       function renderBreadcrumb() {
@@ -369,6 +255,27 @@
           ul.appendChild(li);
         }
       }
+
+      document
+        .getElementById("populate-btn")
+        .addEventListener("click", async (e) => {
+          e.stopPropagation();
+          const feedback = document.getElementById("populate-feedback");
+          const btn = document.getElementById("populate-btn");
+          btn.disabled = true;
+          feedback.textContent = "Working…";
+          try {
+            const { count } = await window.api.populateFilesTab(
+              currentPath,
+              rootFolder,
+            );
+            feedback.textContent = `✓ Files tab updated (${count} file${count !== 1 ? "s" : ""})`;
+          } catch (err) {
+            feedback.textContent = `✗ ${err.message}`;
+          } finally {
+            btn.disabled = false;
+          }
+        });
 
       document.addEventListener("click", closePanel);
       document.getElementById("detail-panel").addEventListener("click", (e) => {
