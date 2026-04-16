@@ -250,6 +250,32 @@ body.browser #populate-feedback {
   color: #555;
 }
 
+/* ── Sheet table ────────────────────────────────────────── */
+
+.sheet-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.9em;
+}
+
+.sheet-table th,
+.sheet-table td {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  padding: 0.4em 0.75em;
+  text-align: left;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+.sheet-table th {
+  background: rgba(0, 0, 0, 0.04);
+  font-weight: 600;
+}
+
+.sheet-table tbody tr:nth-child(even) {
+  background: rgba(0, 0, 0, 0.02);
+}
+
 h1,
 h2,
 h3,

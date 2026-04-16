@@ -1,0 +1,108 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Archive</title>
+    <link rel="stylesheet" href="index.css" />
+  </head>
+  <body>
+    <div id="error-state" style="display: none">
+      <p>No folder specified. <a href="browser.html">← Back to browser</a></p>
+    </div>
+
+    <div id="main" style="display: none">
+      <p id="back-link"><a href="browser.html">← Back to browser</a></p>
+      <h1>⭐ Archive</h1>
+      <p id="folder-path"></p>
+
+      <section>
+        <h2>Files tab</h2>
+        <p>
+          Populate or replace the <strong>Files</strong> sheet in
+          <code>archive.xlsx</code> with the current contents of this folder.
+        </p>
+        <button id="populate-btn">Update Files tab</button>
+        <span id="populate-feedback"></span>
+      </section>
+
+      <section>
+        <h2>Items</h2>
+        <div id="items-state"></div>
+        <div id="items-table-wrap" style="overflow-x: auto"></div>
+      </section>
+    </div>
+
+    <script>
+      (async () => {
+        const params = new URLSearchParams(window.location.search);
+        const folder = params.get("folder");
+
+        if (!folder) {
+          document.getElementById("error-state").style.display = "block";
+          return;
+        }
+
+        const rootFolder = await window.api.getRootFolder();
+        const rel = folder.slice(rootFolder.length).replace(/^[\/]/, "");
+        const parts = rel ? rel.split(/[\/]/) : [];
+        const segments = ["🏠 Home", ...parts].join(" › ");
+        document.getElementById("folder-path").textContent = segments;
+        document.getElementById("main").style.display = "block";
+
+        // Load Items tab
+        const xlsxPath = folder + "/archive.xlsx";
+        const sheet = await window.api.readSheet(xlsxPath, "Items");
+        const stateEl = document.getElementById("items-state");
+        const wrapEl = document.getElementById("items-table-wrap");
+
+        if (!sheet) {
+          stateEl.textContent = "No Items tab found in archive.xlsx.";
+        } else if (sheet.headers.length === 0) {
+          stateEl.textContent = "Items tab is empty.";
+        } else {
+          const table = document.createElement("table");
+          table.className = "sheet-table";
+
+          const thead = table.createTHead();
+          const hRow = thead.insertRow();
+          for (const h of sheet.headers) {
+            const th = document.createElement("th");
+            th.textContent = h ?? "";
+            hRow.appendChild(th);
+          }
+
+          const tbody = table.createTBody();
+          for (const row of sheet.rows) {
+            const tr = tbody.insertRow();
+            for (let i = 0; i < sheet.headers.length; i++) {
+              const td = tr.insertCell();
+              td.textContent = row[i] ?? "";
+            }
+          }
+
+          wrapEl.appendChild(table);
+        }
+
+        document
+          .getElementById("populate-btn")
+          .addEventListener("click", async () => {
+            const feedback = document.getElementById("populate-feedback");
+            const btn = document.getElementById("populate-btn");
+            btn.disabled = true;
+            feedback.textContent = "Working…";
+            try {
+              const { count } = await window.api.populateFilesTab(
+                folder,
+                rootFolder,
+              );
+              feedback.textContent = `✓ Updated (${count} file${count !== 1 ? "s" : ""})`;
+            } catch (err) {
+              feedback.textContent = `✗ ${err.message}`;
+            } finally {
+              btn.disabled = false;
+            }
+          });
+      })();
+    </script>
+  </body>
+</html>

@@ -10,4 +10,6 @@ contextBridge.exposeInMainWorld("api", {
   getFileInfo: (filePath) => ipcRenderer.invoke("get-file-info", filePath),
   populateFilesTab: (folderPath, rootFolder) =>
     ipcRenderer.invoke("populate-files-tab", folderPath, rootFolder),
+  readSheet: (xlsxPath, sheetName) =>
+    ipcRenderer.invoke("read-sheet", xlsxPath, sheetName),
 });

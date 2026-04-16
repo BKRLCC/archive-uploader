@@ -17,10 +17,6 @@
     <div id="browser" style="display: none">
       <div id="browser-left">
         <nav id="breadcrumb"></nav>
-        <div id="populate-bar">
-          <button id="populate-btn">📋 Update Files tab</button>
-          <span id="populate-feedback"></span>
-        </div>
         <ul id="file-list"></ul>
       </div>
       <div id="detail-panel">
@@ -174,14 +170,6 @@
         const entries = await window.api.listFolder(folderPath);
         renderBreadcrumb();
         renderList(entries);
-
-        // Show the populate button only if this folder contains archive.xlsx
-        const hasXlsx = entries.some(
-          (e) => !e.isDirectory && e.name === "archive.xlsx",
-        );
-        const bar = document.getElementById("populate-bar");
-        bar.classList.toggle("visible", hasXlsx);
-        document.getElementById("populate-feedback").textContent = "";
       }
 
       function renderBreadcrumb() {
@@ -243,6 +231,12 @@
               e.stopPropagation();
               navigateTo(filePath);
             });
+          } else if (entry.name === "archive.xlsx") {
+            li.classList.add("folder");
+            li.addEventListener("dblclick", (e) => {
+              e.stopPropagation();
+              window.location.href = `archive.html?folder=${encodeURIComponent(currentPath)}`;
+            });
           }
 
           li.addEventListener("click", (e) => {
@@ -256,27 +250,6 @@
           ul.appendChild(li);
         }
       }
-
-      document
-        .getElementById("populate-btn")
-        .addEventListener("click", async (e) => {
-          e.stopPropagation();
-          const feedback = document.getElementById("populate-feedback");
-          const btn = document.getElementById("populate-btn");
-          btn.disabled = true;
-          feedback.textContent = "Working…";
-          try {
-            const { count } = await window.api.populateFilesTab(
-              currentPath,
-              rootFolder,
-            );
-            feedback.textContent = `✓ Files tab updated (${count} file${count !== 1 ? "s" : ""})`;
-          } catch (err) {
-            feedback.textContent = `✗ ${err.message}`;
-          } finally {
-            btn.disabled = false;
-          }
-        });
 
       document.addEventListener("click", closePanel);
       document.getElementById("detail-panel").addEventListener("click", (e) => {

@@ -171,6 +171,22 @@ ipcMain.handle("populate-files-tab", async (_event, folderPath, rootFolder) => {
   return { count: rows.length };
 });
 
+// IPC: read a named sheet from an xlsx file, returning headers + rows
+ipcMain.handle("read-sheet", async (_event, xlsxPath, sheetName) => {
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.readFile(xlsxPath);
+  const sheet = workbook.getWorksheet(sheetName);
+  if (!sheet) return null;
+
+  const allRows = [];
+  sheet.eachRow((row) => {
+    allRows.push(row.values.slice(1)); // drop the 1-based empty first element
+  });
+  if (allRows.length === 0) return { headers: [], rows: [] };
+  const [headers, ...rows] = allRows;
+  return { headers, rows };
+});
+
 // IPC: return stat metadata for a file or folder
 ipcMain.handle("get-file-info", async (_event, filePath) => {
   const stat = await fs.stat(filePath);
