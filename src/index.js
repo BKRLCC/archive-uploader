@@ -1,5 +1,6 @@
 const { app, BrowserWindow, dialog, ipcMain } = require("electron");
 const path = require("node:path");
+const fs = require("node:fs/promises");
 const Store = require("electron-store");
 
 const store = new Store();
@@ -21,9 +22,6 @@ const createWindow = () => {
 
   // and load the index.html of the app.
   mainWindow.loadFile(path.join(__dirname, "index.html"));
-
-  // Open the DevTools.
-  mainWindow.webContents.openDevTools();
 };
 
 // IPC: return the currently stored root folder
@@ -41,6 +39,32 @@ ipcMain.handle("choose-root-folder", async (event) => {
   if (canceled || filePaths.length === 0) return null;
   store.set("rootFolder", filePaths[0]);
   return filePaths[0];
+});
+
+// IPC: list the contents of a folder (excluding dotfiles)
+ipcMain.handle("list-folder", async (_event, folderPath) => {
+  const entries = await fs.readdir(folderPath, { withFileTypes: true });
+  return entries
+    .filter((e) => !e.name.startsWith(".") && !e.name.startsWith("~$"))
+    .map((e) => ({
+      name: e.name,
+      isDirectory: e.isDirectory(),
+      ext: e.isDirectory() ? null : path.extname(e.name).toLowerCase().slice(1),
+    }))
+    .sort((a, b) => {
+      if (a.isDirectory !== b.isDirectory) return a.isDirectory ? -1 : 1;
+      return a.name.localeCompare(b.name);
+    });
+});
+
+// IPC: return stat metadata for a file or folder
+ipcMain.handle("get-file-info", async (_event, filePath) => {
+  const stat = await fs.stat(filePath);
+  return {
+    size: stat.size,
+    birthtime: stat.birthtime.toISOString(),
+    mtime: stat.mtime.toISOString(),
+  };
 });
 
 // This method will be called when Electron has finished

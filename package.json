@@ -1,6 +1,6 @@
 {
   "name": "archive-uploader",
-  "productName": "archive-uploader",
+  "productName": "Archive Uploader",
   "version": "1.0.0",
   "description": "My Electron application description",
   "main": "src/index.js",
