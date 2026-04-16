@@ -32,7 +32,7 @@
             id="refresh-btn"
             style="font-size: 0.6em; vertical-align: middle"
           >
-            ↻ Refresh
+            ↻ Refresh from file
           </button>
         </h2>
         <div id="items-state"></div>
@@ -91,7 +91,8 @@
             const isSystem = key.startsWith("@");
 
             const label = document.createElement("label");
-            label.style.cssText = "display:block; margin-bottom:0.75em; font-size:0.85em";
+            label.style.cssText =
+              "display:block; margin-bottom:0.75em; font-size:0.85em";
             label.innerHTML = `<span style="color:#888">${key}</span><br>`;
 
             if (isSystem) {
@@ -104,7 +105,8 @@
               input.type = "text";
               input.value = val;
               input.dataset.key = key;
-              input.style.cssText = "width:100%; box-sizing:border-box; padding:0.3em 0.4em";
+              input.style.cssText =
+                "width:100%; box-sizing:border-box; padding:0.3em 0.4em";
               label.appendChild(input);
             }
             fieldsEl.appendChild(label);
@@ -118,43 +120,56 @@
           editingTr = null;
         }
 
-        document.getElementById("edit-drawer").addEventListener("click", (e) => e.stopPropagation());
-        document.getElementById("edit-cancel-btn").addEventListener("click", closeDrawer);
+        document
+          .getElementById("edit-drawer")
+          .addEventListener("click", (e) => e.stopPropagation());
+        document
+          .getElementById("edit-cancel-btn")
+          .addEventListener("click", closeDrawer);
         document.addEventListener("click", closeDrawer);
 
-        document.getElementById("edit-save-btn").addEventListener("click", async () => {
-          const feedback = document.getElementById("edit-feedback");
-          const saveBtn = document.getElementById("edit-save-btn");
-          saveBtn.disabled = true;
-          feedback.textContent = "Saving…";
+        document
+          .getElementById("edit-save-btn")
+          .addEventListener("click", async () => {
+            const feedback = document.getElementById("edit-feedback");
+            const saveBtn = document.getElementById("edit-save-btn");
+            saveBtn.disabled = true;
+            feedback.textContent = "Saving…";
 
-          const updatedValues = {};
-          document.querySelectorAll("#edit-fields input[data-key]").forEach((input) => {
-            updatedValues[input.dataset.key] = input.value;
+            const updatedValues = {};
+            document
+              .querySelectorAll("#edit-fields input[data-key]")
+              .forEach((input) => {
+                updatedValues[input.dataset.key] = input.value;
+              });
+
+            try {
+              const updated = await window.api.updateSheetRow(
+                xlsxPath,
+                editingRowIndex,
+                updatedValues,
+              );
+
+              // Update the table row in place for visible (non-@) columns
+              const visibleIndices = currentHeaders
+                .map((h, i) => ({ h, i }))
+                .filter(({ h }) => !String(h ?? "").startsWith("@"))
+                .map(({ i }) => i);
+
+              const cells = editingTr.querySelectorAll("td.data-cell");
+              visibleIndices.forEach((colIdx, cellIdx) => {
+                const key = String(currentHeaders[colIdx] ?? "");
+                if (cells[cellIdx])
+                  cells[cellIdx].textContent = updated[key] ?? "";
+              });
+
+              closeDrawer();
+            } catch (err) {
+              feedback.textContent = `✗ ${err.message}`;
+            } finally {
+              saveBtn.disabled = false;
+            }
           });
-
-          try {
-            const updated = await window.api.updateSheetRow(xlsxPath, editingRowIndex, updatedValues);
-
-            // Update the table row in place for visible (non-@) columns
-            const visibleIndices = currentHeaders
-              .map((h, i) => ({ h, i }))
-              .filter(({ h }) => !String(h ?? "").startsWith("@"))
-              .map(({ i }) => i);
-
-            const cells = editingTr.querySelectorAll("td.data-cell");
-            visibleIndices.forEach((colIdx, cellIdx) => {
-              const key = String(currentHeaders[colIdx] ?? "");
-              if (cells[cellIdx]) cells[cellIdx].textContent = updated[key] ?? "";
-            });
-
-            closeDrawer();
-          } catch (err) {
-            feedback.textContent = `✗ ${err.message}`;
-          } finally {
-            saveBtn.disabled = false;
-          }
-        });
 
         async function loadItemsTable() {
           const stateEl = document.getElementById("items-state");
@@ -194,7 +209,8 @@
               const tr = tbody.insertRow();
 
               const editTd = tr.insertCell();
-              editTd.style.cssText = "width:2em; text-align:center; cursor:pointer";
+              editTd.style.cssText =
+                "width:2em; text-align:center; cursor:pointer";
               editTd.textContent = "✏️";
               editTd.addEventListener("click", (e) => {
                 e.stopPropagation();

@@ -173,34 +173,38 @@ ipcMain.handle("populate-files-tab", async (_event, folderPath, rootFolder) => {
 
 // IPC: read a named sheet from an xlsx file, returning headers + rows
 // IPC: update a single row in a named sheet by 1-based data row index
-ipcMain.handle("update-sheet-row", async (_event, xlsxPath, rowIndex, updatedValues) => {
-  const workbook = new ExcelJS.Workbook();
-  await workbook.xlsx.readFile(xlsxPath);
-  const sheet = workbook.getWorksheet("Items");
-  if (!sheet) throw new Error("Items sheet not found");
+ipcMain.handle(
+  "update-sheet-row",
+  async (_event, xlsxPath, rowIndex, updatedValues) => {
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.readFile(xlsxPath);
+    const sheet = workbook.getWorksheet("Items");
+    if (!sheet) throw new Error("Items sheet not found");
 
-  // rowIndex is 0-based data row; +2 to skip header and account for 1-based Excel rows
-  const excelRow = sheet.getRow(rowIndex + 2);
-  const headerRow = sheet.getRow(1);
+    // rowIndex is 0-based data row; +2 to skip header and account for 1-based Excel rows
+    const excelRow = sheet.getRow(rowIndex + 2);
+    const headerRow = sheet.getRow(1);
 
-  headerRow.eachCell((cell, colNumber) => {
-    const key = String(cell.value ?? "");
-    if (Object.prototype.hasOwnProperty.call(updatedValues, key)) {
-      excelRow.getCell(colNumber).value = updatedValues[key];
-    }
-  });
-  excelRow.font = { size: 16 };
-  excelRow.commit();
+    headerRow.eachCell((cell, colNumber) => {
+      const key = String(cell.value ?? "");
+      if (Object.prototype.hasOwnProperty.call(updatedValues, key)) {
+        excelRow.getCell(colNumber).value = updatedValues[key];
+      }
+    });
+    excelRow.font = { size: 16 };
+    excelRow.commit();
 
-  await workbook.xlsx.writeFile(xlsxPath);
+    await workbook.xlsx.writeFile(xlsxPath);
 
-  // Return the full updated row as a header→value map
-  const result = {};
-  headerRow.eachCell((cell, colNumber) => {
-    result[String(cell.value ?? "")] = excelRow.getCell(colNumber).value ?? "";
-  });
-  return result;
-});
+    // Return the full updated row as a header→value map
+    const result = {};
+    headerRow.eachCell((cell, colNumber) => {
+      result[String(cell.value ?? "")] =
+        excelRow.getCell(colNumber).value ?? "";
+    });
+    return result;
+  },
+);
 
 ipcMain.handle("read-sheet", async (_event, xlsxPath, sheetName) => {
   const workbook = new ExcelJS.Workbook();
