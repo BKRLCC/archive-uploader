@@ -80,6 +80,7 @@
 
       function emojiFor(entry) {
         if (entry.isDirectory) return EMOJI.folder;
+        if (entry.name === "archive.xlsx") return "⭐";
         if (IMAGE_EXTS.has(entry.ext)) return EMOJI.image;
         if (AUDIO_EXTS.has(entry.ext)) return EMOJI.audio;
         if (VIDEO_EXTS.has(entry.ext)) return EMOJI.video;
