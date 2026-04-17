@@ -208,6 +208,32 @@ ipcMain.handle("create-archive", async (_event, folderPath: string) => {
   return { path: xlsxPath };
 });
 
+ipcMain.handle(
+  "add-sheet-row",
+  async (_event, xlsxPath: string, values: Record<string, string>) => {
+    const buf = await fs.promises.readFile(xlsxPath);
+    const workbook = XLSX.read(buf);
+    const actualName = workbook.SheetNames.find(
+      (n) => n.toLowerCase() === "items",
+    );
+    if (!actualName) throw new Error("No Items sheet found");
+    const sheet = workbook.Sheets[actualName];
+    const rows: string[][] = XLSX.utils.sheet_to_json(sheet, {
+      header: 1,
+      defval: "",
+    });
+    const headers = (rows[0] ?? []).map((h) => String(h ?? ""));
+    const newRow = headers.map((h) => values[h] ?? "");
+    rows.push(newRow);
+    workbook.Sheets[actualName] = XLSX.utils.aoa_to_sheet(rows);
+    await fs.promises.writeFile(
+      xlsxPath,
+      XLSX.write(workbook, { type: "buffer", bookType: "xlsx" }),
+    );
+    return newRow;
+  },
+);
+
 ipcMain.handle("get-root-folder", () => {
   return store.get("rootFolder", null);
 });

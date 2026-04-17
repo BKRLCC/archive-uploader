@@ -18,6 +18,7 @@ export default function ArchivePage() {
     null,
   );
   const [editingRow, setEditingRow] = useState<EditingRow | null>(null);
+  const [addingItem, setAddingItem] = useState(false);
   const [populateFeedback, setPopulateFeedback] = useState("");
   const [populateBusy, setPopulateBusy] = useState(false);
 
@@ -72,6 +73,13 @@ export default function ArchivePage() {
     });
   }
 
+  function handleAddRow(_rowIndex: number, newRow: string[]) {
+    setSheet((prev) => {
+      if (!prev || typeof prev === "string") return prev;
+      return { ...prev, rows: [...prev.rows, newRow] };
+    });
+  }
+
   // ── Items table ─────────────────────────────────────────────────────────────
 
   function renderItemsTable() {
@@ -83,7 +91,7 @@ export default function ArchivePage() {
 
     const visibleIndices = sheet.headers
       .map((h, i) => ({ h, i }))
-      .filter(({ h }) => !h.startsWith("@"))
+      .filter(({ h }) => h === "@type" || !h.startsWith("@"))
       .map(({ i }) => i);
 
     return (
@@ -131,7 +139,13 @@ export default function ArchivePage() {
   }
 
   return (
-    <div className="archive-page" onClick={() => setEditingRow(null)}>
+    <div
+      className="archive-page"
+      onClick={() => {
+        setEditingRow(null);
+        setAddingItem(false);
+      }}
+    >
       <p>
         <Link to="/browser">← Back to browser</Link>
       </p>
@@ -161,12 +175,24 @@ export default function ArchivePage() {
             }}
           >
             ↻ Refresh from file
-          </button>
+          </button>{" "}
+          {sheet && typeof sheet !== "string" && (
+            <button
+              className="refresh-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                setEditingRow(null);
+                setAddingItem(true);
+              }}
+            >
+              + Add item
+            </button>
+          )}
         </h2>
         <div className="items-area" onClick={(e) => e.stopPropagation()}>
           <div className="items-table-wrap">{renderItemsTable()}</div>
           <div
-            className={`edit-drawer${editingRow ? " open" : ""}`}
+            className={`edit-drawer${editingRow || addingItem ? " open" : ""}`}
             onClick={(e) => e.stopPropagation()}
           >
             {editingRow && sheet && typeof sheet !== "string" && (
@@ -177,6 +203,17 @@ export default function ArchivePage() {
                 xlsxPath={xlsxPath!}
                 onSave={handleSaveRow}
                 onClose={() => setEditingRow(null)}
+              />
+            )}
+            {addingItem && sheet && typeof sheet !== "string" && (
+              <EditDrawer
+                headers={sheet.headers}
+                row={sheet.headers.map(() => "")}
+                rowIndex={-1}
+                xlsxPath={xlsxPath!}
+                onSave={handleAddRow}
+                onClose={() => setAddingItem(false)}
+                isNew
               />
             )}
           </div>

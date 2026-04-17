@@ -153,12 +153,19 @@ export default function BrowserPage() {
         <div className="browser-left">
           <div className="breadcrumb-bar">
             <nav className="breadcrumb">{renderBreadcrumb()}</nav>
-            {currentPath && currentPath !== rootFolder &&
+            {currentPath &&
+              currentPath !== rootFolder &&
               !entries.some((e) => e.name === "archive.xlsx") && (
-              <button className="create-archive-btn" onClick={(e) => { e.stopPropagation(); handleCreateArchive(); }}>
-                🌟 Create archive here
-              </button>
-            )}
+                <button
+                  className="create-archive-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleCreateArchive();
+                  }}
+                >
+                  🌟 Create archive here
+                </button>
+              )}
           </div>
           <ul className="file-list">
             {entries.length === 0 ? (
@@ -183,7 +190,8 @@ export default function BrowserPage() {
                       handleEntryDblClick(e, entry, filePath)
                     }
                   >
-                    {emojiFor(entry)}&nbsp;&nbsp;{entry.name === "archive.xlsx" ? "Archive" : entry.name}
+                    {emojiFor(entry)}&nbsp;&nbsp;
+                    {entry.name === "archive.xlsx" ? "Archive" : entry.name}
                   </li>
                 );
               })

@@ -1,5 +1,25 @@
 import React, { useState } from "react";
 
+function toCamelCase(str: string): string {
+  return str
+    .trim()
+    .split(/[\s_-]+/)
+    .filter(Boolean)
+    .map((word, i) =>
+      i === 0
+        ? word.toLowerCase()
+        : word[0].toUpperCase() + word.slice(1).toLowerCase(),
+    )
+    .join("");
+}
+
+function generateId(type: string, name: string): string {
+  const rand = Math.floor(Math.random() * 1000)
+    .toString()
+    .padStart(3, "0");
+  return `#${type}_${toCamelCase(name)}_${rand}`;
+}
+
 const TYPE_OPTIONS = [
   { label: "Resource", value: "RepositoryObject", icon: "📜" },
   { label: "Person", value: "Person", icon: "👤" },
@@ -14,6 +34,7 @@ interface Props {
   xlsxPath: string;
   onSave: (rowIndex: number, updated: string[]) => void;
   onClose: () => void;
+  isNew?: boolean;
 }
 
 export default function EditDrawer({
@@ -23,6 +44,7 @@ export default function EditDrawer({
   xlsxPath,
   onSave,
   onClose,
+  isNew = false,
 }: Props) {
   const [values, setValues] = useState<string[]>(() => [...row]);
   const [saving, setSaving] = useState(false);
@@ -31,6 +53,33 @@ export default function EditDrawer({
   async function handleSave() {
     setSaving(true);
     setFeedback("Saving…");
+
+    if (isNew) {
+      const nameIdx = headers.indexOf("name");
+      const nameVal = (values[nameIdx] ?? "").trim();
+      if (!nameVal) {
+        setFeedback("✗ Name is required");
+        setSaving(false);
+        return;
+      }
+      const typeIdx = headers.indexOf("@type");
+      const typeVal = values[typeIdx] ?? "";
+      const id = generateId(typeVal, nameVal);
+      const updatedValues: Record<string, string> = { "@id": id };
+      headers.forEach((h, i) => {
+        updatedValues[h] = values[i] ?? "";
+      });
+      try {
+        const updated = await window.api.addSheetRow(xlsxPath, updatedValues);
+        onSave(rowIndex, updated);
+        onClose();
+      } catch (err) {
+        setFeedback(`✗ ${(err as Error).message}`);
+        setSaving(false);
+      }
+      return;
+    }
+
     const updatedValues: Record<string, string> = {};
     headers.forEach((h, i) => {
       if (h !== "@id") updatedValues[h] = values[i] ?? "";
@@ -54,6 +103,7 @@ export default function EditDrawer({
       <h3>Edit item</h3>
       <div className="edit-fields">
         {headers.map((key, i) => {
+          if (isNew && key === "@id") return null;
           const isReadOnly = key === "@id";
           const isTypeField = key === "@type";
           return (
