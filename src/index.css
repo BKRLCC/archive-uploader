@@ -358,9 +358,12 @@ textarea {
   font-style: italic;
 }
 
-.edit-field input {
+.edit-field input,
+.edit-field select {
   width: 100%;
   box-sizing: border-box;
+  font-family: "Muli", sans-serif;
+  font-size: 1em;
 }
 
 .edit-actions {

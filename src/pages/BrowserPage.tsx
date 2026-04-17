@@ -183,7 +183,7 @@ export default function BrowserPage() {
                       handleEntryDblClick(e, entry, filePath)
                     }
                   >
-                    {emojiFor(entry)}&nbsp;&nbsp;{entry.name}
+                    {emojiFor(entry)}&nbsp;&nbsp;{entry.name === "archive.xlsx" ? "Archive" : entry.name}
                   </li>
                 );
               })

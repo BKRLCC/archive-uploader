@@ -1,5 +1,12 @@
 import React, { useState } from "react";
 
+const TYPE_OPTIONS = [
+  { label: "Resource", value: "RepositoryObject", icon: "📜" },
+  { label: "Person", value: "Person", icon: "👤" },
+  { label: "Organisation", value: "Organization", icon: "🏠︎" },
+  { label: "Language", value: "Language", icon: "🔤" },
+];
+
 interface Props {
   headers: string[];
   row: string[];
@@ -26,7 +33,7 @@ export default function EditDrawer({
     setFeedback("Saving…");
     const updatedValues: Record<string, string> = {};
     headers.forEach((h, i) => {
-      if (!h.startsWith("@")) updatedValues[h] = values[i] ?? "";
+      if (h !== "@id") updatedValues[h] = values[i] ?? "";
     });
     try {
       const updated = await window.api.updateSheetRow(
@@ -47,12 +54,31 @@ export default function EditDrawer({
       <h3>Edit item</h3>
       <div className="edit-fields">
         {headers.map((key, i) => {
-          const isSystem = key.startsWith("@");
+          const isReadOnly = key === "@id";
+          const isTypeField = key === "@type";
           return (
             <label key={key} className="edit-field">
               <span className="edit-field-key">{key}</span>
-              {isSystem ? (
+              {isReadOnly ? (
                 <span className="edit-field-readonly">{values[i] || "—"}</span>
+              ) : isTypeField ? (
+                <select
+                  value={values[i] ?? ""}
+                  onChange={(e) => {
+                    const next = [...values];
+                    next[i] = e.target.value;
+                    setValues(next);
+                  }}
+                >
+                  {!TYPE_OPTIONS.some((o) => o.value === values[i]) && (
+                    <option value={values[i] ?? ""}>{values[i] || "—"}</option>
+                  )}
+                  {TYPE_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>
+                      {o.icon} {o.label}
+                    </option>
+                  ))}
+                </select>
               ) : (
                 <input
                   type="text"
