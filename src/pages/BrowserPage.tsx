@@ -254,7 +254,7 @@ export default function BrowserPage() {
                 ref={imgRef}
                 className="preview"
                 alt=""
-                src={selected ? `file://${selected.filePath}` : undefined}
+                src={selected ? `localfile://${selected.filePath}` : undefined}
                 onLoad={() => {
                   const img = imgRef.current;
                   if (img)

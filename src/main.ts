@@ -1,7 +1,12 @@
-import { app, BrowserWindow, dialog, ipcMain } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, net, protocol } from "electron";
 import path from "node:path";
 import fs from "node:fs";
 import started from "electron-squirrel-startup";
+
+// Must be called before app is ready
+protocol.registerSchemesAsPrivileged([
+  { scheme: "localfile", privileges: { secure: true, supportFetchAPI: true } },
+]);
 import Store from "electron-store";
 
 const store = new Store();
@@ -34,7 +39,12 @@ const createWindow = () => {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on("ready", createWindow);
+app.on("ready", () => {
+  protocol.handle("localfile", (request) => {
+    return net.fetch(request.url.replace(/^localfile:/, "file:"));
+  });
+  createWindow();
+});
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
@@ -57,7 +67,9 @@ ipcMain.handle("list-folder", async (_event, folderPath: string) => {
   const dirents = await fs.promises.readdir(folderPath, {
     withFileTypes: true,
   });
-  const entries = dirents.map((d) => {
+  const entries = dirents
+    .filter((d) => !d.name.startsWith(".") && !d.name.startsWith("~$"))
+    .map((d) => {
     const isDirectory = d.isDirectory();
     const ext = isDirectory ? "" : path.extname(d.name).slice(1).toLowerCase();
     return { name: d.name, isDirectory, ext };
