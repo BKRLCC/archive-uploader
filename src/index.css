@@ -105,3 +105,154 @@ textarea {
   border-radius: 4px;
   transition: border-color 0.2s ease;
 }
+
+/* ── File Browser ────────────────────────────────────────── */
+
+.browser-page {
+  height: 100vh;
+  margin: 0;
+  box-sizing: border-box;
+  max-width: none;
+  padding: 1em;
+  display: flex;
+  flex-direction: column;
+}
+
+.browser-page .browser-inner {
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  min-height: 0;
+}
+
+.browser-page .browser-left {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+.browser-page .breadcrumb {
+  font-size: 0.9em;
+  margin-bottom: 1em;
+}
+
+.browser-page .breadcrumb span {
+  cursor: pointer;
+  color: #0070f3;
+  text-decoration: underline;
+}
+
+.browser-page .breadcrumb span.current {
+  color: inherit;
+  text-decoration: none;
+  cursor: default;
+}
+
+.browser-page .breadcrumb .sep {
+  margin: 0 0.3em;
+  cursor: default;
+  color: inherit;
+  text-decoration: none;
+}
+
+.browser-page .file-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.browser-page .file-list li {
+  padding: 0.35em 0.5em;
+  cursor: default;
+  border-radius: 4px;
+  user-select: none;
+}
+
+.browser-page .file-list li.folder {
+  cursor: pointer;
+}
+
+.browser-page .file-list li:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.browser-page .file-list li.selected {
+  background: #0070f3;
+  color: #fff;
+}
+
+.browser-page .file-list li.selected:hover {
+  background: #005ecf;
+}
+
+.browser-page .file-list li.empty {
+  color: #999;
+  cursor: default;
+}
+
+.browser-page .empty-state {
+  color: #666;
+}
+
+.browser-page .detail-panel {
+  width: 0;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: width 0.2s ease;
+  border-left: 1px solid transparent;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.browser-page .detail-panel.open {
+  width: 280px;
+  border-left-color: rgba(0, 0, 0, 0.1);
+}
+
+.browser-page .detail-inner {
+  width: 280px;
+  padding: 1em;
+  box-sizing: border-box;
+}
+
+.browser-page .preview {
+  width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  display: block;
+  margin-bottom: 0.75em;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.browser-page .detail-name {
+  font-weight: bold;
+  margin: 0 0 0.2em;
+  word-break: break-word;
+}
+
+.browser-page .detail-type {
+  font-size: 0.85em;
+  color: #555;
+  margin: 0 0 0.75em;
+}
+
+.browser-page .detail-meta {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8em;
+}
+
+.browser-page .detail-meta td {
+  padding: 0.3em 0;
+  vertical-align: top;
+}
+
+.browser-page .detail-meta td:first-child {
+  color: #888;
+  width: 45%;
+  padding-right: 0.5em;
+}

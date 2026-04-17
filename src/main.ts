@@ -1,5 +1,6 @@
 import { app, BrowserWindow, dialog, ipcMain } from "electron";
 import path from "node:path";
+import fs from "node:fs";
 import started from "electron-squirrel-startup";
 import Store from "electron-store";
 
@@ -52,12 +53,38 @@ app.on("activate", () => {
   }
 });
 
+ipcMain.handle("list-folder", async (_event, folderPath: string) => {
+  const dirents = await fs.promises.readdir(folderPath, {
+    withFileTypes: true,
+  });
+  const entries = dirents.map((d) => {
+    const isDirectory = d.isDirectory();
+    const ext = isDirectory ? "" : path.extname(d.name).slice(1).toLowerCase();
+    return { name: d.name, isDirectory, ext };
+  });
+  entries.sort((a, b) => {
+    if (a.isDirectory !== b.isDirectory) return a.isDirectory ? -1 : 1;
+    return a.name.localeCompare(b.name);
+  });
+  return entries;
+});
+
+ipcMain.handle("get-file-info", async (_event, filePath: string) => {
+  const stat = await fs.promises.stat(filePath);
+  return {
+    size: stat.size,
+    birthtime: stat.birthtime.toISOString(),
+    mtime: stat.mtime.toISOString(),
+  };
+});
+
 ipcMain.handle("get-root-folder", () => {
   return store.get("rootFolder", null);
 });
 
 ipcMain.handle("choose-root-folder", async (event) => {
   const win = BrowserWindow.fromWebContents(event.sender);
+  win.focus();
   const { canceled, filePaths } = await dialog.showOpenDialog(win, {
     properties: ["openDirectory"],
     title: "Choose root folder",

@@ -8,4 +8,8 @@ contextBridge.exposeInMainWorld("api", {
     ipcRenderer.invoke("get-root-folder"),
   chooseRootFolder: (): Promise<string | null> =>
     ipcRenderer.invoke("choose-root-folder"),
+  listFolder: (folderPath: string): Promise<import("./api").DirEntry[]> =>
+    ipcRenderer.invoke("list-folder", folderPath),
+  getFileInfo: (filePath: string): Promise<import("./api").FileInfo> =>
+    ipcRenderer.invoke("get-file-info", filePath),
 });

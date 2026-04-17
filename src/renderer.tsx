@@ -5,6 +5,7 @@ import "./index.css";
 import HomePage from "./pages/HomePage";
 import BrowserPage from "./pages/BrowserPage";
 import SettingsPage from "./pages/SettingsPage";
+import ArchivePage from "./pages/ArchivePage";
 
 const root = createRoot(document.getElementById("root")!);
 root.render(
@@ -14,6 +15,7 @@ root.render(
         <Route path="/" element={<HomePage />} />
         <Route path="/browser" element={<BrowserPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/archive" element={<ArchivePage />} />
       </Routes>
     </HashRouter>
   </React.StrictMode>,
