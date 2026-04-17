@@ -339,6 +339,7 @@ textarea {
 }
 
 .edit-field input,
+.edit-field textarea,
 .edit-field select {
   width: 100%;
   box-sizing: border-box;

@@ -31,7 +31,10 @@ export interface Api {
     folder: string,
     rootFolder: string,
   ) => Promise<{ count: number }>;
-  createArchive: (folderPath: string) => Promise<{ path: string }>;
+  createArchive: (
+    folderPath: string,
+    meta: { name: string; description: string },
+  ) => Promise<{ path: string }>;
   addSheetRow: (
     xlsxPath: string,
     values: Record<string, string>,

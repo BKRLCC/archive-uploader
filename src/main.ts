@@ -196,17 +196,32 @@ ipcMain.handle(
   },
 );
 
-ipcMain.handle("create-archive", async (_event, folderPath: string) => {
-  const xlsxPath = folderPath + "/archive.xlsx";
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([]), "Items");
-  XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([]), "Files");
-  await fs.promises.writeFile(
-    xlsxPath,
-    XLSX.write(workbook, { type: "buffer", bookType: "xlsx" }),
-  );
-  return { path: xlsxPath };
-});
+ipcMain.handle(
+  "create-archive",
+  async (
+    _event,
+    folderPath: string,
+    meta: { name: string; description: string },
+  ) => {
+    const xlsxPath = folderPath + "/archive.xlsx";
+    const workbook = XLSX.utils.book_new();
+    const rootDataset = XLSX.utils.aoa_to_sheet([
+      ["Name", "Value"],
+      ["@id", "./"],
+      ["@type", "[Dataset, RepositoryCollection]"],
+      ["name", meta.name],
+      ["description", meta.description],
+    ]);
+    XLSX.utils.book_append_sheet(workbook, rootDataset, "RootDataset");
+    XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([]), "Items");
+    XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([]), "Files");
+    await fs.promises.writeFile(
+      xlsxPath,
+      XLSX.write(workbook, { type: "buffer", bookType: "xlsx" }),
+    );
+    return { path: xlsxPath };
+  },
+);
 
 ipcMain.handle(
   "add-sheet-row",

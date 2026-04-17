@@ -28,8 +28,11 @@ contextBridge.exposeInMainWorld("api", {
     rootFolder: string,
   ): Promise<{ count: number }> =>
     ipcRenderer.invoke("populate-files-tab", folder, rootFolder),
-  createArchive: (folderPath: string): Promise<{ path: string }> =>
-    ipcRenderer.invoke("create-archive", folderPath),
+  createArchive: (
+    folderPath: string,
+    meta: { name: string; description: string },
+  ): Promise<{ path: string }> =>
+    ipcRenderer.invoke("create-archive", folderPath, meta),
   addSheetRow: (
     xlsxPath: string,
     values: Record<string, string>,

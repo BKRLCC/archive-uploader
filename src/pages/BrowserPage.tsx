@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import type { DirEntry, FileInfo } from "../api";
 import FilePreview, { type Selected } from "../components/FilePreview";
 import Drawer from "../components/Drawer";
+import CreateArchiveForm from "../components/CreateArchiveForm";
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -40,6 +41,7 @@ export default function BrowserPage() {
   const [entries, setEntries] = useState<DirEntry[]>([]);
   const [selected, setSelected] = useState<Selected | null>(null);
   const [fileInfo, setFileInfo] = useState<FileInfo | null>(null);
+  const [creatingArchive, setCreatingArchive] = useState(false);
 
   const navigateTo = useCallback(async (folderPath: string) => {
     setSelected(null);
@@ -89,13 +91,14 @@ export default function BrowserPage() {
   const closePanel = useCallback(() => {
     setSelected(null);
     setFileInfo(null);
+    setCreatingArchive(false);
   }, []);
 
-  const handleCreateArchive = useCallback(async () => {
-    if (!currentPath) return;
-    await window.api.createArchive(currentPath);
-    await navigateTo(currentPath);
-  }, [currentPath, navigateTo]);
+  const handleCreateArchive = useCallback(() => {
+    setSelected(null);
+    setFileInfo(null);
+    setCreatingArchive(true);
+  }, []);
 
   // ── Breadcrumb ──────────────────────────────────────────────────────────────
 
@@ -199,8 +202,19 @@ export default function BrowserPage() {
             )}
           </ul>
         </div>
-        <Drawer open={selected !== null} width={280}>
-          <FilePreview selected={selected} fileInfo={fileInfo} />
+        <Drawer open={selected !== null || creatingArchive} width={280}>
+          {creatingArchive && currentPath ? (
+            <CreateArchiveForm
+              folderPath={currentPath}
+              onCreated={async () => {
+                setCreatingArchive(false);
+                await navigateTo(currentPath);
+              }}
+              onClose={() => setCreatingArchive(false)}
+            />
+          ) : (
+            <FilePreview selected={selected} fileInfo={fileInfo} />
+          )}
         </Drawer>
       </div>
     </div>
