@@ -1,6 +1,7 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import type { DirEntry, FileInfo } from "../api";
+import FilePreview, { type Selected } from "../components/FilePreview";
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -12,83 +13,23 @@ const EMOJI = {
   doc: "📄",
 };
 
-const IMAGE_EXTS = new Set(["jpg", "jpeg", "png", "gif", "webp"]);
 const AUDIO_EXTS = new Set(["mp3", "wav", "flac", "aac", "ogg", "m4a"]);
 const VIDEO_EXTS = new Set(["mp4", "mov", "avi", "mkv", "webm"]);
 
-const TYPE_LABELS: Record<string, string> = {
-  jpg: "JPEG image",
-  jpeg: "JPEG image",
-  png: "PNG image",
-  gif: "GIF image",
-  webp: "WebP image",
-  mp3: "MP3 audio",
-  wav: "WAV audio",
-  flac: "FLAC audio",
-  aac: "AAC audio",
-  ogg: "OGG audio",
-  m4a: "M4A audio",
-  mp4: "MP4 video",
-  mov: "QuickTime video",
-  avi: "AVI video",
-  mkv: "MKV video",
-  webm: "WebM video",
-  pdf: "PDF document",
-  txt: "Plain text",
-  html: "HTML file",
-  js: "JavaScript file",
-  json: "JSON file",
-  md: "Markdown file",
-  xlsx: "Excel spreadsheet",
-  docx: "Word document",
-  pptx: "PowerPoint",
-  zip: "ZIP archive",
-  gz: "GZ archive",
-};
-
 // ── Helpers ──────────────────────────────────────────────────────────────────
+
+const IMAGE_EXTS_BROWSER = new Set(["jpg", "jpeg", "png", "gif", "webp"]);
 
 function emojiFor(entry: DirEntry) {
   if (entry.isDirectory) return EMOJI.folder;
   if (entry.name === "archive.xlsx") return "⭐";
-  if (IMAGE_EXTS.has(entry.ext)) return EMOJI.image;
+  if (IMAGE_EXTS_BROWSER.has(entry.ext)) return EMOJI.image;
   if (AUDIO_EXTS.has(entry.ext)) return EMOJI.audio;
   if (VIDEO_EXTS.has(entry.ext)) return EMOJI.video;
   return EMOJI.doc;
 }
 
-function typeLabel(entry: DirEntry) {
-  if (entry.isDirectory) return "Folder";
-  return (
-    TYPE_LABELS[entry.ext] ??
-    (entry.ext ? `${entry.ext.toUpperCase()} file` : "File")
-  );
-}
-
-function formatSize(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  if (bytes < 1024 * 1024 * 1024)
-    return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
-  return `${(bytes / 1024 / 1024 / 1024).toFixed(2)} GB`;
-}
-
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleString("en-GB", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
 // ── Component ────────────────────────────────────────────────────────────────
-
-interface Selected {
-  entry: DirEntry;
-  filePath: string;
-}
 
 export default function BrowserPage() {
   const navigate = useNavigate();
@@ -98,15 +39,10 @@ export default function BrowserPage() {
   const [entries, setEntries] = useState<DirEntry[]>([]);
   const [selected, setSelected] = useState<Selected | null>(null);
   const [fileInfo, setFileInfo] = useState<FileInfo | null>(null);
-  const [imageDims, setImageDims] = useState<{ w: number; h: number } | null>(
-    null,
-  );
-  const imgRef = useRef<HTMLImageElement>(null);
 
   const navigateTo = useCallback(async (folderPath: string) => {
     setSelected(null);
     setFileInfo(null);
-    setImageDims(null);
     setCurrentPath(folderPath);
     const result = await window.api.listFolder(folderPath);
     setEntries(result);
@@ -123,7 +59,6 @@ export default function BrowserPage() {
     async (entry: DirEntry, filePath: string) => {
       setSelected({ entry, filePath });
       setFileInfo(null);
-      setImageDims(null);
       const info = await window.api.getFileInfo(filePath);
       setFileInfo(info);
     },
@@ -153,7 +88,6 @@ export default function BrowserPage() {
   const closePanel = useCallback(() => {
     setSelected(null);
     setFileInfo(null);
-    setImageDims(null);
   }, []);
 
   // ── Breadcrumb ──────────────────────────────────────────────────────────────
@@ -204,8 +138,6 @@ export default function BrowserPage() {
     );
   }
 
-  const isImage = selected ? IMAGE_EXTS.has(selected.entry.ext) : false;
-
   return (
     <div className="browser-page" onClick={closePanel}>
       <p>
@@ -248,51 +180,7 @@ export default function BrowserPage() {
           className={`detail-panel${selected ? " open" : ""}`}
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="detail-inner">
-            {isImage && (
-              <img
-                ref={imgRef}
-                className="preview"
-                alt=""
-                src={selected ? `localfile://${selected.filePath}` : undefined}
-                onLoad={() => {
-                  const img = imgRef.current;
-                  if (img)
-                    setImageDims({ w: img.naturalWidth, h: img.naturalHeight });
-                }}
-              />
-            )}
-            <p className="detail-name">{selected?.entry.name}</p>
-            {fileInfo && selected && (
-              <p className="detail-type">
-                {typeLabel(selected.entry)}
-                {!selected.entry.isDirectory &&
-                  ` · ${formatSize(fileInfo.size)}`}
-              </p>
-            )}
-            {fileInfo && selected && (
-              <table className="detail-meta">
-                <tbody>
-                  <tr>
-                    <td>Created</td>
-                    <td>{formatDate(fileInfo.birthtime)}</td>
-                  </tr>
-                  <tr>
-                    <td>Modified</td>
-                    <td>{formatDate(fileInfo.mtime)}</td>
-                  </tr>
-                  {isImage && (
-                    <tr>
-                      <td>Dimensions</td>
-                      <td>
-                        {imageDims ? `${imageDims.w} × ${imageDims.h}` : "—"}
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            )}
-          </div>
+          <FilePreview selected={selected} fileInfo={fileInfo} />
         </div>
       </div>
     </div>

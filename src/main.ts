@@ -70,10 +70,12 @@ ipcMain.handle("list-folder", async (_event, folderPath: string) => {
   const entries = dirents
     .filter((d) => !d.name.startsWith(".") && !d.name.startsWith("~$"))
     .map((d) => {
-    const isDirectory = d.isDirectory();
-    const ext = isDirectory ? "" : path.extname(d.name).slice(1).toLowerCase();
-    return { name: d.name, isDirectory, ext };
-  });
+      const isDirectory = d.isDirectory();
+      const ext = isDirectory
+        ? ""
+        : path.extname(d.name).slice(1).toLowerCase();
+      return { name: d.name, isDirectory, ext };
+    });
   entries.sort((a, b) => {
     if (a.isDirectory !== b.isDirectory) return a.isDirectory ? -1 : 1;
     return a.name.localeCompare(b.name);
