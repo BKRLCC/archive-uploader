@@ -263,14 +263,14 @@ export default function BrowserPage() {
               />
             )}
             <p className="detail-name">{selected?.entry.name}</p>
-            {fileInfo && (
+            {fileInfo && selected && (
               <p className="detail-type">
-                {typeLabel(selected!.entry)}
-                {!selected!.entry.isDirectory &&
+                {typeLabel(selected.entry)}
+                {!selected.entry.isDirectory &&
                   ` · ${formatSize(fileInfo.size)}`}
               </p>
             )}
-            {fileInfo && (
+            {fileInfo && selected && (
               <table className="detail-meta">
                 <tbody>
                   <tr>
