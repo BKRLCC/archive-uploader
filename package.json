@@ -45,6 +45,7 @@
     "electron-store": "^11.0.2",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
-    "react-router-dom": "^7.14.1"
+    "react-router-dom": "^7.14.1",
+    "xlsx": "^0.18.5"
   }
 }

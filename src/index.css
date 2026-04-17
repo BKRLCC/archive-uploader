@@ -132,9 +132,16 @@ textarea {
   overflow-y: auto;
 }
 
+.browser-page .breadcrumb-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1em;
+}
+
 .browser-page .breadcrumb {
   font-size: 0.9em;
-  margin-bottom: 1em;
+  margin-bottom: 0;
 }
 
 .browser-page .breadcrumb span {
@@ -255,4 +262,167 @@ textarea {
   color: #888;
   width: 45%;
   padding-right: 0.5em;
+}
+
+/* ── Sheet table ─────────────────────────────────────────── */
+
+.sheet-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.9em;
+}
+
+.sheet-table th,
+.sheet-table td {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  padding: 0.4em 0.75em;
+  text-align: left;
+  vertical-align: top;
+  white-space: nowrap;
+  max-width: 400px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sheet-table th {
+  background: rgba(0, 0, 0, 0.04);
+  font-weight: 600;
+}
+
+.sheet-table tbody tr:nth-child(even) {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.edit-btn-cell {
+  width: 2em;
+  text-align: center;
+  cursor: pointer;
+}
+
+/* ── Archive page ────────────────────────────────────────── */
+
+.items-area {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+}
+
+.items-table-wrap {
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.edit-drawer {
+  width: 0;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: width 0.2s ease;
+  border-left: 1px solid transparent;
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.edit-drawer.open {
+  width: 320px;
+  border-left-color: rgba(0, 0, 0, 0.1);
+}
+
+.edit-drawer-inner {
+  width: 320px;
+  padding: 1em;
+  box-sizing: border-box;
+}
+
+.edit-fields {
+  margin-top: 0.5em;
+}
+
+.edit-field {
+  display: block;
+  margin-bottom: 0.75em;
+  font-size: 0.85em;
+}
+
+.edit-field-key {
+  display: block;
+  color: #888;
+  margin-bottom: 0.2em;
+}
+
+.edit-field-readonly {
+  color: #aaa;
+  font-style: italic;
+}
+
+.edit-field input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.edit-actions {
+  margin-top: 1em;
+  display: flex;
+  gap: 0.5em;
+}
+
+.edit-feedback {
+  font-size: 0.85em;
+  color: #555;
+  margin-top: 0.5em;
+}
+
+.populate-feedback {
+  font-size: 0.85em;
+  color: #555;
+}
+
+.refresh-btn {
+  font-size: 0.6em;
+  vertical-align: middle;
+}
+
+.create-archive-btn {
+  font-size: 0.8em;
+  padding: 0.3em 0.8em;
+  white-space: nowrap;
+}
+
+.items-state {
+  color: #666;
+}
+
+.folder-path {
+  color: #555;
+  font-size: 0.9em;
+}
+
+.archive-page {
+  height: 100vh;
+  box-sizing: border-box;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.archive-page section:last-child {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.archive-page section:last-child .items-area {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.archive-page section:last-child .items-table-wrap {
+  overflow-y: auto;
+  height: 100%;
 }

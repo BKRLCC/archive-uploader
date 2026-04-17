@@ -1,6 +1,7 @@
 import { app, BrowserWindow, dialog, ipcMain, net, protocol } from "electron";
 import path from "node:path";
 import fs from "node:fs";
+import * as XLSX from "xlsx";
 import started from "electron-squirrel-startup";
 
 // Must be called before app is ready
@@ -90,6 +91,121 @@ ipcMain.handle("get-file-info", async (_event, filePath: string) => {
     birthtime: stat.birthtime.toISOString(),
     mtime: stat.mtime.toISOString(),
   };
+});
+
+ipcMain.handle(
+  "read-sheet",
+  async (_event, xlsxPath: string, sheetName: string) => {
+    try {
+      const buf = await fs.promises.readFile(xlsxPath);
+      const workbook = XLSX.read(buf);
+      const actualName = workbook.SheetNames.find(
+        (n) => n.toLowerCase() === sheetName.toLowerCase(),
+      );
+      if (!actualName) return null;
+      const sheet = workbook.Sheets[actualName];
+      const rows: string[][] = XLSX.utils.sheet_to_json(sheet, {
+        header: 1,
+        defval: "",
+      });
+      if (rows.length === 0) return { headers: [], rows: [] };
+      const [headerRow, ...dataRows] = rows;
+      const headers = headerRow.map((h) => String(h ?? ""));
+      const data = dataRows.map((r) =>
+        headers.map((_, i) => String(r[i] ?? "")),
+      );
+      return { headers, rows: data };
+    } catch (err) {
+      console.error("read-sheet error:", err);
+      return null;
+    }
+  },
+);
+
+ipcMain.handle(
+  "update-sheet-row",
+  async (
+    _event,
+    xlsxPath: string,
+    rowIndex: number,
+    updatedValues: Record<string, string>,
+  ) => {
+    const buf = await fs.promises.readFile(xlsxPath);
+    const workbook = XLSX.read(buf);
+    const actualName = workbook.SheetNames.find(
+      (n) => n.toLowerCase() === "items",
+    );
+    if (!actualName) throw new Error("No Items sheet found");
+    const sheet = workbook.Sheets[actualName];
+    const rows: string[][] = XLSX.utils.sheet_to_json(sheet, {
+      header: 1,
+      defval: "",
+    });
+    const headers = rows[0].map((h) => String(h ?? ""));
+    const dataRowIndex = rowIndex + 1; // +1 for header
+    if (!rows[dataRowIndex]) rows[dataRowIndex] = headers.map(() => "");
+    for (const [key, value] of Object.entries(updatedValues)) {
+      const col = headers.indexOf(key);
+      if (col !== -1) rows[dataRowIndex][col] = value;
+    }
+    const newSheet = XLSX.utils.aoa_to_sheet(rows);
+    workbook.Sheets[actualName] = newSheet;
+    await fs.promises.writeFile(
+      xlsxPath,
+      XLSX.write(workbook, { type: "buffer", bookType: "xlsx" }),
+    );
+    return rows[dataRowIndex].map((v) => String(v ?? ""));
+  },
+);
+
+ipcMain.handle(
+  "populate-files-tab",
+  async (_event, folder: string, rootFolder: string) => {
+    const dirents = await fs.promises.readdir(folder, { withFileTypes: true });
+    const files = dirents.filter(
+      (d) =>
+        !d.isDirectory() && !d.name.startsWith(".") && !d.name.startsWith("~$"),
+    );
+    const fileRows = await Promise.all(
+      files.map(async (d) => {
+        const filePath = path.join(folder, d.name);
+        const stat = await fs.promises.stat(filePath);
+        const rel = filePath.slice(rootFolder.length).replace(/^[\\/]/, "");
+        return [d.name, rel, stat.size, stat.mtime.toISOString()];
+      }),
+    );
+    const sheetData = [["Filename", "Path", "Size", "Modified"], ...fileRows];
+    let workbook: XLSX.WorkBook;
+    try {
+      const buf = await fs.promises.readFile(folder + "/archive.xlsx");
+      workbook = XLSX.read(buf);
+    } catch {
+      workbook = XLSX.utils.book_new();
+    }
+    const sheet = XLSX.utils.aoa_to_sheet(sheetData);
+    if (workbook.SheetNames.includes("Files")) {
+      workbook.Sheets["Files"] = sheet;
+    } else {
+      XLSX.utils.book_append_sheet(workbook, sheet, "Files");
+    }
+    await fs.promises.writeFile(
+      folder + "/archive.xlsx",
+      XLSX.write(workbook, { type: "buffer", bookType: "xlsx" }),
+    );
+    return { count: files.length };
+  },
+);
+
+ipcMain.handle("create-archive", async (_event, folderPath: string) => {
+  const xlsxPath = folderPath + "/archive.xlsx";
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([]), "Items");
+  XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([]), "Files");
+  await fs.promises.writeFile(
+    xlsxPath,
+    XLSX.write(workbook, { type: "buffer", bookType: "xlsx" }),
+  );
+  return { path: xlsxPath };
 });
 
 ipcMain.handle("get-root-folder", () => {

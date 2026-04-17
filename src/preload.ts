@@ -12,4 +12,22 @@ contextBridge.exposeInMainWorld("api", {
     ipcRenderer.invoke("list-folder", folderPath),
   getFileInfo: (filePath: string): Promise<import("./api").FileInfo> =>
     ipcRenderer.invoke("get-file-info", filePath),
+  readSheet: (
+    xlsxPath: string,
+    sheetName: string,
+  ): Promise<import("./api").SheetData | null> =>
+    ipcRenderer.invoke("read-sheet", xlsxPath, sheetName),
+  updateSheetRow: (
+    xlsxPath: string,
+    rowIndex: number,
+    updatedValues: Record<string, string>,
+  ): Promise<string[]> =>
+    ipcRenderer.invoke("update-sheet-row", xlsxPath, rowIndex, updatedValues),
+  populateFilesTab: (
+    folder: string,
+    rootFolder: string,
+  ): Promise<{ count: number }> =>
+    ipcRenderer.invoke("populate-files-tab", folder, rootFolder),
+  createArchive: (folderPath: string): Promise<{ path: string }> =>
+    ipcRenderer.invoke("create-archive", folderPath),
 });

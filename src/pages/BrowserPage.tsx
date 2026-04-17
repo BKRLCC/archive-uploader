@@ -90,6 +90,12 @@ export default function BrowserPage() {
     setFileInfo(null);
   }, []);
 
+  const handleCreateArchive = useCallback(async () => {
+    if (!currentPath) return;
+    await window.api.createArchive(currentPath);
+    await navigateTo(currentPath);
+  }, [currentPath, navigateTo]);
+
   // ── Breadcrumb ──────────────────────────────────────────────────────────────
 
   function renderBreadcrumb() {
@@ -145,7 +151,15 @@ export default function BrowserPage() {
       </p>
       <div className="browser-inner">
         <div className="browser-left">
-          <nav className="breadcrumb">{renderBreadcrumb()}</nav>
+          <div className="breadcrumb-bar">
+            <nav className="breadcrumb">{renderBreadcrumb()}</nav>
+            {currentPath && currentPath !== rootFolder &&
+              !entries.some((e) => e.name === "archive.xlsx") && (
+              <button className="create-archive-btn" onClick={(e) => { e.stopPropagation(); handleCreateArchive(); }}>
+                🌟 Create archive here
+              </button>
+            )}
+          </div>
           <ul className="file-list">
             {entries.length === 0 ? (
               <li className="empty">This folder is empty.</li>
