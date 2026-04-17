@@ -82,7 +82,7 @@ export default function FilePreview({ selected, fileInfo }: Props) {
   const isImage = selected ? IMAGE_EXTS.has(selected.entry.ext) : false;
 
   return (
-    <div className="detail-inner">
+    <div className="drawer-inner">
       {isImage && selected && (
         <img
           ref={imgRef}

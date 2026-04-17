@@ -1,17 +1,5 @@
 import React, { useState } from "react";
-
-function toCamelCase(str: string): string {
-  return str
-    .trim()
-    .split(/[\s_-]+/)
-    .filter(Boolean)
-    .map((word, i) =>
-      i === 0
-        ? word.toLowerCase()
-        : word[0].toUpperCase() + word.slice(1).toLowerCase(),
-    )
-    .join("");
-}
+import { toCamelCase } from "../helpers/string-formatters";
 
 function generateId(type: string, name: string): string {
   const rand = Math.floor(Math.random() * 1000)
@@ -99,7 +87,7 @@ export default function EditDrawer({
   }
 
   return (
-    <div className="edit-drawer-inner">
+    <div className="drawer-inner">
       <h3>Edit item</h3>
       <div className="edit-fields">
         {headers.map((key, i) => {

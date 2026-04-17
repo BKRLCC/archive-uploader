@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import type { SheetData } from "../api";
 import EditDrawer from "../components/EditDrawer";
+import Drawer from "../components/Drawer";
 
 interface EditingRow {
   rowIndex: number;
@@ -146,79 +147,76 @@ export default function ArchivePage() {
         setAddingItem(false);
       }}
     >
-      <p>
-        <Link to="/browser">← Back to browser</Link>
-      </p>
-      <h1>⭐ Archive</h1>
-      <p className="folder-path">{renderBreadcrumb()}</p>
-
-      <section>
-        <h2>Files tab</h2>
+      <div className="archive-main">
         <p>
-          Populate or replace the <strong>Files</strong> sheet in{" "}
-          <code>archive.xlsx</code> with the current contents of this folder.
+          <Link to="/browser">← Back to browser</Link>
         </p>
-        <button onClick={handlePopulate} disabled={populateBusy}>
-          Update Files tab
-        </button>{" "}
-        <span className="populate-feedback">{populateFeedback}</span>
-      </section>
+        <h1>⭐ Archive</h1>
+        <p className="folder-path">{renderBreadcrumb()}</p>
 
-      <section>
-        <h2>
-          Items{" "}
-          <button
-            className="refresh-btn"
-            onClick={(e) => {
-              e.stopPropagation();
-              loadSheet();
-            }}
-          >
-            ↻ Refresh from file
+        <section>
+          <h2>Files tab</h2>
+          <p>
+            Populate or replace the <strong>Files</strong> sheet in{" "}
+            <code>archive.xlsx</code> with the current contents of this folder.
+          </p>
+          <button onClick={handlePopulate} disabled={populateBusy}>
+            Update Files tab
           </button>{" "}
-          {sheet && typeof sheet !== "string" && (
+          <span className="populate-feedback">{populateFeedback}</span>
+        </section>
+
+        <section>
+          <h2>
+            Items{" "}
             <button
               className="refresh-btn"
               onClick={(e) => {
                 e.stopPropagation();
-                setEditingRow(null);
-                setAddingItem(true);
+                loadSheet();
               }}
             >
-              + Add item
-            </button>
-          )}
-        </h2>
-        <div className="items-area" onClick={(e) => e.stopPropagation()}>
+              ↻ Refresh from file
+            </button>{" "}
+            {sheet && typeof sheet !== "string" && (
+              <button
+                className="refresh-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setEditingRow(null);
+                  setAddingItem(true);
+                }}
+              >
+                + Add item
+              </button>
+            )}
+          </h2>
           <div className="items-table-wrap">{renderItemsTable()}</div>
-          <div
-            className={`edit-drawer${editingRow || addingItem ? " open" : ""}`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {editingRow && sheet && typeof sheet !== "string" && (
-              <EditDrawer
-                headers={sheet.headers}
-                row={editingRow.row}
-                rowIndex={editingRow.rowIndex}
-                xlsxPath={xlsxPath!}
-                onSave={handleSaveRow}
-                onClose={() => setEditingRow(null)}
-              />
-            )}
-            {addingItem && sheet && typeof sheet !== "string" && (
-              <EditDrawer
-                headers={sheet.headers}
-                row={sheet.headers.map(() => "")}
-                rowIndex={-1}
-                xlsxPath={xlsxPath!}
-                onSave={handleAddRow}
-                onClose={() => setAddingItem(false)}
-                isNew
-              />
-            )}
-          </div>
-        </div>
-      </section>
+        </section>
+      </div>
+      <Drawer open={editingRow !== null || addingItem} width={320}>
+        {editingRow && sheet && typeof sheet !== "string" && (
+          <EditDrawer
+            headers={sheet.headers}
+            row={editingRow.row}
+            rowIndex={editingRow.rowIndex}
+            xlsxPath={xlsxPath!}
+            onSave={handleSaveRow}
+            onClose={() => setEditingRow(null)}
+          />
+        )}
+        {addingItem && sheet && typeof sheet !== "string" && (
+          <EditDrawer
+            headers={sheet.headers}
+            row={sheet.headers.map(() => "")}
+            rowIndex={-1}
+            xlsxPath={xlsxPath!}
+            onSave={handleAddRow}
+            onClose={() => setAddingItem(false)}
+            isNew
+          />
+        )}
+      </Drawer>
     </div>
   );
 }

@@ -202,27 +202,8 @@ textarea {
   color: #666;
 }
 
-.browser-page .detail-panel {
-  width: 0;
-  overflow: hidden;
-  flex-shrink: 0;
-  transition: width 0.2s ease;
-  border-left: 1px solid transparent;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  overflow-y: auto;
-}
-
-.browser-page .detail-panel.open {
-  width: 280px;
-  border-left-color: rgba(0, 0, 0, 0.1);
-}
-
-.browser-page .detail-inner {
-  width: 280px;
-  padding: 1em;
-  box-sizing: border-box;
+.browser-page .drawer {
+  align-self: stretch;
 }
 
 .browser-page .preview {
@@ -313,7 +294,7 @@ textarea {
   overflow-x: auto;
 }
 
-.edit-drawer {
+.drawer {
   width: 0;
   overflow: hidden;
   flex-shrink: 0;
@@ -326,13 +307,12 @@ textarea {
   overflow-y: auto;
 }
 
-.edit-drawer.open {
-  width: 320px;
+.drawer.open {
+  width: var(--drawer-width);
   border-left-color: rgba(0, 0, 0, 0.1);
 }
 
-.edit-drawer-inner {
-  width: 320px;
+.drawer-inner {
   padding: 1em;
   box-sizing: border-box;
 }
@@ -406,26 +386,37 @@ textarea {
 .archive-page {
   height: 100vh;
   box-sizing: border-box;
+  margin: 0;
+  max-width: none;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+}
+
+.archive-page > .drawer {
+  position: relative;
+  align-self: stretch;
+  height: auto;
+}
+
+.archive-main {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
   padding: 2rem;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
 }
 
-.archive-page section:last-child {
+.archive-main section:last-child {
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
 }
 
-.archive-page section:last-child .items-area {
+.archive-main section:last-child .items-table-wrap {
   flex: 1;
   min-height: 0;
-  overflow: hidden;
-}
-
-.archive-page section:last-child .items-table-wrap {
   overflow-y: auto;
-  height: 100%;
 }

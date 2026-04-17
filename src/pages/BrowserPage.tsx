@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import type { DirEntry, FileInfo } from "../api";
 import FilePreview, { type Selected } from "../components/FilePreview";
+import Drawer from "../components/Drawer";
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -198,12 +199,9 @@ export default function BrowserPage() {
             )}
           </ul>
         </div>
-        <div
-          className={`detail-panel${selected ? " open" : ""}`}
-          onClick={(e) => e.stopPropagation()}
-        >
+        <Drawer open={selected !== null} width={280}>
           <FilePreview selected={selected} fileInfo={fileInfo} />
-        </div>
+        </Drawer>
       </div>
     </div>
   );
