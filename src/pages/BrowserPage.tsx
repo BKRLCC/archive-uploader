@@ -4,6 +4,7 @@ import type { DirEntry, FileInfo } from "../api";
 import FilePreview, { type Selected } from "../components/FilePreview";
 import Drawer from "../components/Drawer";
 import CreateArchiveForm from "../components/CreateArchiveForm";
+import Breadcrumb from "../components/Breadcrumb";
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -23,6 +24,7 @@ const VIDEO_EXTS = new Set(["mp4", "mov", "avi", "mkv", "webm"]);
 const IMAGE_EXTS_BROWSER = new Set(["jpg", "jpeg", "png", "gif", "webp"]);
 
 function emojiFor(entry: DirEntry) {
+  if (entry.name === "People & Organisations" && entry.isDirectory) return "👥";
   if (entry.isDirectory) return EMOJI.folder;
   if (entry.name === "archive.xlsx") return "⭐";
   if (IMAGE_EXTS_BROWSER.has(entry.ext)) return EMOJI.image;
@@ -100,38 +102,6 @@ export default function BrowserPage() {
     setCreatingArchive(true);
   }, []);
 
-  // ── Breadcrumb ──────────────────────────────────────────────────────────────
-
-  function renderBreadcrumb() {
-    if (!rootFolder || !currentPath) return null;
-    const rel = currentPath.slice(rootFolder.length);
-    const parts = rel.split(/[/\\]/).filter(Boolean);
-
-    const segments: { label: string; segPath: string }[] = [
-      { label: "🏠 Home", segPath: rootFolder },
-    ];
-    let builtPath = rootFolder;
-    for (const part of parts) {
-      builtPath = builtPath + "/" + part;
-      segments.push({ label: part, segPath: builtPath });
-    }
-
-    return segments.map((seg, i) => {
-      const isLast = i === segments.length - 1;
-      return (
-        <React.Fragment key={seg.segPath}>
-          {i > 0 && <span className="sep">›</span>}
-          <span
-            className={isLast ? "current" : undefined}
-            onClick={isLast ? undefined : () => navigateTo(seg.segPath)}
-          >
-            {seg.label}
-          </span>
-        </React.Fragment>
-      );
-    });
-  }
-
   // ── Render ──────────────────────────────────────────────────────────────────
 
   if (!rootFolder) {
@@ -156,7 +126,15 @@ export default function BrowserPage() {
       <div className="browser-inner">
         <div className="browser-left">
           <div className="breadcrumb-bar">
-            <nav className="breadcrumb">{renderBreadcrumb()}</nav>
+            <nav className="breadcrumb">
+              {rootFolder && currentPath && (
+                <Breadcrumb
+                  rootFolder={rootFolder}
+                  currentPath={currentPath}
+                  onNavigate={navigateTo}
+                />
+              )}
+            </nav>
             {currentPath &&
               currentPath !== rootFolder &&
               !entries.some((e) => e.name === "archive.xlsx") && (
@@ -167,7 +145,23 @@ export default function BrowserPage() {
                     handleCreateArchive();
                   }}
                 >
-                  🌟 Create archive here
+                  🌟 Create Archive
+                </button>
+              )}
+            {currentPath &&
+              currentPath === rootFolder &&
+              !entries.some(
+                (e) => e.name === "People & Organisations" && e.isDirectory,
+              ) && (
+                <button
+                  className="create-archive-btn"
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    await window.api.createPeopleOrgsFolder(rootFolder);
+                    await navigateTo(currentPath);
+                  }}
+                >
+                  👥 Create People &amp; Orgs folder
                 </button>
               )}
           </div>

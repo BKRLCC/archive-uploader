@@ -213,8 +213,16 @@ ipcMain.handle(
       ["description", meta.description],
     ]);
     XLSX.utils.book_append_sheet(workbook, rootDataset, "RootDataset");
-    XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([]), "Items");
-    XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([]), "Files");
+    XLSX.utils.book_append_sheet(
+      workbook,
+      XLSX.utils.aoa_to_sheet([]),
+      "Items",
+    );
+    XLSX.utils.book_append_sheet(
+      workbook,
+      XLSX.utils.aoa_to_sheet([]),
+      "Files",
+    );
     await fs.promises.writeFile(
       xlsxPath,
       XLSX.write(workbook, { type: "buffer", bookType: "xlsx" }),
@@ -249,6 +257,44 @@ ipcMain.handle(
   },
 );
 
+ipcMain.handle(
+  "update-root-dataset",
+  async (_event, xlsxPath: string, updates: Record<string, string>) => {
+    const buf = await fs.promises.readFile(xlsxPath);
+    const workbook = XLSX.read(buf);
+    const actualName = workbook.SheetNames.find(
+      (n) => n.toLowerCase() === "rootdataset",
+    );
+    if (!actualName) throw new Error("No RootDataset sheet found");
+    const sheet = workbook.Sheets[actualName];
+    const rows: string[][] = XLSX.utils.sheet_to_json(sheet, {
+      header: 1,
+      defval: "",
+    });
+    for (const row of rows) {
+      const key = String(row[0] ?? "");
+      if (Object.prototype.hasOwnProperty.call(updates, key)) {
+        row[1] = updates[key];
+      }
+    }
+    workbook.Sheets[actualName] = XLSX.utils.aoa_to_sheet(rows);
+    await fs.promises.writeFile(
+      xlsxPath,
+      XLSX.write(workbook, { type: "buffer", bookType: "xlsx" }),
+    );
+    const updated: string[][] = XLSX.utils.sheet_to_json(
+      workbook.Sheets[actualName],
+      { header: 1, defval: "" },
+    );
+    const [headerRow, ...dataRows] = updated;
+    const headers = (headerRow ?? []).map((h) => String(h ?? ""));
+    return {
+      headers,
+      rows: dataRows.map((r) => headers.map((_, i) => String(r[i] ?? ""))),
+    };
+  },
+);
+
 ipcMain.handle("get-root-folder", () => {
   return store.get("rootFolder", null);
 });
@@ -264,3 +310,22 @@ ipcMain.handle("choose-root-folder", async (event) => {
   store.set("rootFolder", filePaths[0]);
   return filePaths[0];
 });
+
+ipcMain.handle(
+  "create-people-orgs-folder",
+  async (_event, rootFolder: string) => {
+    const folderPath = path.join(rootFolder, "People & Organisations");
+    await fs.promises.mkdir(folderPath, { recursive: true });
+    const xlsxPath = path.join(folderPath, "archive.xlsx");
+    const workbook = XLSX.utils.book_new();
+    const peopleSheet = XLSX.utils.aoa_to_sheet([
+      ["@id", "@type", "name", "givenName", "familyName", "email", "url"],
+    ]);
+    XLSX.utils.book_append_sheet(workbook, peopleSheet, "People");
+    await fs.promises.writeFile(
+      xlsxPath,
+      XLSX.write(workbook, { type: "buffer", bookType: "xlsx" }),
+    );
+    return { path: folderPath };
+  },
+);

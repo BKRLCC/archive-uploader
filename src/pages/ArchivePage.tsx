@@ -2,11 +2,21 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import type { SheetData } from "../api";
 import EditDrawer from "../components/EditDrawer";
+import EditRootDatasetForm from "../components/EditRootDatasetForm";
 import Drawer from "../components/Drawer";
+
+type TabId = "RootDataset" | "Items" | "Files";
+type SheetState = SheetData | null | "empty" | "missing";
 
 interface EditingRow {
   rowIndex: number;
   row: string[];
+}
+
+function sheetStateFromData(data: SheetData | null): SheetState {
+  if (data === null) return "missing";
+  if (data.headers.length === 0) return "empty";
+  return data;
 }
 
 export default function ArchivePage() {
@@ -15,29 +25,52 @@ export default function ArchivePage() {
     ?.folder;
 
   const [rootFolder, setRootFolder] = useState<string | null>(null);
-  const [sheet, setSheet] = useState<SheetData | null | "empty" | "missing">(
-    null,
-  );
+  const [activeTab, setActiveTab] = useState<TabId>("RootDataset");
+
+  const [rootDatasetSheet, setRootDatasetSheet] = useState<SheetState>(null);
+  const [itemsSheet, setItemsSheet] = useState<SheetState>(null);
+  const [filesSheet, setFilesSheet] = useState<SheetState>(null);
+
   const [editingRow, setEditingRow] = useState<EditingRow | null>(null);
   const [addingItem, setAddingItem] = useState(false);
+  const [editingRootDataset, setEditingRootDataset] = useState(false);
+
   const [populateFeedback, setPopulateFeedback] = useState("");
   const [populateBusy, setPopulateBusy] = useState(false);
 
   const xlsxPath = folder ? folder + "/archive.xlsx" : null;
 
-  const loadSheet = useCallback(async () => {
+  const closeDrawer = useCallback(() => {
+    setEditingRow(null);
+    setAddingItem(false);
+    setEditingRootDataset(false);
+  }, []);
+
+  const loadRootDataset = useCallback(async () => {
+    if (!xlsxPath) return;
+    const data = await window.api.readSheet(xlsxPath, "RootDataset");
+    setRootDatasetSheet(sheetStateFromData(data));
+  }, [xlsxPath]);
+
+  const loadItems = useCallback(async () => {
     if (!xlsxPath) return;
     setEditingRow(null);
     const data = await window.api.readSheet(xlsxPath, "Items");
-    if (data === null) setSheet("missing");
-    else if (data.headers.length === 0) setSheet("empty");
-    else setSheet(data);
+    setItemsSheet(sheetStateFromData(data));
+  }, [xlsxPath]);
+
+  const loadFiles = useCallback(async () => {
+    if (!xlsxPath) return;
+    const data = await window.api.readSheet(xlsxPath, "Files");
+    setFilesSheet(sheetStateFromData(data));
   }, [xlsxPath]);
 
   useEffect(() => {
     window.api.getRootFolder().then(setRootFolder);
-    loadSheet();
-  }, [loadSheet]);
+    loadRootDataset();
+    loadItems();
+    loadFiles();
+  }, [loadRootDataset, loadItems, loadFiles]);
 
   // ── Breadcrumb ──────────────────────────────────────────────────────────────
 
@@ -57,6 +90,7 @@ export default function ArchivePage() {
     try {
       const { count } = await window.api.populateFilesTab(folder, rootFolder);
       setPopulateFeedback(`✓ Updated (${count} file${count !== 1 ? "s" : ""})`);
+      await loadFiles();
     } catch (err) {
       setPopulateFeedback(`✗ ${(err as Error).message}`);
     } finally {
@@ -64,33 +98,63 @@ export default function ArchivePage() {
     }
   }
 
-  // ── Edit drawer ─────────────────────────────────────────────────────────────
+  // ── Row handlers ────────────────────────────────────────────────────────────
 
   function handleSaveRow(rowIndex: number, updated: string[]) {
-    setSheet((prev) => {
+    setItemsSheet((prev) => {
       if (!prev || typeof prev === "string") return prev;
-      const newRows = prev.rows.map((r, i) => (i === rowIndex ? updated : r));
-      return { ...prev, rows: newRows };
+      return {
+        ...prev,
+        rows: prev.rows.map((r, i) => (i === rowIndex ? updated : r)),
+      };
     });
   }
 
   function handleAddRow(_rowIndex: number, newRow: string[]) {
-    setSheet((prev) => {
+    setItemsSheet((prev) => {
       if (!prev || typeof prev === "string") return prev;
       return { ...prev, rows: [...prev.rows, newRow] };
     });
   }
 
+  // ── Generic table ───────────────────────────────────────────────────────────
+
+  function renderGenericTable(sheet: SheetState, emptyLabel: string) {
+    if (sheet === "missing") return <p className="items-state">Not found.</p>;
+    if (sheet === "empty") return <p className="items-state">{emptyLabel}</p>;
+    if (!sheet) return <p className="items-state">Loading…</p>;
+    return (
+      <table className="sheet-table">
+        <thead>
+          <tr>
+            {sheet.headers.map((h) => (
+              <th key={h}>{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {sheet.rows.map((row, i) => (
+            <tr key={i}>
+              {row.map((cell, j) => (
+                <td key={j}>{cell}</td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  }
+
   // ── Items table ─────────────────────────────────────────────────────────────
 
   function renderItemsTable() {
-    if (sheet === "missing")
+    if (itemsSheet === "missing")
       return <p className="items-state">No Items tab found in archive.xlsx.</p>;
-    if (sheet === "empty")
+    if (itemsSheet === "empty")
       return <p className="items-state">Items tab is empty.</p>;
-    if (!sheet) return <p className="items-state">Loading…</p>;
+    if (!itemsSheet) return <p className="items-state">Loading…</p>;
 
-    const visibleIndices = sheet.headers
+    const visibleIndices = itemsSheet.headers
       .map((h, i) => ({ h, i }))
       .filter(({ h }) => h === "@type" || !h.startsWith("@"))
       .map(({ i }) => i);
@@ -101,17 +165,19 @@ export default function ArchivePage() {
           <tr>
             <th></th>
             {visibleIndices.map((i) => (
-              <th key={i}>{sheet.headers[i]}</th>
+              <th key={i}>{itemsSheet.headers[i]}</th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {sheet.rows.map((row, rowIndex) => (
+          {itemsSheet.rows.map((row, rowIndex) => (
             <tr key={rowIndex}>
               <td
                 className="edit-btn-cell"
                 onClick={(e) => {
                   e.stopPropagation();
+                  setEditingRootDataset(false);
+                  setAddingItem(false);
                   setEditingRow({ rowIndex, row });
                 }}
               >
@@ -139,14 +205,10 @@ export default function ArchivePage() {
     );
   }
 
+  const drawerOpen = editingRootDataset || editingRow !== null || addingItem;
+
   return (
-    <div
-      className="archive-page"
-      onClick={() => {
-        setEditingRow(null);
-        setAddingItem(false);
-      }}
-    >
+    <div className="archive-page" onClick={closeDrawer}>
       <div className="archive-main">
         <p>
           <Link to="/browser">← Back to browser</Link>
@@ -154,65 +216,125 @@ export default function ArchivePage() {
         <h1>⭐ Archive</h1>
         <p className="folder-path">{renderBreadcrumb()}</p>
 
-        <section>
-          <h2>Files tab</h2>
-          <p>
-            Populate or replace the <strong>Files</strong> sheet in{" "}
-            <code>archive.xlsx</code> with the current contents of this folder.
-          </p>
-          <button onClick={handlePopulate} disabled={populateBusy}>
-            Update Files tab
-          </button>{" "}
-          <span className="populate-feedback">{populateFeedback}</span>
-        </section>
-
-        <section>
-          <h2>
-            Items{" "}
+        <div className="tab-bar">
+          {(["RootDataset", "Items", "Files"] as TabId[]).map((tab) => (
             <button
-              className="refresh-btn"
+              key={tab}
+              className={`tab${activeTab === tab ? " active" : ""}`}
               onClick={(e) => {
                 e.stopPropagation();
-                loadSheet();
+                setActiveTab(tab);
+                closeDrawer();
               }}
             >
-              ↻ Refresh from file
-            </button>{" "}
-            {sheet && typeof sheet !== "string" && (
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        {activeTab === "RootDataset" && (
+          <section>
+            <div className="section-toolbar">
+              <h2>Root Dataset</h2>
               <button
                 className="refresh-btn"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setEditingRow(null);
-                  setAddingItem(true);
+                  closeDrawer();
+                  setEditingRootDataset(true);
                 }}
               >
-                + Add item
+                ✏️ Edit
               </button>
-            )}
-          </h2>
-          <div className="items-table-wrap">{renderItemsTable()}</div>
-        </section>
+            </div>
+            {renderGenericTable(rootDatasetSheet, "RootDataset tab is empty.")}
+          </section>
+        )}
+
+        {activeTab === "Items" && (
+          <section>
+            <div className="section-toolbar">
+              <h2>Items</h2>
+              <div>
+                <button
+                  className="refresh-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    loadItems();
+                  }}
+                >
+                  ↻ Refresh
+                </button>{" "}
+                {itemsSheet && typeof itemsSheet !== "string" && (
+                  <button
+                    className="refresh-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      closeDrawer();
+                      setAddingItem(true);
+                    }}
+                  >
+                    + Add item
+                  </button>
+                )}
+              </div>
+            </div>
+            {renderItemsTable()}
+          </section>
+        )}
+
+        {activeTab === "Files" && (
+          <section>
+            <div className="section-toolbar">
+              <h2>Files</h2>
+              <div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlePopulate();
+                  }}
+                  disabled={populateBusy}
+                  className="refresh-btn"
+                >
+                  ↻ Update Files tab
+                </button>{" "}
+                <span className="populate-feedback">{populateFeedback}</span>
+              </div>
+            </div>
+            {renderGenericTable(filesSheet, "Files tab is empty.")}
+          </section>
+        )}
       </div>
-      <Drawer open={editingRow !== null || addingItem} width={320}>
-        {editingRow && sheet && typeof sheet !== "string" && (
+
+      <Drawer open={drawerOpen} width={320}>
+        {editingRootDataset &&
+          rootDatasetSheet &&
+          typeof rootDatasetSheet !== "string" && (
+            <EditRootDatasetForm
+              sheetData={rootDatasetSheet}
+              xlsxPath={xlsxPath!}
+              onSave={(updated) => setRootDatasetSheet(updated)}
+              onClose={closeDrawer}
+            />
+          )}
+        {editingRow && itemsSheet && typeof itemsSheet !== "string" && (
           <EditDrawer
-            headers={sheet.headers}
+            headers={itemsSheet.headers}
             row={editingRow.row}
             rowIndex={editingRow.rowIndex}
             xlsxPath={xlsxPath!}
             onSave={handleSaveRow}
-            onClose={() => setEditingRow(null)}
+            onClose={closeDrawer}
           />
         )}
-        {addingItem && sheet && typeof sheet !== "string" && (
+        {addingItem && itemsSheet && typeof itemsSheet !== "string" && (
           <EditDrawer
-            headers={sheet.headers}
-            row={sheet.headers.map(() => "")}
+            headers={itemsSheet.headers}
+            row={itemsSheet.headers.map(() => "")}
             rowIndex={-1}
             xlsxPath={xlsxPath!}
             onSave={handleAddRow}
-            onClose={() => setAddingItem(false)}
+            onClose={closeDrawer}
             isNew
           />
         )}

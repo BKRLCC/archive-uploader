@@ -39,6 +39,11 @@ export interface Api {
     xlsxPath: string,
     values: Record<string, string>,
   ) => Promise<string[]>;
+  updateRootDataset: (
+    xlsxPath: string,
+    updates: Record<string, string>,
+  ) => Promise<SheetData>;
+  createPeopleOrgsFolder: (rootFolder: string) => Promise<{ path: string }>;
 }
 
 declare global {
