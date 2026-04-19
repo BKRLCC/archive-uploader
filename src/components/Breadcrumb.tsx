@@ -24,14 +24,14 @@ export default function Breadcrumb({
   }
 
   return (
-    <div>
+    <div className="breadcrumb-bar">
       {segments.map((seg, i) => {
         const isLast = i === segments.length - 1;
         return (
           <React.Fragment key={seg.segPath}>
             {i > 0 && <span className="sep">›</span>}
             <span
-              className={isLast ? "current" : undefined}
+              className={isLast ? "breadcrumb current" : "breadcrumb"}
               onClick={isLast ? undefined : () => onNavigate(seg.segPath)}
             >
               {seg.label}

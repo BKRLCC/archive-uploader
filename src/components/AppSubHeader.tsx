@@ -38,7 +38,7 @@ export default function AppSubHeader() {
 
   return (
     <div className="app-subheader">
-      <nav className="breadcrumb">
+      <nav className="breadcrumb-nav">
         <Breadcrumb
           rootFolder={rootFolder}
           currentPath={currentPath}

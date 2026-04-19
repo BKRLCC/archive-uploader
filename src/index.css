@@ -84,11 +84,6 @@
   flex-wrap: wrap;
 }
 
-.app-subheader .breadcrumb {
-  flex: 1;
-  min-width: 0;
-}
-
 .subheader-actions {
   display: flex;
   gap: 0.5em;
@@ -221,31 +216,33 @@ textarea {
   overflow-y: auto;
 }
 
-.browser-page .breadcrumb-bar {
+.breadcrumb-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1em;
 }
 
-.browser-page .breadcrumb {
+.breadcrumb-bar .sep {
+  margin: 0 0.3em;
+  color: #555;
+}
+
+.breadcrumb {
   font-size: 0.9em;
   margin-bottom: 0;
+  cursor: pointer;
 }
 
-.browser-page .breadcrumb span {
-  cursor: pointer;
+.breadcrumb-bar span.breadcrumb {
   color: #0070f3;
   text-decoration: underline;
 }
-
-.browser-page .breadcrumb span.current {
+.breadcrumb-bar span.current {
   color: inherit;
   text-decoration: none;
   cursor: default;
 }
 
-.browser-page .breadcrumb .sep {
+.breadcrumb .sep {
   margin: 0 0.3em;
   cursor: default;
   color: inherit;
