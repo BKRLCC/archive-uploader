@@ -1,21 +1,33 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { HashRouter, Routes, Route } from "react-router-dom";
+import { HashRouter, Routes, Route, Outlet } from "react-router-dom";
 import "./index.css";
+import AppHeader from "./components/AppHeader";
 import HomePage from "./pages/HomePage";
 import BrowserPage from "./pages/BrowserPage";
 import SettingsPage from "./pages/SettingsPage";
 import ArchivePage from "./pages/ArchivePage";
+
+function Layout() {
+  return (
+    <div className="app-layout">
+      <AppHeader />
+      <Outlet />
+    </div>
+  );
+}
 
 const root = createRoot(document.getElementById("root")!);
 root.render(
   <React.StrictMode>
     <HashRouter>
       <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/browser" element={<BrowserPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
-        <Route path="/archive" element={<ArchivePage />} />
+        <Route element={<Layout />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/browser" element={<BrowserPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/archive" element={<ArchivePage />} />
+        </Route>
       </Routes>
     </HashRouter>
   </React.StrictMode>,

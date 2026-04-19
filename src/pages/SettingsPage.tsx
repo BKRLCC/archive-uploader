@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 
 export default function SettingsPage() {
   const [rootFolder, setRootFolder] = useState<string | null>(null);
@@ -15,7 +14,6 @@ export default function SettingsPage() {
 
   return (
     <div>
-      <p><Link to="/">← Back</Link></p>
       <h1>Settings</h1>
       <section>
         <h2>Root folder</h2>

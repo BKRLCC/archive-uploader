@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import type { DirEntry, FileInfo } from "../api";
 import FilePreview, { type Selected } from "../components/FilePreview";
 import Drawer from "../components/Drawer";
@@ -40,8 +40,11 @@ export default function BrowserPage() {
   const navigate = useNavigate();
 
   const [rootFolder, setRootFolder] = useState<string | null>(null);
-  const [currentPath, setCurrentPath] = useState<string | null>(null);
   const [entries, setEntries] = useState<DirEntry[]>([]);
+
+  const [searchParams] = useSearchParams();
+  const pathParam = searchParams.get("path");
+  const currentPath = pathParam ?? rootFolder;
   const [selected, setSelected] = useState<Selected | null>(null);
   const [fileInfo, setFileInfo] = useState<FileInfo | null>(null);
   const [creatingArchive, setCreatingArchive] = useState(false);
@@ -52,20 +55,42 @@ export default function BrowserPage() {
     entry: DirEntry;
   } | null>(null);
 
-  const navigateTo = useCallback(async (folderPath: string) => {
-    setSelected(null);
-    setFileInfo(null);
-    setCurrentPath(folderPath);
-    const result = await window.api.listFolder(folderPath);
+  const navigateTo = useCallback(
+    (folderPath: string) => {
+      navigate(`/browser?path=${encodeURIComponent(folderPath)}`);
+    },
+    [navigate],
+  );
+
+  const refreshCurrentFolder = useCallback(async () => {
+    if (!currentPath) return;
+    const result = await window.api.listFolder(currentPath);
     setEntries(result);
+  }, [currentPath]);
+
+  // Load rootFolder once on mount
+  useEffect(() => {
+    window.api.getRootFolder().then(setRootFolder);
   }, []);
 
+  // When rootFolder loads and no ?path= is set, navigate there (replace so it's not a history entry)
   useEffect(() => {
-    window.api.getRootFolder().then((folder) => {
-      setRootFolder(folder);
-      if (folder) navigateTo(folder);
-    });
-  }, [navigateTo]);
+    if (rootFolder && !pathParam) {
+      navigate(`/browser?path=${encodeURIComponent(rootFolder)}`, {
+        replace: true,
+      });
+    }
+  }, [rootFolder, pathParam, navigate]);
+
+  // Load entries and clear selection whenever the displayed folder changes
+  useEffect(() => {
+    if (!currentPath) return;
+    setSelected(null);
+    setFileInfo(null);
+    setCreatingArchive(false);
+    setContextMenu(null);
+    window.api.listFolder(currentPath).then(setEntries);
+  }, [currentPath]);
 
   const handleSelect = useCallback(
     async (entry: DirEntry, filePath: string) => {
@@ -114,12 +139,9 @@ export default function BrowserPage() {
 
   // ── Render ──────────────────────────────────────────────────────────────────
 
-  if (!rootFolder) {
+  if (!currentPath) {
     return (
       <div className="browser-page">
-        <p>
-          <Link to="/">← Home</Link>
-        </p>
         <p className="empty-state">
           No root folder set.{" "}
           <Link to="/settings">Choose one in Settings →</Link>
@@ -130,9 +152,6 @@ export default function BrowserPage() {
 
   return (
     <div className="browser-page" onClick={closePanel}>
-      <p>
-        <Link to="/">← Home</Link>
-      </p>
       <div className="browser-inner">
         <div className="browser-left">
           <div className="breadcrumb-bar">
@@ -168,7 +187,7 @@ export default function BrowserPage() {
                   onClick={async (e) => {
                     e.stopPropagation();
                     await window.api.createPeopleOrgsFolder(rootFolder);
-                    await navigateTo(currentPath);
+                    await refreshCurrentFolder();
                   }}
                 >
                   👥 Create People &amp; Orgs folder
@@ -182,7 +201,7 @@ export default function BrowserPage() {
                   onClick={async (e) => {
                     e.stopPropagation();
                     await window.api.createPlacesFolder(rootFolder);
-                    await navigateTo(currentPath);
+                    await refreshCurrentFolder();
                   }}
                 >
                   📍 Create Places folder
@@ -214,7 +233,12 @@ export default function BrowserPage() {
                     onContextMenu={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      setContextMenu({ x: e.clientX, y: e.clientY, filePath, entry });
+                      setContextMenu({
+                        x: e.clientX,
+                        y: e.clientY,
+                        filePath,
+                        entry,
+                      });
                     }}
                   >
                     {emojiFor(entry)}&nbsp;&nbsp;
@@ -231,7 +255,7 @@ export default function BrowserPage() {
               folderPath={currentPath}
               onCreated={async () => {
                 setCreatingArchive(false);
-                await navigateTo(currentPath);
+                await refreshCurrentFolder();
               }}
               onClose={() => setCreatingArchive(false)}
             />
@@ -273,10 +297,11 @@ export default function BrowserPage() {
                 const name = contextMenu.entry.name;
                 const fp = contextMenu.filePath;
                 setContextMenu(null);
-                if (!window.confirm(`Delete "${name}"? This cannot be undone.`)) return;
+                if (!window.confirm(`Delete "${name}"? This cannot be undone.`))
+                  return;
                 await window.api.deleteFile(fp);
                 closePanel();
-                if (currentPath) await navigateTo(currentPath);
+                await refreshCurrentFolder();
               }}
             >
               Delete

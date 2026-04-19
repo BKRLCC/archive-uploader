@@ -4,6 +4,64 @@
   font-weight: 100 900;
   font-style: normal;
 }
+
+/* ── CSS Variables ───────────────────────────────────────── */
+
+:root {
+  --header-height: 42px;
+}
+
+/* ── App layout ──────────────────────────────────────────── */
+
+.app-layout {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.app-header {
+  height: var(--header-height);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 1em;
+  background: #a62b2b;
+  color: #fff;
+  gap: 0.75em;
+  -webkit-app-region: drag;
+}
+
+.app-header-back {
+  width: 80px;
+  -webkit-app-region: no-drag;
+}
+
+.back-btn {
+  all: unset;
+  font-family: "Muli", sans-serif;
+  font-size: 0.85em;
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  padding: 0.25em 0.5em;
+  border-radius: 4px;
+  transition: background 0.15s ease;
+}
+
+.back-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.app-header-title {
+  flex: 1;
+  text-align: center;
+  font-family: "Meloso", sans-serif;
+  font-size: 1.05em;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  margin-right: 80px; /* balance the back-btn width so title stays centred */
+}
 @font-face {
   font-family: "Meloso";
   src: url("./fonts/meloso/Meloso-Italic.otf") format("opentype");
@@ -74,7 +132,7 @@
 
 body {
   font-family: "Muli", sans-serif;
-  padding: 2rem;
+  margin: 0;
 }
 
 h1,
@@ -109,7 +167,7 @@ textarea {
 /* ── File Browser ────────────────────────────────────────── */
 
 .browser-page {
-  height: 100vh;
+  height: 100%;
   margin: 0;
   box-sizing: border-box;
   max-width: none;
@@ -385,7 +443,7 @@ textarea {
 }
 
 .archive-page {
-  height: 100vh;
+  height: 100%;
   box-sizing: border-box;
   margin: 0;
   max-width: none;

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import type { SheetData } from "../api";
 import EditDrawer from "../components/EditDrawer";
 import EditRootDatasetForm from "../components/EditRootDatasetForm";
@@ -214,9 +214,7 @@ export default function ArchivePage() {
   if (!folder) {
     return (
       <div>
-        <p>
-          No folder specified. <Link to="/browser">← Back to browser</Link>
-        </p>
+        <p>No folder specified.</p>
       </div>
     );
   }
@@ -228,9 +226,6 @@ export default function ArchivePage() {
   return (
     <div className="archive-page" onClick={closeDrawer}>
       <div className="archive-main">
-        <p>
-          <Link to="/browser">← Back to browser</Link>
-        </p>
         <h1>⭐ Archive</h1>
         <p className="folder-path">{renderBreadcrumb()}</p>
 

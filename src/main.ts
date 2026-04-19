@@ -1,4 +1,12 @@
-import { app, BrowserWindow, dialog, ipcMain, net, protocol, shell } from "electron";
+import {
+  app,
+  BrowserWindow,
+  dialog,
+  ipcMain,
+  net,
+  protocol,
+  shell,
+} from "electron";
 import path from "node:path";
 import fs from "node:fs";
 import * as XLSX from "xlsx";
