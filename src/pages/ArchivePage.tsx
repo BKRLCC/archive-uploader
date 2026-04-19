@@ -5,12 +5,12 @@ import EditDrawer from "../components/EditDrawer";
 import EditRootDatasetForm from "../components/EditRootDatasetForm";
 import Drawer from "../components/Drawer";
 
-type TabId = "RootDataset" | "Items" | "Files";
 type SheetState = SheetData | null | "empty" | "missing";
 
 interface EditingRow {
   rowIndex: number;
   row: string[];
+  sheetName: string;
 }
 
 function sheetStateFromData(data: SheetData | null): SheetState {
@@ -25,14 +25,12 @@ export default function ArchivePage() {
     ?.folder;
 
   const [rootFolder, setRootFolder] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<TabId>("RootDataset");
-
-  const [rootDatasetSheet, setRootDatasetSheet] = useState<SheetState>(null);
-  const [itemsSheet, setItemsSheet] = useState<SheetState>(null);
-  const [filesSheet, setFilesSheet] = useState<SheetState>(null);
+  const [sheetNames, setSheetNames] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState<string>("RootDataset");
+  const [sheets, setSheets] = useState<Record<string, SheetState>>({});
 
   const [editingRow, setEditingRow] = useState<EditingRow | null>(null);
-  const [addingItem, setAddingItem] = useState(false);
+  const [addingItem, setAddingItem] = useState<string | false>(false); // sheetName or false
   const [editingRootDataset, setEditingRootDataset] = useState(false);
 
   const [populateFeedback, setPopulateFeedback] = useState("");
@@ -46,31 +44,33 @@ export default function ArchivePage() {
     setEditingRootDataset(false);
   }, []);
 
-  const loadRootDataset = useCallback(async () => {
-    if (!xlsxPath) return;
-    const data = await window.api.readSheet(xlsxPath, "RootDataset");
-    setRootDatasetSheet(sheetStateFromData(data));
-  }, [xlsxPath]);
+  const reloadSheet = useCallback(
+    async (name: string) => {
+      if (!xlsxPath) return;
+      const data = await window.api.readSheet(xlsxPath, name);
+      setSheets((prev) => ({ ...prev, [name]: sheetStateFromData(data) }));
+    },
+    [xlsxPath],
+  );
 
-  const loadItems = useCallback(async () => {
+  const loadAll = useCallback(async () => {
     if (!xlsxPath) return;
-    setEditingRow(null);
-    const data = await window.api.readSheet(xlsxPath, "Items");
-    setItemsSheet(sheetStateFromData(data));
-  }, [xlsxPath]);
-
-  const loadFiles = useCallback(async () => {
-    if (!xlsxPath) return;
-    const data = await window.api.readSheet(xlsxPath, "Files");
-    setFilesSheet(sheetStateFromData(data));
+    const names = await window.api.getSheetNames(xlsxPath);
+    setSheetNames(names);
+    if (names.length > 0) setActiveTab(names[0]);
+    const results = await Promise.all(
+      names.map(async (name) => {
+        const data = await window.api.readSheet(xlsxPath, name);
+        return [name, sheetStateFromData(data)] as const;
+      }),
+    );
+    setSheets(Object.fromEntries(results));
   }, [xlsxPath]);
 
   useEffect(() => {
     window.api.getRootFolder().then(setRootFolder);
-    loadRootDataset();
-    loadItems();
-    loadFiles();
-  }, [loadRootDataset, loadItems, loadFiles]);
+    loadAll();
+  }, [loadAll]);
 
   // ── Breadcrumb ──────────────────────────────────────────────────────────────
 
@@ -90,7 +90,7 @@ export default function ArchivePage() {
     try {
       const { count } = await window.api.populateFilesTab(folder, rootFolder);
       setPopulateFeedback(`✓ Updated (${count} file${count !== 1 ? "s" : ""})`);
-      await loadFiles();
+      await reloadSheet("Files");
     } catch (err) {
       setPopulateFeedback(`✗ ${(err as Error).message}`);
     } finally {
@@ -100,24 +100,40 @@ export default function ArchivePage() {
 
   // ── Row handlers ────────────────────────────────────────────────────────────
 
-  function handleSaveRow(rowIndex: number, updated: string[]) {
-    setItemsSheet((prev) => {
-      if (!prev || typeof prev === "string") return prev;
+  function handleSaveRow(
+    rowIndex: number,
+    updated: string[],
+    sheetName: string,
+  ) {
+    setSheets((prev) => {
+      const sheet = prev[sheetName];
+      if (!sheet || typeof sheet === "string") return prev;
       return {
         ...prev,
-        rows: prev.rows.map((r, i) => (i === rowIndex ? updated : r)),
+        [sheetName]: {
+          ...sheet,
+          rows: sheet.rows.map((r, i) => (i === rowIndex ? updated : r)),
+        },
       };
     });
   }
 
-  function handleAddRow(_rowIndex: number, newRow: string[]) {
-    setItemsSheet((prev) => {
-      if (!prev || typeof prev === "string") return prev;
-      return { ...prev, rows: [...prev.rows, newRow] };
+  function handleAddRow(
+    _rowIndex: number,
+    newRow: string[],
+    sheetName: string,
+  ) {
+    setSheets((prev) => {
+      const sheet = prev[sheetName];
+      if (!sheet || typeof sheet === "string") return prev;
+      return {
+        ...prev,
+        [sheetName]: { ...sheet, rows: [...sheet.rows, newRow] },
+      };
     });
   }
 
-  // ── Generic table ───────────────────────────────────────────────────────────
+  // ── Generic read-only table ─────────────────────────────────────────────────
 
   function renderGenericTable(sheet: SheetState, emptyLabel: string) {
     if (sheet === "missing") return <p className="items-state">Not found.</p>;
@@ -145,16 +161,16 @@ export default function ArchivePage() {
     );
   }
 
-  // ── Items table ─────────────────────────────────────────────────────────────
+  // ── Editable Items-style table ──────────────────────────────────────────────
 
-  function renderItemsTable() {
-    if (itemsSheet === "missing")
-      return <p className="items-state">No Items tab found in archive.xlsx.</p>;
-    if (itemsSheet === "empty")
-      return <p className="items-state">Items tab is empty.</p>;
-    if (!itemsSheet) return <p className="items-state">Loading…</p>;
+  function renderEditableTable(sheet: SheetState, sheetName: string) {
+    if (sheet === "missing")
+      return <p className="items-state">Sheet not found in archive.xlsx.</p>;
+    if (sheet === "empty")
+      return <p className="items-state">This tab is empty.</p>;
+    if (!sheet) return <p className="items-state">Loading…</p>;
 
-    const visibleIndices = itemsSheet.headers
+    const visibleIndices = sheet.headers
       .map((h, i) => ({ h, i }))
       .filter(({ h }) => h === "@type" || !h.startsWith("@"))
       .map(({ i }) => i);
@@ -165,12 +181,12 @@ export default function ArchivePage() {
           <tr>
             <th></th>
             {visibleIndices.map((i) => (
-              <th key={i}>{itemsSheet.headers[i]}</th>
+              <th key={i}>{sheet.headers[i]}</th>
             ))}
           </tr>
         </thead>
         <tbody>
-          {itemsSheet.rows.map((row, rowIndex) => (
+          {sheet.rows.map((row, rowIndex) => (
             <tr key={rowIndex}>
               <td
                 className="edit-btn-cell"
@@ -178,7 +194,7 @@ export default function ArchivePage() {
                   e.stopPropagation();
                   setEditingRootDataset(false);
                   setAddingItem(false);
-                  setEditingRow({ rowIndex, row });
+                  setEditingRow({ rowIndex, row, sheetName });
                 }}
               >
                 ✏️
@@ -205,7 +221,9 @@ export default function ArchivePage() {
     );
   }
 
-  const drawerOpen = editingRootDataset || editingRow !== null || addingItem;
+  const rootDatasetSheet = sheets["RootDataset"] ?? null;
+  const drawerOpen =
+    editingRootDataset || editingRow !== null || addingItem !== false;
 
   return (
     <div className="archive-page" onClick={closeDrawer}>
@@ -217,7 +235,7 @@ export default function ArchivePage() {
         <p className="folder-path">{renderBreadcrumb()}</p>
 
         <div className="tab-bar">
-          {(["RootDataset", "Items", "Files"] as TabId[]).map((tab) => (
+          {sheetNames.map((tab) => (
             <button
               key={tab}
               className={`tab${activeTab === tab ? " active" : ""}`}
@@ -251,38 +269,6 @@ export default function ArchivePage() {
           </section>
         )}
 
-        {activeTab === "Items" && (
-          <section>
-            <div className="section-toolbar">
-              <h2>Items</h2>
-              <div>
-                <button
-                  className="refresh-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    loadItems();
-                  }}
-                >
-                  ↻ Refresh
-                </button>{" "}
-                {itemsSheet && typeof itemsSheet !== "string" && (
-                  <button
-                    className="refresh-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      closeDrawer();
-                      setAddingItem(true);
-                    }}
-                  >
-                    + Add item
-                  </button>
-                )}
-              </div>
-            </div>
-            {renderItemsTable()}
-          </section>
-        )}
-
         {activeTab === "Files" && (
           <section>
             <div className="section-toolbar">
@@ -301,9 +287,46 @@ export default function ArchivePage() {
                 <span className="populate-feedback">{populateFeedback}</span>
               </div>
             </div>
-            {renderGenericTable(filesSheet, "Files tab is empty.")}
+            {renderGenericTable(sheets["Files"] ?? null, "Files tab is empty.")}
           </section>
         )}
+
+        {activeTab !== "RootDataset" &&
+          activeTab !== "Files" &&
+          (() => {
+            const sheet = sheets[activeTab] ?? null;
+            return (
+              <section>
+                <div className="section-toolbar">
+                  <h2>{activeTab}</h2>
+                  <div>
+                    <button
+                      className="refresh-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        reloadSheet(activeTab);
+                      }}
+                    >
+                      ↻ Refresh
+                    </button>{" "}
+                    {sheet && typeof sheet !== "string" && (
+                      <button
+                        className="refresh-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          closeDrawer();
+                          setAddingItem(activeTab);
+                        }}
+                      >
+                        + Add item
+                      </button>
+                    )}
+                  </div>
+                </div>
+                {renderEditableTable(sheet, activeTab)}
+              </section>
+            );
+          })()}
       </div>
 
       <Drawer open={drawerOpen} width={320}>
@@ -313,31 +336,47 @@ export default function ArchivePage() {
             <EditRootDatasetForm
               sheetData={rootDatasetSheet}
               xlsxPath={xlsxPath!}
-              onSave={(updated) => setRootDatasetSheet(updated)}
+              onSave={(updated) =>
+                setSheets((prev) => ({ ...prev, RootDataset: updated }))
+              }
               onClose={closeDrawer}
             />
           )}
-        {editingRow && itemsSheet && typeof itemsSheet !== "string" && (
-          <EditDrawer
-            headers={itemsSheet.headers}
-            row={editingRow.row}
-            rowIndex={editingRow.rowIndex}
-            xlsxPath={xlsxPath!}
-            onSave={handleSaveRow}
-            onClose={closeDrawer}
-          />
-        )}
-        {addingItem && itemsSheet && typeof itemsSheet !== "string" && (
-          <EditDrawer
-            headers={itemsSheet.headers}
-            row={itemsSheet.headers.map(() => "")}
-            rowIndex={-1}
-            xlsxPath={xlsxPath!}
-            onSave={handleAddRow}
-            onClose={closeDrawer}
-            isNew
-          />
-        )}
+        {editingRow &&
+          (() => {
+            const sheet = sheets[editingRow.sheetName];
+            return sheet && typeof sheet !== "string" ? (
+              <EditDrawer
+                headers={sheet.headers}
+                row={editingRow.row}
+                rowIndex={editingRow.rowIndex}
+                xlsxPath={xlsxPath!}
+                sheetName={editingRow.sheetName}
+                onSave={(rowIndex, updated) =>
+                  handleSaveRow(rowIndex, updated, editingRow.sheetName)
+                }
+                onClose={closeDrawer}
+              />
+            ) : null;
+          })()}
+        {addingItem &&
+          (() => {
+            const sheet = sheets[addingItem];
+            return sheet && typeof sheet !== "string" ? (
+              <EditDrawer
+                headers={sheet.headers}
+                row={sheet.headers.map(() => "")}
+                rowIndex={-1}
+                xlsxPath={xlsxPath!}
+                sheetName={addingItem}
+                onSave={(rowIndex, newRow) =>
+                  handleAddRow(rowIndex, newRow, addingItem)
+                }
+                onClose={closeDrawer}
+                isNew
+              />
+            ) : null;
+          })()}
       </Drawer>
     </div>
   );

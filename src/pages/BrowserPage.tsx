@@ -45,6 +45,12 @@ export default function BrowserPage() {
   const [selected, setSelected] = useState<Selected | null>(null);
   const [fileInfo, setFileInfo] = useState<FileInfo | null>(null);
   const [creatingArchive, setCreatingArchive] = useState(false);
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    filePath: string;
+    entry: DirEntry;
+  } | null>(null);
 
   const navigateTo = useCallback(async (folderPath: string) => {
     setSelected(null);
@@ -86,6 +92,8 @@ export default function BrowserPage() {
         navigateTo(filePath);
       } else if (entry.name === "archive.xlsx") {
         navigate("/archive", { state: { folder: currentPath } });
+      } else {
+        window.api.openFile(filePath);
       }
     },
     [navigateTo, navigate, currentPath],
@@ -95,6 +103,7 @@ export default function BrowserPage() {
     setSelected(null);
     setFileInfo(null);
     setCreatingArchive(false);
+    setContextMenu(null);
   }, []);
 
   const handleCreateArchive = useCallback(() => {
@@ -202,6 +211,11 @@ export default function BrowserPage() {
                     onDoubleClick={(e) =>
                       handleEntryDblClick(e, entry, filePath)
                     }
+                    onContextMenu={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setContextMenu({ x: e.clientX, y: e.clientY, filePath, entry });
+                    }}
                   >
                     {emojiFor(entry)}&nbsp;&nbsp;
                     {entry.name === "archive.xlsx" ? "Archive" : entry.name}
@@ -226,6 +240,50 @@ export default function BrowserPage() {
           )}
         </Drawer>
       </div>
+      {contextMenu && (
+        <div
+          className="context-menu"
+          style={{ top: contextMenu.y, left: contextMenu.x }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            onClick={() => {
+              if (contextMenu.entry.isDirectory) {
+                navigateTo(contextMenu.filePath);
+              } else {
+                window.api.openFile(contextMenu.filePath);
+              }
+              setContextMenu(null);
+            }}
+          >
+            Open
+          </button>
+          <button
+            onClick={() => {
+              window.api.showInFinder(contextMenu.filePath);
+              setContextMenu(null);
+            }}
+          >
+            Show in Finder
+          </button>
+          {!contextMenu.entry.isDirectory && (
+            <button
+              className="context-menu-danger"
+              onClick={async () => {
+                const name = contextMenu.entry.name;
+                const fp = contextMenu.filePath;
+                setContextMenu(null);
+                if (!window.confirm(`Delete "${name}"? This cannot be undone.`)) return;
+                await window.api.deleteFile(fp);
+                closePanel();
+                if (currentPath) await navigateTo(currentPath);
+              }}
+            >
+              Delete
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

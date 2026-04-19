@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, ipcMain, net, protocol } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, net, protocol, shell } from "electron";
 import path from "node:path";
 import fs from "node:fs";
 import * as XLSX from "xlsx";
@@ -122,20 +122,27 @@ ipcMain.handle(
   },
 );
 
+ipcMain.handle("get-sheet-names", async (_event, xlsxPath: string) => {
+  const buf = await fs.promises.readFile(xlsxPath);
+  const workbook = XLSX.read(buf);
+  return workbook.SheetNames;
+});
+
 ipcMain.handle(
   "update-sheet-row",
   async (
     _event,
     xlsxPath: string,
+    sheetName: string,
     rowIndex: number,
     updatedValues: Record<string, string>,
   ) => {
     const buf = await fs.promises.readFile(xlsxPath);
     const workbook = XLSX.read(buf);
     const actualName = workbook.SheetNames.find(
-      (n) => n.toLowerCase() === "items",
+      (n) => n.toLowerCase() === sheetName.toLowerCase(),
     );
-    if (!actualName) throw new Error("No Items sheet found");
+    if (!actualName) throw new Error(`No ${sheetName} sheet found`);
     const sheet = workbook.Sheets[actualName];
     const rows: string[][] = XLSX.utils.sheet_to_json(sheet, {
       header: 1,
@@ -233,13 +240,18 @@ ipcMain.handle(
 
 ipcMain.handle(
   "add-sheet-row",
-  async (_event, xlsxPath: string, values: Record<string, string>) => {
+  async (
+    _event,
+    xlsxPath: string,
+    sheetName: string,
+    values: Record<string, string>,
+  ) => {
     const buf = await fs.promises.readFile(xlsxPath);
     const workbook = XLSX.read(buf);
     const actualName = workbook.SheetNames.find(
-      (n) => n.toLowerCase() === "items",
+      (n) => n.toLowerCase() === sheetName.toLowerCase(),
     );
-    if (!actualName) throw new Error("No Items sheet found");
+    if (!actualName) throw new Error(`No ${sheetName} sheet found`);
     const sheet = workbook.Sheets[actualName];
     const rows: string[][] = XLSX.utils.sheet_to_json(sheet, {
       header: 1,
@@ -359,3 +371,15 @@ ipcMain.handle(
     return { path: folderPath };
   },
 );
+
+ipcMain.handle("open-file", async (_event, filePath: string) => {
+  return shell.openPath(filePath);
+});
+
+ipcMain.handle("show-in-finder", (_event, filePath: string) => {
+  shell.showItemInFolder(filePath);
+});
+
+ipcMain.handle("delete-file", async (_event, filePath: string) => {
+  await fs.promises.unlink(filePath);
+});

@@ -12,6 +12,8 @@ contextBridge.exposeInMainWorld("api", {
     ipcRenderer.invoke("list-folder", folderPath),
   getFileInfo: (filePath: string): Promise<import("./api").FileInfo> =>
     ipcRenderer.invoke("get-file-info", filePath),
+  getSheetNames: (xlsxPath: string): Promise<string[]> =>
+    ipcRenderer.invoke("get-sheet-names", xlsxPath),
   readSheet: (
     xlsxPath: string,
     sheetName: string,
@@ -19,10 +21,17 @@ contextBridge.exposeInMainWorld("api", {
     ipcRenderer.invoke("read-sheet", xlsxPath, sheetName),
   updateSheetRow: (
     xlsxPath: string,
+    sheetName: string,
     rowIndex: number,
     updatedValues: Record<string, string>,
   ): Promise<string[]> =>
-    ipcRenderer.invoke("update-sheet-row", xlsxPath, rowIndex, updatedValues),
+    ipcRenderer.invoke(
+      "update-sheet-row",
+      xlsxPath,
+      sheetName,
+      rowIndex,
+      updatedValues,
+    ),
   populateFilesTab: (
     folder: string,
     rootFolder: string,
@@ -35,8 +44,10 @@ contextBridge.exposeInMainWorld("api", {
     ipcRenderer.invoke("create-archive", folderPath, meta),
   addSheetRow: (
     xlsxPath: string,
+    sheetName: string,
     values: Record<string, string>,
-  ): Promise<string[]> => ipcRenderer.invoke("add-sheet-row", xlsxPath, values),
+  ): Promise<string[]> =>
+    ipcRenderer.invoke("add-sheet-row", xlsxPath, sheetName, values),
   updateRootDataset: (
     xlsxPath: string,
     updates: Record<string, string>,
@@ -46,4 +57,10 @@ contextBridge.exposeInMainWorld("api", {
     ipcRenderer.invoke("create-people-orgs-folder", rootFolder),
   createPlacesFolder: (rootFolder: string): Promise<{ path: string }> =>
     ipcRenderer.invoke("create-places-folder", rootFolder),
+  openFile: (filePath: string): Promise<string> =>
+    ipcRenderer.invoke("open-file", filePath),
+  showInFinder: (filePath: string): Promise<void> =>
+    ipcRenderer.invoke("show-in-finder", filePath),
+  deleteFile: (filePath: string): Promise<void> =>
+    ipcRenderer.invoke("delete-file", filePath),
 });

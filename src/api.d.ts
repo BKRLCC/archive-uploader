@@ -21,9 +21,11 @@ export interface Api {
   chooseRootFolder: () => Promise<string | null>;
   listFolder: (folderPath: string) => Promise<DirEntry[]>;
   getFileInfo: (filePath: string) => Promise<FileInfo>;
+  getSheetNames: (xlsxPath: string) => Promise<string[]>;
   readSheet: (xlsxPath: string, sheetName: string) => Promise<SheetData | null>;
   updateSheetRow: (
     xlsxPath: string,
+    sheetName: string,
     rowIndex: number,
     updatedValues: Record<string, string>,
   ) => Promise<string[]>;
@@ -37,6 +39,7 @@ export interface Api {
   ) => Promise<{ path: string }>;
   addSheetRow: (
     xlsxPath: string,
+    sheetName: string,
     values: Record<string, string>,
   ) => Promise<string[]>;
   updateRootDataset: (
@@ -45,6 +48,9 @@ export interface Api {
   ) => Promise<SheetData>;
   createPeopleOrgsFolder: (rootFolder: string) => Promise<{ path: string }>;
   createPlacesFolder: (rootFolder: string) => Promise<{ path: string }>;
+  openFile: (filePath: string) => Promise<string>;
+  showInFinder: (filePath: string) => Promise<void>;
+  deleteFile: (filePath: string) => Promise<void>;
 }
 
 declare global {

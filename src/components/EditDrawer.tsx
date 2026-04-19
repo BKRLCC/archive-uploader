@@ -20,6 +20,7 @@ interface Props {
   row: string[];
   rowIndex: number;
   xlsxPath: string;
+  sheetName: string;
   onSave: (rowIndex: number, updated: string[]) => void;
   onClose: () => void;
   isNew?: boolean;
@@ -30,6 +31,7 @@ export default function EditDrawer({
   row,
   rowIndex,
   xlsxPath,
+  sheetName,
   onSave,
   onClose,
   isNew = false,
@@ -58,7 +60,11 @@ export default function EditDrawer({
         updatedValues[h] = values[i] ?? "";
       });
       try {
-        const updated = await window.api.addSheetRow(xlsxPath, updatedValues);
+        const updated = await window.api.addSheetRow(
+          xlsxPath,
+          sheetName,
+          updatedValues,
+        );
         onSave(rowIndex, updated);
         onClose();
       } catch (err) {
@@ -75,6 +81,7 @@ export default function EditDrawer({
     try {
       const updated = await window.api.updateSheetRow(
         xlsxPath,
+        sheetName,
         rowIndex,
         updatedValues,
       );
