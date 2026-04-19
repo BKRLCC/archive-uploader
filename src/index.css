@@ -173,6 +173,7 @@ h3,
 h4,
 h5,
 h6 {
+  color: hsl(0, 59%, 38%);
   font-family: "Meloso", sans-serif;
 }
 
