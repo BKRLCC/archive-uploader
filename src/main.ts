@@ -98,6 +98,7 @@ ipcMain.handle("get-file-info", async (_event, filePath: string) => {
     size: stat.size,
     birthtime: stat.birthtime.toISOString(),
     mtime: stat.mtime.toISOString(),
+    isDirectory: stat.isDirectory(),
   };
 });
 

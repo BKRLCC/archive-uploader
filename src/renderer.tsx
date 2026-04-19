@@ -3,15 +3,16 @@ import { createRoot } from "react-dom/client";
 import { HashRouter, Routes, Route, Outlet } from "react-router-dom";
 import "./index.css";
 import AppHeader from "./components/AppHeader";
+import AppSubHeader from "./components/AppSubHeader";
 import HomePage from "./pages/HomePage";
 import BrowserPage from "./pages/BrowserPage";
 import SettingsPage from "./pages/SettingsPage";
-import ArchivePage from "./pages/ArchivePage";
 
 function Layout() {
   return (
     <div className="app-layout">
       <AppHeader />
+      <AppSubHeader />
       <div className="app-content">
         <Outlet />
       </div>
@@ -28,7 +29,6 @@ root.render(
           <Route path="/" element={<HomePage />} />
           <Route path="/browser" element={<BrowserPage />} />
           <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/archive" element={<ArchivePage />} />
         </Route>
       </Routes>
     </HashRouter>

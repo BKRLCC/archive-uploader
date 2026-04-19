@@ -4,7 +4,7 @@ import type { DirEntry, FileInfo } from "../api";
 import FilePreview, { type Selected } from "../components/FilePreview";
 import Drawer from "../components/Drawer";
 import CreateArchiveForm from "../components/CreateArchiveForm";
-import Breadcrumb from "../components/Breadcrumb";
+import FilePage from "./FilePage";
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -42,9 +42,11 @@ export default function BrowserPage() {
   const [rootFolder, setRootFolder] = useState<string | null>(null);
   const [entries, setEntries] = useState<DirEntry[]>([]);
 
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const pathParam = searchParams.get("path");
   const currentPath = pathParam ?? rootFolder;
+  const isFile = searchParams.get("type") === "file";
+  const showCreate = searchParams.get("showCreate") === "1";
   const [selected, setSelected] = useState<Selected | null>(null);
   const [fileInfo, setFileInfo] = useState<FileInfo | null>(null);
   const [creatingArchive, setCreatingArchive] = useState(false);
@@ -58,6 +60,13 @@ export default function BrowserPage() {
   const navigateTo = useCallback(
     (folderPath: string) => {
       navigate(`/browser?path=${encodeURIComponent(folderPath)}`);
+    },
+    [navigate],
+  );
+
+  const navigateToFile = useCallback(
+    (filePath: string) => {
+      navigate(`/browser?path=${encodeURIComponent(filePath)}&type=file`);
     },
     [navigate],
   );
@@ -84,13 +93,20 @@ export default function BrowserPage() {
 
   // Load entries and clear selection whenever the displayed folder changes
   useEffect(() => {
-    if (!currentPath) return;
+    if (!currentPath || isFile) return;
     setSelected(null);
     setFileInfo(null);
     setCreatingArchive(false);
     setContextMenu(null);
     window.api.listFolder(currentPath).then(setEntries);
-  }, [currentPath]);
+  }, [currentPath, isFile]);
+
+  // Open CreateArchiveForm when ?showCreate=1 is in URL
+  useEffect(() => {
+    if (showCreate) {
+      setCreatingArchive(true);
+    }
+  }, [showCreate]);
 
   const handleSelect = useCallback(
     async (entry: DirEntry, filePath: string) => {
@@ -115,13 +131,11 @@ export default function BrowserPage() {
       e.stopPropagation();
       if (entry.isDirectory) {
         navigateTo(filePath);
-      } else if (entry.name === "archive.xlsx") {
-        navigate("/archive", { state: { folder: currentPath } });
       } else {
-        window.api.openFile(filePath);
+        navigateToFile(filePath);
       }
     },
-    [navigateTo, navigate, currentPath],
+    [navigateTo, navigateToFile],
   );
 
   const closePanel = useCallback(() => {
@@ -129,13 +143,13 @@ export default function BrowserPage() {
     setFileInfo(null);
     setCreatingArchive(false);
     setContextMenu(null);
-  }, []);
-
-  const handleCreateArchive = useCallback(() => {
-    setSelected(null);
-    setFileInfo(null);
-    setCreatingArchive(true);
-  }, []);
+    // Remove showCreate param without pushing a history entry
+    if (searchParams.has("showCreate")) {
+      const next = new URLSearchParams(searchParams);
+      next.delete("showCreate");
+      setSearchParams(next, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   // ── Render ──────────────────────────────────────────────────────────────────
 
@@ -150,114 +164,66 @@ export default function BrowserPage() {
     );
   }
 
+  if (isFile) {
+    return <FilePage />;
+  }
+
   return (
     <div className="browser-page" onClick={closePanel}>
       <div className="browser-inner">
         <div className="browser-left">
-          <div className="breadcrumb-bar">
-            <nav className="breadcrumb">
-              {rootFolder && currentPath && (
-                <Breadcrumb
-                  rootFolder={rootFolder}
-                  currentPath={currentPath}
-                  onNavigate={navigateTo}
-                />
+          <div className="file-list-wrapper">
+            <ul className="file-list">
+              {entries.length === 0 ? (
+                <li className="empty">This folder is empty.</li>
+              ) : (
+                entries.map((entry) => {
+                  const filePath = currentPath + "/" + entry.name;
+                  const isSelected = selected?.filePath === filePath;
+                  return (
+                    <li
+                      key={entry.name}
+                      className={[
+                        entry.isDirectory || entry.name === "archive.xlsx"
+                          ? "folder"
+                          : "",
+                        isSelected ? "selected" : "",
+                      ]
+                        .join(" ")
+                        .trim()}
+                      onClick={(e) => handleEntryClick(e, entry, filePath)}
+                      onDoubleClick={(e) =>
+                        handleEntryDblClick(e, entry, filePath)
+                      }
+                      onContextMenu={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setContextMenu({
+                          x: e.clientX,
+                          y: e.clientY,
+                          filePath,
+                          entry,
+                        });
+                      }}
+                    >
+                      {emojiFor(entry)}&nbsp;&nbsp;
+                      {entry.name === "archive.xlsx" ? "Archive" : entry.name}
+                    </li>
+                  );
+                })
               )}
-            </nav>
-            {currentPath &&
-              currentPath !== rootFolder &&
-              !entries.some((e) => e.name === "archive.xlsx") && (
-                <button
-                  className="create-archive-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleCreateArchive();
-                  }}
-                >
-                  🌟 Create Archive
-                </button>
-              )}
-            {currentPath &&
-              currentPath === rootFolder &&
-              !entries.some(
-                (e) => e.name === "People & Organisations" && e.isDirectory,
-              ) && (
-                <button
-                  className="create-archive-btn"
-                  onClick={async (e) => {
-                    e.stopPropagation();
-                    await window.api.createPeopleOrgsFolder(rootFolder);
-                    await refreshCurrentFolder();
-                  }}
-                >
-                  👥 Create People &amp; Orgs folder
-                </button>
-              )}
-            {currentPath &&
-              currentPath === rootFolder &&
-              !entries.some((e) => e.name === "Places" && e.isDirectory) && (
-                <button
-                  className="create-archive-btn"
-                  onClick={async (e) => {
-                    e.stopPropagation();
-                    await window.api.createPlacesFolder(rootFolder);
-                    await refreshCurrentFolder();
-                  }}
-                >
-                  📍 Create Places folder
-                </button>
-              )}
+            </ul>
           </div>
-          <ul className="file-list">
-            {entries.length === 0 ? (
-              <li className="empty">This folder is empty.</li>
-            ) : (
-              entries.map((entry) => {
-                const filePath = currentPath + "/" + entry.name;
-                const isSelected = selected?.filePath === filePath;
-                return (
-                  <li
-                    key={entry.name}
-                    className={[
-                      entry.isDirectory || entry.name === "archive.xlsx"
-                        ? "folder"
-                        : "",
-                      isSelected ? "selected" : "",
-                    ]
-                      .join(" ")
-                      .trim()}
-                    onClick={(e) => handleEntryClick(e, entry, filePath)}
-                    onDoubleClick={(e) =>
-                      handleEntryDblClick(e, entry, filePath)
-                    }
-                    onContextMenu={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setContextMenu({
-                        x: e.clientX,
-                        y: e.clientY,
-                        filePath,
-                        entry,
-                      });
-                    }}
-                  >
-                    {emojiFor(entry)}&nbsp;&nbsp;
-                    {entry.name === "archive.xlsx" ? "Archive" : entry.name}
-                  </li>
-                );
-              })
-            )}
-          </ul>
         </div>
         <Drawer open={selected !== null || creatingArchive} width={280}>
           {creatingArchive && currentPath ? (
             <CreateArchiveForm
               folderPath={currentPath}
               onCreated={async () => {
-                setCreatingArchive(false);
+                closePanel();
                 await refreshCurrentFolder();
               }}
-              onClose={() => setCreatingArchive(false)}
+              onClose={closePanel}
             />
           ) : (
             <FilePreview selected={selected} fileInfo={fileInfo} />
@@ -275,7 +241,7 @@ export default function BrowserPage() {
               if (contextMenu.entry.isDirectory) {
                 navigateTo(contextMenu.filePath);
               } else {
-                window.api.openFile(contextMenu.filePath);
+                navigateToFile(contextMenu.filePath);
               }
               setContextMenu(null);
             }}

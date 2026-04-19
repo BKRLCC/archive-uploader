@@ -9,6 +9,7 @@ export interface FileInfo {
   size: number;
   birthtime: string;
   mtime: string;
+  isDirectory: boolean;
 }
 
 export interface SheetData {

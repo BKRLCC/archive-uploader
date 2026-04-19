@@ -24,7 +24,7 @@ export default function Breadcrumb({
   }
 
   return (
-    <>
+    <div>
       {segments.map((seg, i) => {
         const isLast = i === segments.length - 1;
         return (
@@ -39,6 +39,6 @@ export default function Breadcrumb({
           </React.Fragment>
         );
       })}
-    </>
+    </div>
   );
 }
