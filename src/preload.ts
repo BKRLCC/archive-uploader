@@ -44,4 +44,6 @@ contextBridge.exposeInMainWorld("api", {
     ipcRenderer.invoke("update-root-dataset", xlsxPath, updates),
   createPeopleOrgsFolder: (rootFolder: string): Promise<{ path: string }> =>
     ipcRenderer.invoke("create-people-orgs-folder", rootFolder),
+  createPlacesFolder: (rootFolder: string): Promise<{ path: string }> =>
+    ipcRenderer.invoke("create-places-folder", rootFolder),
 });

@@ -25,6 +25,7 @@ const IMAGE_EXTS_BROWSER = new Set(["jpg", "jpeg", "png", "gif", "webp"]);
 
 function emojiFor(entry: DirEntry) {
   if (entry.name === "People & Organisations" && entry.isDirectory) return "👥";
+  if (entry.name === "Places" && entry.isDirectory) return "📍";
   if (entry.isDirectory) return EMOJI.folder;
   if (entry.name === "archive.xlsx") return "⭐";
   if (IMAGE_EXTS_BROWSER.has(entry.ext)) return EMOJI.image;
@@ -162,6 +163,20 @@ export default function BrowserPage() {
                   }}
                 >
                   👥 Create People &amp; Orgs folder
+                </button>
+              )}
+            {currentPath &&
+              currentPath === rootFolder &&
+              !entries.some((e) => e.name === "Places" && e.isDirectory) && (
+                <button
+                  className="create-archive-btn"
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    await window.api.createPlacesFolder(rootFolder);
+                    await navigateTo(currentPath);
+                  }}
+                >
+                  📍 Create Places folder
                 </button>
               )}
           </div>

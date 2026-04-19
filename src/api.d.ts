@@ -44,6 +44,7 @@ export interface Api {
     updates: Record<string, string>,
   ) => Promise<SheetData>;
   createPeopleOrgsFolder: (rootFolder: string) => Promise<{ path: string }>;
+  createPlacesFolder: (rootFolder: string) => Promise<{ path: string }>;
 }
 
 declare global {

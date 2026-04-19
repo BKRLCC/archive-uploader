@@ -311,6 +311,36 @@ ipcMain.handle("choose-root-folder", async (event) => {
   return filePaths[0];
 });
 
+ipcMain.handle("create-places-folder", async (_event, rootFolder: string) => {
+  const folderPath = path.join(rootFolder, "Places");
+  await fs.promises.mkdir(folderPath, { recursive: true });
+  const xlsxPath = path.join(folderPath, "archive.xlsx");
+  const workbook = XLSX.utils.book_new();
+  const rootDataset = XLSX.utils.aoa_to_sheet([
+    ["Name", "Value"],
+    ["@id", "./"],
+    ["@type", "[Dataset, RepositoryCollection]"],
+    ["name", "Places"],
+    ["description", ""],
+  ]);
+  XLSX.utils.book_append_sheet(workbook, rootDataset, "RootDataset");
+  XLSX.utils.book_append_sheet(
+    workbook,
+    XLSX.utils.aoa_to_sheet([["@id", "@type", "name", "description"]]),
+    "Items",
+  );
+  XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([]), "Files");
+  const localitiesSheet = XLSX.utils.aoa_to_sheet([
+    ["@id", "@type", ".latitude", ".longitude", "asWKT"],
+  ]);
+  XLSX.utils.book_append_sheet(workbook, localitiesSheet, "Localities");
+  await fs.promises.writeFile(
+    xlsxPath,
+    XLSX.write(workbook, { type: "buffer", bookType: "xlsx" }),
+  );
+  return { path: folderPath };
+});
+
 ipcMain.handle(
   "create-people-orgs-folder",
   async (_event, rootFolder: string) => {
