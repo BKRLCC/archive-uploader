@@ -140,24 +140,26 @@ export default function ArchivePage() {
     if (sheet === "empty") return <p className="items-state">{emptyLabel}</p>;
     if (!sheet) return <p className="items-state">Loading…</p>;
     return (
-      <table className="sheet-table">
-        <thead>
-          <tr>
-            {sheet.headers.map((h) => (
-              <th key={h}>{h}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {sheet.rows.map((row, i) => (
-            <tr key={i}>
-              {row.map((cell, j) => (
-                <td key={j}>{cell}</td>
+      <div className="table-scroll">
+        <table className="sheet-table">
+          <thead>
+            <tr>
+              {sheet.headers.map((h) => (
+                <th key={h}>{h}</th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {sheet.rows.map((row, i) => (
+              <tr key={i}>
+                {row.map((cell, j) => (
+                  <td key={j}>{cell}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     );
   }
 
@@ -176,36 +178,38 @@ export default function ArchivePage() {
       .map(({ i }) => i);
 
     return (
-      <table className="sheet-table">
-        <thead>
-          <tr>
-            <th></th>
-            {visibleIndices.map((i) => (
-              <th key={i}>{sheet.headers[i]}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {sheet.rows.map((row, rowIndex) => (
-            <tr key={rowIndex}>
-              <td
-                className="edit-btn-cell"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setEditingRootDataset(false);
-                  setAddingItem(false);
-                  setEditingRow({ rowIndex, row, sheetName });
-                }}
-              >
-                ✏️
-              </td>
+      <div className="table-scroll">
+        <table className="sheet-table">
+          <thead>
+            <tr>
+              <th></th>
               {visibleIndices.map((i) => (
-                <td key={i}>{row[i] ?? ""}</td>
+                <th key={i}>{sheet.headers[i]}</th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {sheet.rows.map((row, rowIndex) => (
+              <tr key={rowIndex}>
+                <td
+                  className="edit-btn-cell"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setEditingRootDataset(false);
+                    setAddingItem(false);
+                    setEditingRow({ rowIndex, row, sheetName });
+                  }}
+                >
+                  ✏️
+                </td>
+                {visibleIndices.map((i) => (
+                  <td key={i}>{row[i] ?? ""}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     );
   }
 

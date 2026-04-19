@@ -20,6 +20,16 @@
   overflow: hidden;
 }
 
+.app-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 1.5em;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
 .app-header {
   height: var(--header-height);
   flex-shrink: 0;
@@ -167,11 +177,9 @@ textarea {
 /* ── File Browser ────────────────────────────────────────── */
 
 .browser-page {
-  height: 100%;
-  margin: 0;
-  box-sizing: border-box;
-  max-width: none;
-  padding: 1em;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
@@ -304,6 +312,12 @@ textarea {
 }
 
 /* ── Sheet table ─────────────────────────────────────────── */
+
+.table-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
 
 .sheet-table {
   border-collapse: collapse;
@@ -443,13 +457,11 @@ textarea {
 }
 
 .archive-page {
-  height: 100%;
-  box-sizing: border-box;
-  margin: 0;
-  max-width: none;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
   display: flex;
   flex-direction: row;
-  overflow: hidden;
 }
 
 .archive-page > .drawer {
@@ -461,23 +473,17 @@ textarea {
 .archive-main {
   flex: 1;
   min-width: 0;
-  overflow-y: auto;
+  overflow: hidden;
   padding: 2rem;
   display: flex;
   flex-direction: column;
 }
 
-.archive-main section:last-child {
+.archive-main section {
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
-}
-
-.archive-main section:last-child .items-table-wrap {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
 }
 
 .tab-bar {

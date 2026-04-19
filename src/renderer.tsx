@@ -12,7 +12,9 @@ function Layout() {
   return (
     <div className="app-layout">
       <AppHeader />
-      <Outlet />
+      <div className="app-content">
+        <Outlet />
+      </div>
     </div>
   );
 }
