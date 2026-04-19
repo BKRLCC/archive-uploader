@@ -1,5 +1,6 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { UiIcons } from "../config/icons";
 
 export default function AppHeader() {
   const location = useLocation();
@@ -22,21 +23,21 @@ export default function AppHeader() {
           onClick={() => navigate("/")}
           title="Home"
         >
-          🏠
+          {UiIcons.home}
         </button>
         <button
           className="header-nav-btn"
           onClick={() => navigate("/browser")}
           title="File Browser"
         >
-          📁
+          {UiIcons.fileBrowser}
         </button>
         <button
           className="header-nav-btn"
           onClick={() => navigate("/settings")}
           title="Settings"
         >
-          ⚙️
+          {UiIcons.settings}
         </button>
       </div>
     </header>

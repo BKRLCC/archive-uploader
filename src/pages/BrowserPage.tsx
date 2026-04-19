@@ -5,15 +5,16 @@ import FilePreview, { type Selected } from "../components/FilePreview";
 import Drawer from "../components/Drawer";
 import CreateArchiveForm from "../components/CreateArchiveForm";
 import FilePage from "./FilePage";
+import { UiIcons } from "../config/icons";
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
 const EMOJI = {
-  folder: "📁",
-  image: "🖼️",
-  audio: "🎵",
-  video: "🎬",
-  doc: "📄",
+  folder: UiIcons.folder,
+  image: UiIcons.image,
+  audio: UiIcons.audio,
+  video: UiIcons.video,
+  doc: UiIcons.doc,
 };
 
 const AUDIO_EXTS = new Set(["mp3", "wav", "flac", "aac", "ogg", "m4a"]);

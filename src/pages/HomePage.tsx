@@ -1,5 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { DataTypeLabels } from "../config/datatype-labels";
+import { UiIcons } from "../config/icons";
 
 export default function HomePage() {
   return (
@@ -17,7 +19,7 @@ export default function HomePage() {
       <h2>How it works</h2>
       <p>
         All your metadata is kept in Excel files called{" "}
-        <code>metadata.tsx</code>. In the Archivist app, you will see these
+        <code>metadata.xlsx</code>. In the Archivist app, you will see these
         files called "<code>⭐ Metadata</code>". You can make an{" "}
         <code>⭐ Metadata</code> file in any folder by clicking the{" "}
         <span className="pretend-button">🌟 Create metadata file</span> button.
@@ -25,10 +27,32 @@ export default function HomePage() {
         archive files.
       </p>
       <p>
-        <Link to="/browser">File Browser</Link>
+        There are a few special types of data. Each of these has its own folder
+        in the root of your archive.
+      </p>
+      <ul>
+        <li>
+          {DataTypeLabels.PeopleAndOrgs.icon}{" "}
+          {DataTypeLabels.PeopleAndOrgs.label}
+        </li>
+        <li>
+          {DataTypeLabels.Places.icon} {DataTypeLabels.Places.label}
+        </li>
+        <li>
+          {DataTypeLabels["ldac:DataReuseLicense"].icon}{" "}
+          {DataTypeLabels["ldac:DataReuseLicense"].label}
+        </li>
+      </ul>
+      <h2>Get started: </h2>
+      <p>
+        <Link className="button-link" to="/browser">
+          {UiIcons.fileBrowser} File Browser
+        </Link>
       </p>
       <p>
-        <Link to="/settings">Settings</Link>
+        <Link to="/settings" className="button-link">
+          {UiIcons.settings} Settings
+        </Link>
       </p>
     </div>
   );

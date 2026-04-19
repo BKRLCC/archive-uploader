@@ -193,7 +193,8 @@ h6 {
   font-family: "Meloso", sans-serif;
 }
 
-button {
+button,
+.button-link {
   font-family: "Meloso", sans-serif;
   background-color: #a62b2b;
   color: #fff;
@@ -202,6 +203,7 @@ button {
   border-radius: 20px;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  text-decoration: none;
 }
 
 input,
