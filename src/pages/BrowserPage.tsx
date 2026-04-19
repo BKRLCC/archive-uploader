@@ -49,7 +49,6 @@ export default function BrowserPage() {
   const showCreate = searchParams.get("showCreate") === "1";
   const [selected, setSelected] = useState<Selected | null>(null);
   const [fileInfo, setFileInfo] = useState<FileInfo | null>(null);
-  const [creatingArchive, setCreatingArchive] = useState(false);
   const [contextMenu, setContextMenu] = useState<{
     x: number;
     y: number;
@@ -96,17 +95,9 @@ export default function BrowserPage() {
     if (!currentPath || isFile) return;
     setSelected(null);
     setFileInfo(null);
-    setCreatingArchive(false);
     setContextMenu(null);
     window.api.listFolder(currentPath).then(setEntries);
   }, [currentPath, isFile]);
-
-  // Open CreateArchiveForm when ?showCreate=1 is in URL
-  useEffect(() => {
-    if (showCreate) {
-      setCreatingArchive(true);
-    }
-  }, [showCreate]);
 
   const handleSelect = useCallback(
     async (entry: DirEntry, filePath: string) => {
@@ -141,9 +132,7 @@ export default function BrowserPage() {
   const closePanel = useCallback(() => {
     setSelected(null);
     setFileInfo(null);
-    setCreatingArchive(false);
     setContextMenu(null);
-    // Remove showCreate param without pushing a history entry
     if (searchParams.has("showCreate")) {
       const next = new URLSearchParams(searchParams);
       next.delete("showCreate");
@@ -215,8 +204,8 @@ export default function BrowserPage() {
             </ul>
           </div>
         </div>
-        <Drawer open={selected !== null || creatingArchive} width={280}>
-          {creatingArchive && currentPath ? (
+        <Drawer open={selected !== null || showCreate} width={280}>
+          {showCreate && currentPath ? (
             <CreateArchiveForm
               folderPath={currentPath}
               onCreated={async () => {

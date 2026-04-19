@@ -38,7 +38,7 @@ export default function CreateArchiveForm({
 
   return (
     <div className="drawer-inner">
-      <h3>New archive</h3>
+      <h3>New metadata file</h3>
       <form onSubmit={handleSubmit}>
         <div className="edit-fields">
           <label className="edit-field">
