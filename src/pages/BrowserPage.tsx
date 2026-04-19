@@ -26,6 +26,7 @@ const IMAGE_EXTS_BROWSER = new Set(["jpg", "jpeg", "png", "gif", "webp"]);
 function emojiFor(entry: DirEntry) {
   if (entry.name === "People & Organisations" && entry.isDirectory) return "👥";
   if (entry.name === "Places" && entry.isDirectory) return "📍";
+  if (entry.name === "Licenses" && entry.isDirectory) return "📜";
   if (entry.isDirectory) return EMOJI.folder;
   if (entry.name === "metadata.xlsx") return "⭐";
   if (IMAGE_EXTS_BROWSER.has(entry.ext)) return EMOJI.image;
@@ -47,6 +48,7 @@ export default function BrowserPage() {
   const currentPath = pathParam ?? rootFolder;
   const isFile = searchParams.get("type") === "file";
   const showCreate = searchParams.get("showCreate") === "1";
+  const refreshKey = searchParams.get("r");
   const [selected, setSelected] = useState<Selected | null>(null);
   const [fileInfo, setFileInfo] = useState<FileInfo | null>(null);
   const [contextMenu, setContextMenu] = useState<{
@@ -97,7 +99,7 @@ export default function BrowserPage() {
     setFileInfo(null);
     setContextMenu(null);
     window.api.listFolder(currentPath).then(setEntries);
-  }, [currentPath, isFile]);
+  }, [currentPath, isFile, refreshKey]);
 
   const handleSelect = useCallback(
     async (entry: DirEntry, filePath: string) => {

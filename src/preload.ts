@@ -57,6 +57,8 @@ contextBridge.exposeInMainWorld("api", {
     ipcRenderer.invoke("create-people-orgs-folder", rootFolder),
   createPlacesFolder: (rootFolder: string): Promise<{ path: string }> =>
     ipcRenderer.invoke("create-places-folder", rootFolder),
+  createLicensesFolder: (rootFolder: string): Promise<{ path: string }> =>
+    ipcRenderer.invoke("create-licenses-folder", rootFolder),
   openFile: (filePath: string): Promise<string> =>
     ipcRenderer.invoke("open-file", filePath),
   showInFinder: (filePath: string): Promise<void> =>

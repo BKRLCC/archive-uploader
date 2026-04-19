@@ -70,7 +70,10 @@ export default function AppSubHeader() {
                 onClick={async (e) => {
                   e.stopPropagation();
                   await window.api.createPeopleOrgsFolder(rootFolder);
-                  await refreshEntries();
+                  navigate(
+                    `/browser?path=${encodeURIComponent(currentPath)}&r=${Date.now()}`,
+                    { replace: true },
+                  );
                 }}
               >
                 👥 Create People &amp; Orgs folder
@@ -83,10 +86,29 @@ export default function AppSubHeader() {
                 onClick={async (e) => {
                   e.stopPropagation();
                   await window.api.createPlacesFolder(rootFolder);
-                  await refreshEntries();
+                  navigate(
+                    `/browser?path=${encodeURIComponent(currentPath)}&r=${Date.now()}`,
+                    { replace: true },
+                  );
                 }}
               >
                 📍 Create Places folder
+              </button>
+            )}
+          {currentPath === rootFolder &&
+            !entries.some((e) => e.name === "Licenses" && e.isDirectory) && (
+              <button
+                className="create-archive-btn"
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  await window.api.createLicensesFolder(rootFolder);
+                  navigate(
+                    `/browser?path=${encodeURIComponent(currentPath)}&r=${Date.now()}`,
+                    { replace: true },
+                  );
+                }}
+              >
+                📜 Create Licenses folder
               </button>
             )}
         </div>

@@ -1,0 +1,4 @@
+name,@id,,,
+ldac,https://w3id.org/ldac/terms#,,,
+csvw,http://www.w3.org/ns/csvw#,,,
+custom,"arcp://name,custom/terms#",,,

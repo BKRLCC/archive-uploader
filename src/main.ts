@@ -392,3 +392,82 @@ ipcMain.handle("show-in-finder", (_event, filePath: string) => {
 ipcMain.handle("delete-file", async (_event, filePath: string) => {
   await fs.promises.unlink(filePath);
 });
+
+ipcMain.handle("create-licenses-folder", async (_event, rootFolder: string) => {
+  const folderPath = path.join(rootFolder, "Licenses");
+  await fs.promises.mkdir(folderPath, { recursive: true });
+  const xlsxPath = path.join(folderPath, "metadata.xlsx");
+  const workbook = XLSX.utils.book_new();
+
+  const rootDataset = XLSX.utils.aoa_to_sheet([
+    ["Name", "Value"],
+    ["@id", "./"],
+    ["@type", "[Dataset, RepositoryCollection]"],
+    ["name", "Licenses"],
+    ["description", ""],
+  ]);
+  XLSX.utils.book_append_sheet(workbook, rootDataset, "RootDataset");
+
+  const contextSheet = XLSX.utils.aoa_to_sheet([
+    ["name", "@id"],
+    ["ldac", "https://w3id.org/ldac/terms#"],
+    ["csvw", "http://www.w3.org/ns/csvw#"],
+    ["custom", "arcp://name,custom/terms#"],
+  ]);
+  XLSX.utils.book_append_sheet(workbook, contextSheet, "@context");
+
+  const itemsSheet = XLSX.utils.aoa_to_sheet([
+    [
+      "@id",
+      "@type",
+      "name",
+      "description",
+      "ldac:allowTextIndex",
+      "isRef_sameAs",
+      "isRef_isPartOf",
+    ],
+    [
+      "https://creativecommons.org/licenses/by/4.0/",
+      "ldac:DataReuseLicense",
+      "Attribution 4.0 International (CC BY 4.0)",
+      "You are free to: Share — copy and redistribute the material in any medium or format. Adapt — remix, transform, and build upon the material for any purpose, even commercially. This license is acceptable for Free Cultural Works. The licensor cannot revoke these freedoms as long as you follow the license terms.",
+      "TRUE",
+      "CC_BY_4.0.txt",
+      "./",
+    ],
+    [
+      "https://creativecommons.org/licenses/by-nd/3.0/au/",
+      "ldac:DataReuseLicense",
+      "Attribution-NoDerivs 3.0 Australia (CC BY-ND 3.0 AU)",
+      "You are free to: Share — copy and redistribute the material in any medium or format for any purpose, even commercially. The licensor cannot revoke these freedoms as long as you follow the license terms.",
+      "TRUE",
+      "",
+      "./",
+    ],
+    [
+      "Licenses/Example.txt",
+      "[ldac:DataReuseLicense, File]",
+      "Example Custom License",
+      "This license explains who is allowed to use and possibly redistribute this data, and for what purpose.",
+      "TRUE",
+      "",
+      "./",
+    ],
+    [
+      "CC_BY_4.0.txt",
+      "[ldac:DataReuseLicense, File]",
+      "Attribution 4.0 International (CC BY 4.0) Local",
+      "Local copy of the CC BY 4.0 license.",
+      "TRUE",
+      "https://creativecommons.org/licenses/by/4.0/",
+      "./",
+    ],
+  ]);
+  XLSX.utils.book_append_sheet(workbook, itemsSheet, "Items");
+
+  await fs.promises.writeFile(
+    xlsxPath,
+    XLSX.write(workbook, { type: "buffer", bookType: "xlsx" }),
+  );
+  return { path: folderPath };
+});
