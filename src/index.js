@@ -92,9 +92,9 @@ const MIME_TYPES = {
   pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
 };
 
-// IPC: populate (or replace) the "Files" sheet in archive.xlsx
+// IPC: populate (or replace) the "Files" sheet in metadata.xlsx
 ipcMain.handle("populate-files-tab", async (_event, folderPath, rootFolder) => {
-  const xlsxPath = path.join(folderPath, "archive.xlsx");
+  const xlsxPath = path.join(folderPath, "metadata.xlsx");
 
   // Read all direct children of the folder
   const allEntries = await fs.readdir(folderPath, { withFileTypes: true });
@@ -103,7 +103,7 @@ ipcMain.handle("populate-files-tab", async (_event, folderPath, rootFolder) => {
       e.isFile() &&
       !e.name.startsWith(".") &&
       !e.name.startsWith("~$") &&
-      e.name !== "archive.xlsx",
+      e.name !== "metadata.xlsx",
   );
 
   // Build rows

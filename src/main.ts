@@ -193,7 +193,7 @@ ipcMain.handle(
     const sheetData = [["Filename", "Path", "Size", "Modified"], ...fileRows];
     let workbook: XLSX.WorkBook;
     try {
-      const buf = await fs.promises.readFile(folder + "/archive.xlsx");
+      const buf = await fs.promises.readFile(folder + "/metadata.xlsx");
       workbook = XLSX.read(buf);
     } catch {
       workbook = XLSX.utils.book_new();
@@ -205,7 +205,7 @@ ipcMain.handle(
       XLSX.utils.book_append_sheet(workbook, sheet, "Files");
     }
     await fs.promises.writeFile(
-      folder + "/archive.xlsx",
+      folder + "/metadata.xlsx",
       XLSX.write(workbook, { type: "buffer", bookType: "xlsx" }),
     );
     return { count: files.length };
@@ -219,7 +219,7 @@ ipcMain.handle(
     folderPath: string,
     meta: { name: string; description: string },
   ) => {
-    const xlsxPath = folderPath + "/archive.xlsx";
+    const xlsxPath = folderPath + "/metadata.xlsx";
     const workbook = XLSX.utils.book_new();
     const rootDataset = XLSX.utils.aoa_to_sheet([
       ["Name", "Value"],
@@ -335,7 +335,7 @@ ipcMain.handle("choose-root-folder", async (event) => {
 ipcMain.handle("create-places-folder", async (_event, rootFolder: string) => {
   const folderPath = path.join(rootFolder, "Places");
   await fs.promises.mkdir(folderPath, { recursive: true });
-  const xlsxPath = path.join(folderPath, "archive.xlsx");
+  const xlsxPath = path.join(folderPath, "metadata.xlsx");
   const workbook = XLSX.utils.book_new();
   const rootDataset = XLSX.utils.aoa_to_sheet([
     ["Name", "Value"],
@@ -367,7 +367,7 @@ ipcMain.handle(
   async (_event, rootFolder: string) => {
     const folderPath = path.join(rootFolder, "People & Organisations");
     await fs.promises.mkdir(folderPath, { recursive: true });
-    const xlsxPath = path.join(folderPath, "archive.xlsx");
+    const xlsxPath = path.join(folderPath, "metadata.xlsx");
     const workbook = XLSX.utils.book_new();
     const peopleSheet = XLSX.utils.aoa_to_sheet([
       ["@id", "@type", "name", "givenName", "familyName", "email", "url"],

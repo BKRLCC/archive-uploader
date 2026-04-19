@@ -154,7 +154,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
 
   function renderEditableTable(sheet: SheetState, sheetName: string) {
     if (sheet === "missing")
-      return <p className="items-state">Sheet not found in archive.xlsx.</p>;
+      return <p className="items-state">Sheet not found in metadata.xlsx.</p>;
     if (sheet === "empty")
       return <p className="items-state">This tab is empty.</p>;
     if (!sheet) return <p className="items-state">Loading…</p>;
@@ -207,7 +207,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
   return (
     <div className="archive-page" onClick={closeDrawer}>
       <div className="archive-main">
-        <h1>⭐ Archive</h1>
+        <h1>⭐ Metadata</h1>
 
         <div className="tab-bar">
           {sheetNames.map((tab) => (

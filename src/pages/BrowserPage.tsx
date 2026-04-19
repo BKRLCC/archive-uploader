@@ -27,7 +27,7 @@ function emojiFor(entry: DirEntry) {
   if (entry.name === "People & Organisations" && entry.isDirectory) return "👥";
   if (entry.name === "Places" && entry.isDirectory) return "📍";
   if (entry.isDirectory) return EMOJI.folder;
-  if (entry.name === "archive.xlsx") return "⭐";
+  if (entry.name === "metadata.xlsx") return "⭐";
   if (IMAGE_EXTS_BROWSER.has(entry.ext)) return EMOJI.image;
   if (AUDIO_EXTS.has(entry.ext)) return EMOJI.audio;
   if (VIDEO_EXTS.has(entry.ext)) return EMOJI.video;
@@ -184,7 +184,7 @@ export default function BrowserPage() {
                     <li
                       key={entry.name}
                       className={[
-                        entry.isDirectory || entry.name === "archive.xlsx"
+                        entry.isDirectory || entry.name === "metadata.xlsx"
                           ? "folder"
                           : "",
                         isSelected ? "selected" : "",
@@ -207,7 +207,7 @@ export default function BrowserPage() {
                       }}
                     >
                       {emojiFor(entry)}&nbsp;&nbsp;
-                      {entry.name === "archive.xlsx" ? "Archive" : entry.name}
+                      {entry.name === "metadata.xlsx" ? "Metadata" : entry.name}
                     </li>
                   );
                 })

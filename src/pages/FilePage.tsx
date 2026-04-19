@@ -10,13 +10,13 @@ export default function FilePage() {
   const [info, setInfo] = useState<FileInfo | null>(null);
 
   useEffect(() => {
-    if (!filePath || filePath.endsWith("archive.xlsx")) return;
+    if (!filePath || filePath.endsWith("metadata.xlsx")) return;
     window.api.getFileInfo(filePath).then(setInfo);
   }, [filePath]);
 
   if (!filePath) return <p>No file specified.</p>;
 
-  if (filePath.endsWith("archive.xlsx")) {
+  if (filePath.endsWith("metadata.xlsx")) {
     return <ArchiveView xlsxPath={filePath} />;
   }
 

@@ -16,6 +16,29 @@ export default function AppHeader() {
         )}
       </div>
       <span className="app-header-title">Archivist</span>
+      <div className="app-header-nav no-drag">
+        <button
+          className="header-nav-btn"
+          onClick={() => navigate("/")}
+          title="Home"
+        >
+          🏠
+        </button>
+        <button
+          className="header-nav-btn"
+          onClick={() => navigate("/browser")}
+          title="File Browser"
+        >
+          📁
+        </button>
+        <button
+          className="header-nav-btn"
+          onClick={() => navigate("/settings")}
+          title="Settings"
+        >
+          ⚙️
+        </button>
+      </div>
     </header>
   );
 }

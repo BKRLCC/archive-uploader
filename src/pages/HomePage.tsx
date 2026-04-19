@@ -16,11 +16,13 @@ export default function HomePage() {
       </ul>
       <h2>How it works</h2>
       <p>
-        All your metadata is kept in Excel files called <code>archive.tsx</code>
-        . In the Archivist app, you will see these files called "
-        <code>⭐ Archive</code>". You can make an <code>⭐ Archive</code> in any
-        folder by clicking the "🌟 Create archive" button. When it comes to
-        upload time, the app will read and combine all of these archive files.
+        All your metadata is kept in Excel files called{" "}
+        <code>metadata.tsx</code>. In the Archivist app, you will see these
+        files called "<code>⭐ Metadata</code>". You can make an{" "}
+        <code>⭐ Metadata</code> file in any folder by clicking the{" "}
+        <span className="pretend-button">🌟 Create metadata file</span> button.
+        When it comes to upload time, the app will read and combine all of these
+        archive files.
       </p>
       <p>
         <Link to="/browser">File Browser</Link>

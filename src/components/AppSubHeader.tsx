@@ -48,7 +48,7 @@ export default function AppSubHeader() {
       {!isFile && (
         <div className="subheader-actions">
           {currentPath !== rootFolder &&
-            !entries.some((e) => e.name === "archive.xlsx") && (
+            !entries.some((e) => e.name === "metadata.xlsx") && (
               <button
                 className="create-archive-btn"
                 onClick={(e) => {
@@ -58,7 +58,7 @@ export default function AppSubHeader() {
                   );
                 }}
               >
-                🌟 Create Archive
+                🌟 Create metadata file
               </button>
             )}
           {currentPath === rootFolder &&

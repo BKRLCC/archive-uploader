@@ -36,7 +36,7 @@ export default function ArchivePage() {
   const [populateFeedback, setPopulateFeedback] = useState("");
   const [populateBusy, setPopulateBusy] = useState(false);
 
-  const xlsxPath = folder ? folder + "/archive.xlsx" : null;
+  const xlsxPath = folder ? folder + "/metadata.xlsx" : null;
 
   const closeDrawer = useCallback(() => {
     setEditingRow(null);
@@ -167,7 +167,7 @@ export default function ArchivePage() {
 
   function renderEditableTable(sheet: SheetState, sheetName: string) {
     if (sheet === "missing")
-      return <p className="items-state">Sheet not found in archive.xlsx.</p>;
+      return <p className="items-state">Sheet not found in metadata.xlsx.</p>;
     if (sheet === "empty")
       return <p className="items-state">This tab is empty.</p>;
     if (!sheet) return <p className="items-state">Loading…</p>;
