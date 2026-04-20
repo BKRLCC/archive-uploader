@@ -1,4 +1,4 @@
-import { LabelDataType } from "../modules/types";
+import { LabelDataType } from "../types/types";
 import { TypeIcons } from "./icons";
 
 type LabelConfig = {
@@ -20,8 +20,8 @@ export const DataTypeLabels: Record<LabelDataType, LabelConfig> = {
   },
   RepositoryObject: {
     icon: TypeIcons.RepositoryObject,
-    label: "Objects",
-    labelSingular: "Object",
+    label: "Items",
+    labelSingular: "Item",
   },
   Language: {
     icon: TypeIcons.Language,
@@ -57,6 +57,11 @@ export const DataTypeLabels: Record<LabelDataType, LabelConfig> = {
     icon: TypeIcons.Places,
     label: "Places",
     labelSingular: "Place",
+  },
+  File: {
+    icon: TypeIcons.File,
+    label: "Files",
+    labelSingular: "File",
   },
   "ldac:DataReuseLicense": {
     icon: TypeIcons["ldac:DataReuseLicense"],

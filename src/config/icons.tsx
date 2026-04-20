@@ -1,4 +1,4 @@
-import { LabelDataType } from "../modules/types";
+import { LabelDataType } from "../types/types";
 
 // Icon mapping for different object types
 // e.g. Person: "👤"

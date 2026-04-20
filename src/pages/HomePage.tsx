@@ -6,7 +6,7 @@ import { UiIcons } from "../config/icons";
 export default function HomePage() {
   return (
     <div>
-      <h1>💖 Hello!</h1>
+      <h1>👋 Hello!</h1>
       <p>Archivist is your archive manager.</p>
       <p>Here you can: </p>
       <ul>
