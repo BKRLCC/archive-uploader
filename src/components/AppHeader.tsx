@@ -1,6 +1,7 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { UiIcons } from "../config/icons";
+import logo from "../icons/logo.png";
 
 export default function AppHeader() {
   const location = useLocation();
@@ -16,7 +17,10 @@ export default function AppHeader() {
           </button>
         )}
       </div>
-      <span className="app-header-title">Archivist</span>
+      <span className="app-header-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <img src={logo} alt="" style={{ height: 28, width: 28 }} />
+        Archivist
+      </span>
       <div className="app-header-nav no-drag">
         <button
           className="header-nav-btn"

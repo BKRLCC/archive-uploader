@@ -21,6 +21,8 @@ import Store from "electron-store";
 
 const store = new Store();
 
+const isDev = !app.isPackaged;
+
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
   app.quit();
@@ -53,6 +55,9 @@ app.on("ready", () => {
   protocol.handle("localfile", (request) => {
     return net.fetch(request.url.replace(/^localfile:/, "file:"));
   });
+  if (process.platform === "darwin" && isDev) {
+    app.dock!.setIcon(path.join(process.cwd(), "src/icons/logo.png"));
+  }
   createWindow();
 });
 
