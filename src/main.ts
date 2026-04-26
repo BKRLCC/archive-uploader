@@ -11,6 +11,7 @@ import path from "node:path";
 import fs from "node:fs";
 import * as XLSX from "xlsx";
 import started from "electron-squirrel-startup";
+import { spreadsheets, type SpreadsheetType } from "./types/types";
 
 // Must be called before app is ready
 protocol.registerSchemesAsPrivileged([
@@ -71,6 +72,46 @@ app.on("activate", () => {
     createWindow();
   }
 });
+
+// ── Workbook builder ─────────────────────────────────────────────────────────
+
+function buildWorkbook(
+  schemaKey: SpreadsheetType,
+  meta: { name: string; description: string },
+): XLSX.WorkBook {
+  const schema = spreadsheets[schemaKey];
+  const workbook = XLSX.utils.book_new();
+
+  const rootDataset = XLSX.utils.aoa_to_sheet([
+    ["Name", "Value"],
+    ["@id", "./"],
+    ["@type", "[Dataset, RepositoryCollection]"],
+    ["name", meta.name],
+    ["description", meta.description],
+  ]);
+  XLSX.utils.book_append_sheet(workbook, rootDataset, "RootDataset");
+
+  for (const tab of schema.tabs) {
+    const rows: string[][] = [tab.headers, ...(tab.seedRows ?? [])];
+    XLSX.utils.book_append_sheet(
+      workbook,
+      XLSX.utils.aoa_to_sheet(rows),
+      tab.name,
+    );
+  }
+
+  for (const extra of schema.extraSheets ?? []) {
+    XLSX.utils.book_append_sheet(
+      workbook,
+      XLSX.utils.aoa_to_sheet(extra.rows),
+      extra.name,
+    );
+  }
+
+  return workbook;
+}
+
+// ── IPC handlers ─────────────────────────────────────────────────────────────
 
 ipcMain.handle("list-folder", async (_event, folderPath: string) => {
   const dirents = await fs.promises.readdir(folderPath, {
@@ -220,25 +261,7 @@ ipcMain.handle(
     meta: { name: string; description: string },
   ) => {
     const xlsxPath = folderPath + "/metadata.xlsx";
-    const workbook = XLSX.utils.book_new();
-    const rootDataset = XLSX.utils.aoa_to_sheet([
-      ["Name", "Value"],
-      ["@id", "./"],
-      ["@type", "[Dataset, RepositoryCollection]"],
-      ["name", meta.name],
-      ["description", meta.description],
-    ]);
-    XLSX.utils.book_append_sheet(workbook, rootDataset, "RootDataset");
-    XLSX.utils.book_append_sheet(
-      workbook,
-      XLSX.utils.aoa_to_sheet([]),
-      "Items",
-    );
-    XLSX.utils.book_append_sheet(
-      workbook,
-      XLSX.utils.aoa_to_sheet([]),
-      "Files",
-    );
+    const workbook = buildWorkbook("RepositoryObject", meta);
     await fs.promises.writeFile(
       xlsxPath,
       XLSX.write(workbook, { type: "buffer", bookType: "xlsx" }),
@@ -333,28 +356,14 @@ ipcMain.handle("choose-root-folder", async (event) => {
 });
 
 ipcMain.handle("create-places-folder", async (_event, rootFolder: string) => {
-  const folderPath = path.join(rootFolder, "Places");
+  const schema = spreadsheets.Places;
+  const folderPath = path.join(rootFolder, schema.folderName);
   await fs.promises.mkdir(folderPath, { recursive: true });
   const xlsxPath = path.join(folderPath, "metadata.xlsx");
-  const workbook = XLSX.utils.book_new();
-  const rootDataset = XLSX.utils.aoa_to_sheet([
-    ["Name", "Value"],
-    ["@id", "./"],
-    ["@type", "[Dataset, RepositoryCollection]"],
-    ["name", "Places"],
-    ["description", ""],
-  ]);
-  XLSX.utils.book_append_sheet(workbook, rootDataset, "RootDataset");
-  XLSX.utils.book_append_sheet(
-    workbook,
-    XLSX.utils.aoa_to_sheet([["@id", "@type", "name", "description"]]),
-    "Items",
-  );
-  XLSX.utils.book_append_sheet(workbook, XLSX.utils.aoa_to_sheet([]), "Files");
-  const localitiesSheet = XLSX.utils.aoa_to_sheet([
-    ["@id", "@type", ".latitude", ".longitude", "asWKT"],
-  ]);
-  XLSX.utils.book_append_sheet(workbook, localitiesSheet, "Localities");
+  const workbook = buildWorkbook("Places", {
+    name: schema.folderName,
+    description: "",
+  });
   await fs.promises.writeFile(
     xlsxPath,
     XLSX.write(workbook, { type: "buffer", bookType: "xlsx" }),
@@ -365,14 +374,14 @@ ipcMain.handle("create-places-folder", async (_event, rootFolder: string) => {
 ipcMain.handle(
   "create-people-orgs-folder",
   async (_event, rootFolder: string) => {
-    const folderPath = path.join(rootFolder, "People & Organisations");
+    const schema = spreadsheets.PeopleAndOrgs;
+    const folderPath = path.join(rootFolder, schema.folderName);
     await fs.promises.mkdir(folderPath, { recursive: true });
     const xlsxPath = path.join(folderPath, "metadata.xlsx");
-    const workbook = XLSX.utils.book_new();
-    const peopleSheet = XLSX.utils.aoa_to_sheet([
-      ["@id", "@type", "name", "givenName", "familyName", "email", "url"],
-    ]);
-    XLSX.utils.book_append_sheet(workbook, peopleSheet, "People");
+    const workbook = buildWorkbook("PeopleAndOrgs", {
+      name: schema.folderName,
+      description: "",
+    });
     await fs.promises.writeFile(
       xlsxPath,
       XLSX.write(workbook, { type: "buffer", bookType: "xlsx" }),
@@ -394,77 +403,14 @@ ipcMain.handle("delete-file", async (_event, filePath: string) => {
 });
 
 ipcMain.handle("create-licenses-folder", async (_event, rootFolder: string) => {
-  const folderPath = path.join(rootFolder, "Licenses");
+  const schema = spreadsheets["ldac:DataReuseLicense"];
+  const folderPath = path.join(rootFolder, schema.folderName);
   await fs.promises.mkdir(folderPath, { recursive: true });
   const xlsxPath = path.join(folderPath, "metadata.xlsx");
-  const workbook = XLSX.utils.book_new();
-
-  const rootDataset = XLSX.utils.aoa_to_sheet([
-    ["Name", "Value"],
-    ["@id", "./"],
-    ["@type", "[Dataset, RepositoryCollection]"],
-    ["name", "Licenses"],
-    ["description", ""],
-  ]);
-  XLSX.utils.book_append_sheet(workbook, rootDataset, "RootDataset");
-
-  const contextSheet = XLSX.utils.aoa_to_sheet([
-    ["name", "@id"],
-    ["ldac", "https://w3id.org/ldac/terms#"],
-    ["csvw", "http://www.w3.org/ns/csvw#"],
-    ["custom", "arcp://name,custom/terms#"],
-  ]);
-  XLSX.utils.book_append_sheet(workbook, contextSheet, "@context");
-
-  const itemsSheet = XLSX.utils.aoa_to_sheet([
-    [
-      "@id",
-      "@type",
-      "name",
-      "description",
-      "ldac:allowTextIndex",
-      "isRef_sameAs",
-      "isRef_isPartOf",
-    ],
-    [
-      "https://creativecommons.org/licenses/by/4.0/",
-      "ldac:DataReuseLicense",
-      "Attribution 4.0 International (CC BY 4.0)",
-      "You are free to: Share — copy and redistribute the material in any medium or format. Adapt — remix, transform, and build upon the material for any purpose, even commercially. This license is acceptable for Free Cultural Works. The licensor cannot revoke these freedoms as long as you follow the license terms.",
-      "TRUE",
-      "CC_BY_4.0.txt",
-      "./",
-    ],
-    [
-      "https://creativecommons.org/licenses/by-nd/3.0/au/",
-      "ldac:DataReuseLicense",
-      "Attribution-NoDerivs 3.0 Australia (CC BY-ND 3.0 AU)",
-      "You are free to: Share — copy and redistribute the material in any medium or format for any purpose, even commercially. The licensor cannot revoke these freedoms as long as you follow the license terms.",
-      "TRUE",
-      "",
-      "./",
-    ],
-    [
-      "Licenses/Example.txt",
-      "[ldac:DataReuseLicense, File]",
-      "Example Custom License",
-      "This license explains who is allowed to use and possibly redistribute this data, and for what purpose.",
-      "TRUE",
-      "",
-      "./",
-    ],
-    [
-      "CC_BY_4.0.txt",
-      "[ldac:DataReuseLicense, File]",
-      "Attribution 4.0 International (CC BY 4.0) Local",
-      "Local copy of the CC BY 4.0 license.",
-      "TRUE",
-      "https://creativecommons.org/licenses/by/4.0/",
-      "./",
-    ],
-  ]);
-  XLSX.utils.book_append_sheet(workbook, itemsSheet, "Items");
-
+  const workbook = buildWorkbook("ldac:DataReuseLicense", {
+    name: schema.folderName,
+    description: "",
+  });
   await fs.promises.writeFile(
     xlsxPath,
     XLSX.write(workbook, { type: "buffer", bookType: "xlsx" }),
