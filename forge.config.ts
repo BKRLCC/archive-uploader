@@ -12,6 +12,17 @@ const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
     icon: 'src/icons/logo',
+    ...(process.env.APPLE_ID ? {
+      osxSign: {
+        identity: 'Developer ID Application: LIGHT GARDEN AGENCY PTY LTD (BRN84M6L39)',
+      },
+      osxNotarize: {
+        tool: 'notarytool' as const,
+        appleId: process.env.APPLE_ID,
+        appleIdPassword: process.env.APPLE_ID_PASSWORD!,
+        teamId: process.env.APPLE_TEAM_ID!,
+      },
+    } : {}),
   },
   rebuildConfig: {},
   publishers: [
