@@ -12,6 +12,7 @@ import fs from "node:fs";
 import * as XLSX from "xlsx";
 import started from "electron-squirrel-startup";
 import { spreadsheets, type SpreadsheetType } from "./types/types";
+import { updateElectronApp } from "update-electron-app";
 
 // Must be called before app is ready
 protocol.registerSchemesAsPrivileged([
@@ -22,6 +23,11 @@ import Store from "electron-store";
 const store = new Store();
 
 const isDev = !app.isPackaged;
+
+// Auto-update from GitHub Releases (only in production)
+if (!isDev) {
+  updateElectronApp({ repo: "BKRLCC/archive-uploader" });
+}
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {

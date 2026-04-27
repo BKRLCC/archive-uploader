@@ -17,7 +17,10 @@ export default function AppHeader() {
           </button>
         )}
       </div>
-      <span className="app-header-title" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <span
+        className="app-header-title"
+        style={{ display: "flex", alignItems: "center", gap: 8 }}
+      >
         <img src={logo} alt="" style={{ height: 28, width: 28 }} />
         Archivist
       </span>

@@ -1,39 +1,42 @@
-import type { ForgeConfig } from '@electron-forge/shared-types';
-import { MakerSquirrel } from '@electron-forge/maker-squirrel';
-import { MakerZIP } from '@electron-forge/maker-zip';
-import { MakerDeb } from '@electron-forge/maker-deb';
-import { MakerRpm } from '@electron-forge/maker-rpm';
-import { VitePlugin } from '@electron-forge/plugin-vite';
-import { FusesPlugin } from '@electron-forge/plugin-fuses';
-import { FuseV1Options, FuseVersion } from '@electron/fuses';
-import { PublisherGithub } from '@electron-forge/publisher-github';
+import type { ForgeConfig } from "@electron-forge/shared-types";
+import { MakerSquirrel } from "@electron-forge/maker-squirrel";
+import { MakerZIP } from "@electron-forge/maker-zip";
+import { MakerDeb } from "@electron-forge/maker-deb";
+import { MakerRpm } from "@electron-forge/maker-rpm";
+import { VitePlugin } from "@electron-forge/plugin-vite";
+import { FusesPlugin } from "@electron-forge/plugin-fuses";
+import { FuseV1Options, FuseVersion } from "@electron/fuses";
+import { PublisherGithub } from "@electron-forge/publisher-github";
 
 const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
-    icon: 'src/icons/logo',
-    ...(process.env.APPLE_ID ? {
-      osxSign: {
-        identity: 'Developer ID Application: LIGHT GARDEN AGENCY PTY LTD (BRN84M6L39)',
-      },
-      osxNotarize: {
-        tool: 'notarytool' as const,
-        appleId: process.env.APPLE_ID,
-        appleIdPassword: process.env.APPLE_ID_PASSWORD!,
-        teamId: process.env.APPLE_TEAM_ID!,
-      },
-    } : {}),
+    icon: "src/icons/logo",
+    ...(process.env.APPLE_ID
+      ? {
+          osxSign: {
+            identity:
+              "Developer ID Application: LIGHT GARDEN AGENCY PTY LTD (BRN84M6L39)",
+          },
+          osxNotarize: {
+            tool: "notarytool" as const,
+            appleId: process.env.APPLE_ID,
+            appleIdPassword: process.env.APPLE_ID_PASSWORD!,
+            teamId: process.env.APPLE_TEAM_ID!,
+          },
+        }
+      : {}),
   },
   rebuildConfig: {},
   publishers: [
     new PublisherGithub({
-      repository: { owner: 'BKRLCC', name: 'archive-uploader' },
+      repository: { owner: "BKRLCC", name: "archive-uploader" },
       prerelease: true,
     }),
   ],
   makers: [
     new MakerSquirrel({}),
-    new MakerZIP({}, ['darwin']),
+    new MakerZIP({}, ["darwin"]),
     new MakerRpm({}),
     new MakerDeb({}),
   ],
@@ -44,20 +47,20 @@ const config: ForgeConfig = {
       build: [
         {
           // `entry` is just an alias for `build.lib.entry` in the corresponding file of `config`.
-          entry: 'src/main.ts',
-          config: 'vite.main.config.ts',
-          target: 'main',
+          entry: "src/main.ts",
+          config: "vite.main.config.ts",
+          target: "main",
         },
         {
-          entry: 'src/preload.ts',
-          config: 'vite.preload.config.ts',
-          target: 'preload',
+          entry: "src/preload.ts",
+          config: "vite.preload.config.ts",
+          target: "preload",
         },
       ],
       renderer: [
         {
-          name: 'main_window',
-          config: 'vite.renderer.config.ts',
+          name: "main_window",
+          config: "vite.renderer.config.ts",
         },
       ],
     }),
