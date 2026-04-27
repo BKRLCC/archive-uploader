@@ -16,7 +16,7 @@ const config: ForgeConfig = {
   rebuildConfig: {},
   publishers: [
     new PublisherGithub({
-      repository: { owner: 'elsewheredreams', name: 'archive-uploader' },
+      repository: { owner: 'BKRLCC', name: 'archive-uploader' },
       prerelease: true,
     }),
   ],
