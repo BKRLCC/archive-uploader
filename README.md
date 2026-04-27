@@ -15,6 +15,6 @@ All your metadata is kept in Excel files called `metadata.xlsx`. In the Archivis
 
 There are a few special types of data. Each of these has its own folder in the root of your archive.
 
-👥 People & Organisations
-🗺️ Places
-📜 Licenses
+- 👥 People & Organisations
+- 🗺️ Places
+- 📜 Licenses
