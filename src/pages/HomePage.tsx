@@ -32,8 +32,8 @@ export default function HomePage() {
       </p>
       <ul>
         <li>
-          {DataTypeLabels.PeopleAndOrgs.icon}{" "}
-          {DataTypeLabels.PeopleAndOrgs.label}
+          {DataTypeLabels.People.icon}{" "}
+          {DataTypeLabels.People.label}
         </li>
         <li>
           {DataTypeLabels.Places.icon} {DataTypeLabels.Places.label}

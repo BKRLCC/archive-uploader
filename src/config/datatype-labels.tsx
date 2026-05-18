@@ -13,11 +13,7 @@ export const DataTypeLabels: Record<LabelDataType, LabelConfig> = {
     label: "People",
     labelSingular: "Person",
   },
-  Organization: {
-    icon: TypeIcons.Organization,
-    label: "Organisations",
-    labelSingular: "Organisation",
-  },
+
   RepositoryObject: {
     icon: TypeIcons.RepositoryObject,
     label: "Items",
@@ -48,10 +44,10 @@ export const DataTypeLabels: Record<LabelDataType, LabelConfig> = {
     label: "Geometries",
     labelSingular: "Geometry",
   },
-  PeopleAndOrgs: {
+  People: {
     icon: TypeIcons.PeopleAndOrgs,
-    label: "People & Organisations",
-    labelSingular: "Person or Organisation",
+    label: "People",
+    labelSingular: "Person",
   },
   Places: {
     icon: TypeIcons.Places,

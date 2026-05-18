@@ -63,20 +63,20 @@ export default function AppSubHeader() {
             )}
           {currentPath === rootFolder &&
             !entries.some(
-              (e) => e.name === "People & Organisations" && e.isDirectory,
+              (e) => e.name === "People" && e.isDirectory,
             ) && (
               <button
                 className="create-archive-btn"
                 onClick={async (e) => {
                   e.stopPropagation();
-                  await window.api.createPeopleOrgsFolder(rootFolder);
+                  await window.api.createPeopleFolder(rootFolder);
                   navigate(
                     `/browser?path=${encodeURIComponent(currentPath)}&r=${Date.now()}`,
                     { replace: true },
                   );
                 }}
               >
-                👥 Create People &amp; Orgs folder
+                👥 Create People folder
               </button>
             )}
           {currentPath === rootFolder &&

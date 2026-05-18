@@ -383,13 +383,13 @@ ipcMain.handle("create-places-folder", async (_event, rootFolder: string) => {
 });
 
 ipcMain.handle(
-  "create-people-orgs-folder",
+  "create-people-folder",
   async (_event, rootFolder: string) => {
-    const schema = spreadsheets.PeopleAndOrgs;
+    const schema = spreadsheets.People;
     const folderPath = path.join(rootFolder, schema.folderName);
     await fs.promises.mkdir(folderPath, { recursive: true });
     const xlsxPath = path.join(folderPath, "metadata.xlsx");
-    const workbook = buildWorkbook("PeopleAndOrgs", {
+    const workbook = buildWorkbook("People", {
       name: schema.folderName,
       description: "",
     });

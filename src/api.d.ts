@@ -47,7 +47,7 @@ export interface Api {
     xlsxPath: string,
     updates: Record<string, string>,
   ) => Promise<SheetData>;
-  createPeopleOrgsFolder: (rootFolder: string) => Promise<{ path: string }>;
+  createPeopleFolder: (rootFolder: string) => Promise<{ path: string }>;
   createPlacesFolder: (rootFolder: string) => Promise<{ path: string }>;
   createLicensesFolder: (rootFolder: string) => Promise<{ path: string }>;
   openFile: (filePath: string) => Promise<string>;

@@ -25,7 +25,7 @@ const VIDEO_EXTS = new Set(["mp4", "mov", "avi", "mkv", "webm"]);
 const IMAGE_EXTS_BROWSER = new Set(["jpg", "jpeg", "png", "gif", "webp"]);
 
 function emojiFor(entry: DirEntry) {
-  if (entry.name === "People & Organisations" && entry.isDirectory) return "👥";
+  if (entry.name === "People" && entry.isDirectory) return "👥";
   if (entry.name === "Places" && entry.isDirectory) return "📍";
   if (entry.name === "Licenses" && entry.isDirectory) return "📜";
   if (entry.isDirectory) return EMOJI.folder;

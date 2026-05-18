@@ -11,7 +11,6 @@ function generateId(type: string, name: string): string {
 const TYPE_OPTIONS = [
   { label: "Resource", value: "RepositoryObject", icon: "📜" },
   { label: "Person", value: "Person", icon: "👤" },
-  { label: "Organisation", value: "Organization", icon: "🏠︎" },
   { label: "Language", value: "Language", icon: "🔤" },
 ];
 

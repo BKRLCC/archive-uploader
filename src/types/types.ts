@@ -2,7 +2,6 @@ import { DataTypeLabels } from "../config/datatype-labels";
 
 export type ItemDataType =
   | "Person"
-  | "Organization"
   | "RepositoryObject"
   | "Language"
   | "Dataset"
@@ -13,7 +12,7 @@ export type ItemDataType =
   | "File";
 
 export type CombinedType =
-  | "PeopleAndOrgs" // Person + Organization
+  | "People"
   | "Places";
 
 export type LabelDataType = ItemDataType | CombinedType;
@@ -31,8 +30,6 @@ export type Person = BaseItem & {
   gender?: string;
   birthDate?: string;
 };
-
-export type Organization = BaseItem & {};
 
 // https://www.ldaca.edu.au/resources/user-guides/crate-o/convert-spreadsheet/#objects
 export type RepositoryObject = BaseItem & {
@@ -68,7 +65,6 @@ export type File = {
 // Maps each ItemDataType string to its TypeScript type, used to constrain TypeColumns.
 type ItemTypeMap = {
   Person: Person;
-  Organization: Organization;
   RepositoryObject: RepositoryObject;
   Language: BaseItem;
   Dataset: BaseItem;
@@ -82,7 +78,6 @@ type ItemTypeMap = {
 // Runtime column definitions — each entry is constrained to the keys of the corresponding type.
 export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
   Person: ["@id", "@type", "name", "description", "gender", "birthDate"],
-  Organization: ["@id", "@type", "name", "description"],
   RepositoryObject: ["@id", "@type", "name", "description", "inLanguage"],
   Language: ["@id", "@type", "name", "description"],
   Dataset: ["@id", "@type", "name", "description"],
@@ -121,7 +116,7 @@ export type SpreadsheetSchema = {
 
 export type SpreadsheetType =
   | "RepositoryObject"
-  | "PeopleAndOrgs"
+  | "People"
   | "Places"
   | "ldac:DataReuseLicense";
 
@@ -141,18 +136,13 @@ export const spreadsheets: Record<SpreadsheetType, SpreadsheetSchema> = {
       },
     ],
   },
-  PeopleAndOrgs: {
-    folderName: "People & Organisations",
+  People: {
+    folderName: "People",
     tabs: [
       {
         name: DataTypeLabels.Person.label,
         type: "Person",
         headers: TypeColumns.Person,
-      },
-      {
-        name: DataTypeLabels.Organization.label,
-        type: "Organization",
-        headers: TypeColumns.Organization,
       },
     ],
   },
