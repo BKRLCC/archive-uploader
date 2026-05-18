@@ -1,12 +1,14 @@
-import React from "react";
-import { createRoot } from "react-dom/client";
-import { HashRouter, Routes, Route, Outlet } from "react-router-dom";
-import "./index.css";
-import AppHeader from "./components/AppHeader";
-import AppSubHeader from "./components/AppSubHeader";
-import HomePage from "./pages/HomePage";
-import BrowserPage from "./pages/BrowserPage";
-import SettingsPage from "./pages/SettingsPage";
+import React from 'react'
+import { createRoot } from 'react-dom/client'
+import { HashRouter, Routes, Route, Outlet } from 'react-router-dom'
+import { Provider } from 'react-redux'
+import './index.css'
+import AppHeader from './components/AppHeader'
+import AppSubHeader from './components/AppSubHeader'
+import HomePage from './pages/HomePage'
+import BrowserPage from './pages/BrowserPage'
+import SettingsPage from './pages/SettingsPage'
+import store from './ducks/store'
 
 function Layout() {
   return (
@@ -17,24 +19,26 @@ function Layout() {
         <Outlet />
       </div>
     </div>
-  );
+  )
 }
 
-const root = createRoot(document.getElementById("root")!);
+const root = createRoot(document.getElementById('root')!)
 root.render(
   <React.StrictMode>
-    <HashRouter>
-      <Routes>
-        <Route element={<Layout />}>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/browser" element={<BrowserPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-        </Route>
-      </Routes>
-    </HashRouter>
+    <Provider store={store}>
+      <HashRouter>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/browser" element={<BrowserPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+          </Route>
+        </Routes>
+      </HashRouter>
+    </Provider>
   </React.StrictMode>,
-);
+)
 
 console.log(
   '👋 This message is being logged by "renderer.ts", included via Vite',
-);
+)

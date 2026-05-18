@@ -1,22 +1,8 @@
-import { combineReducers, AnyAction } from "@reduxjs/toolkit";
-import peopleSlice, { PeopleState } from "./people";
-import { useSelector as useReduxSelector, TypedUseSelectorHook } from "react-redux";
+import { combineReducers } from '@reduxjs/toolkit'
+import peopleReducer from './people'
 
-export const useSelector: TypedUseSelectorHook<RootState> = useReduxSelector;
+const rootReducer = combineReducers({
+  people: peopleReducer,
+})
 
-type GlobalState =
-  | {
-      people: PeopleState;
-    }
-  | undefined;
-
-const appReducer = combineReducers({
-  people: peopleSlice.reducer
-});
-
-export const rootReducer = (state: GlobalState, action: AnyAction) => {
-  return appReducer(state, action);
-};
-
-export type RootState = ReturnType<typeof rootReducer>;
-export default rootReducer;
+export default rootReducer

@@ -1,6 +1,6 @@
 import { Person } from 'src/types/types'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { RootState } from './root-reducer'
+import type { RootState } from './store'
 
 type PeopleDictionary = Record<string, Person>
 
