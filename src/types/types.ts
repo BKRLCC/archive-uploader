@@ -34,6 +34,7 @@ export type Person = BaseItem & {
 // https://www.ldaca.edu.au/resources/user-guides/crate-o/convert-spreadsheet/#objects
 export type RepositoryObject = BaseItem & {
   inLanguage?: string;
+  isRef_creator?: string;
 };
 
 export type License = BaseItem & {
@@ -78,7 +79,7 @@ type ItemTypeMap = {
 // Runtime column definitions — each entry is constrained to the keys of the corresponding type.
 export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
   Person: ["@id", "@type", "name", "description", "gender", "birthDate"],
-  RepositoryObject: ["@id", "@type", "name", "description", "inLanguage"],
+  RepositoryObject: ["@id", "@type", "name", "description", "inLanguage", "isRef_creator"],
   Language: ["@id", "@type", "name", "description"],
   Dataset: ["@id", "@type", "name", "description"],
   RepositoryCollection: ["@id", "@type", "name", "description"],
