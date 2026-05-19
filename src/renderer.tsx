@@ -9,6 +9,44 @@ import HomePage from './pages/HomePage'
 import BrowserPage from './pages/BrowserPage'
 import SettingsPage from './pages/SettingsPage'
 import store from './ducks/store'
+import { useAppDispatch } from './ducks/hooks'
+import { setLoading, setPeople } from './ducks/people'
+import { loadPeopleFromSpreadsheet } from './ducks/people-loader'
+
+let hasBootstrappedPeople = false
+
+function PeopleBootstrap() {
+  const dispatch = useAppDispatch()
+
+  React.useEffect(() => {
+    if (hasBootstrappedPeople) return
+    hasBootstrappedPeople = true
+
+    let cancelled = false
+
+    const run = async () => {
+      dispatch(setLoading(true))
+      try {
+        const people = await loadPeopleFromSpreadsheet()
+        if (!cancelled) {
+          dispatch(setPeople(people))
+        }
+      } finally {
+        if (!cancelled) {
+          dispatch(setLoading(false))
+        }
+      }
+    }
+
+    void run()
+
+    return () => {
+      cancelled = true
+    }
+  }, [dispatch])
+
+  return null
+}
 
 function Layout() {
   return (
@@ -26,6 +64,7 @@ const root = createRoot(document.getElementById('root')!)
 root.render(
   <React.StrictMode>
     <Provider store={store}>
+      <PeopleBootstrap />
       <HashRouter>
         <Routes>
           <Route element={<Layout />}>
