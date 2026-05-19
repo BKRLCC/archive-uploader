@@ -1,5 +1,8 @@
 import React, { useState } from 'react'
-import { getControlledVocabularyForField, isMultiSelectField } from '../config/field-vocabularies'
+import {
+  getControlledVocabularyForField,
+  isMultiSelectField,
+} from '../config/field-vocabularies'
 import Select from 'react-select'
 import { useAppSelector } from '../ducks/hooks'
 import { selectPeople } from '../ducks/people'
@@ -201,20 +204,39 @@ export default function EditDrawer({
                   isMulti
                   isDisabled={peopleOptions.length === 0}
                   options={peopleOptions}
-                  value={(values[i] ?? '').split(/,\s*/).filter(Boolean).map(
-                    (id) => peopleOptions.find((o) => o.value === id) || { value: id, label: id, searchText: id }
-                  )}
+                  value={(values[i] ?? '')
+                    .split(/,\s*/)
+                    .filter(Boolean)
+                    .map(
+                      (id) =>
+                        peopleOptions.find((o) => o.value === id) || {
+                          value: id,
+                          label: id,
+                          searchText: id,
+                        },
+                    )}
                   onChange={(selected) => {
                     const ids = (selected as VocabOption[]).map((o) => o.value)
                     const next = [...values]
                     next[i] = ids.join(', ')
                     setValues(next)
                   }}
-                  placeholder={peopleOptions.length === 0 ? 'People vocabulary unavailable' : 'Select people…'}
+                  placeholder={
+                    peopleOptions.length === 0
+                      ? 'People vocabulary unavailable'
+                      : 'Select people…'
+                  }
                   styles={{
-                    multiValue: (base) => ({ ...base, background: 'rgba(166,43,43,0.15)' }),
+                    multiValue: (base) => ({
+                      ...base,
+                      background: 'rgba(166,43,43,0.15)',
+                    }),
                     multiValueLabel: (base) => ({ ...base, color: '#a62b2b' }),
-                    control: (base) => ({ ...base, borderColor: '#a62b2b', minHeight: 34 }),
+                    control: (base) => ({
+                      ...base,
+                      borderColor: '#a62b2b',
+                      minHeight: 34,
+                    }),
                   }}
                 />
               ) : isPeopleControlled ? (

@@ -8,6 +8,7 @@ export type ControlledVocabularySource =
 export const FIELD_VOCABULARIES: Record<string, ControlledVocabularySource> = {
   isRef_creator: 'People',
   isRef_contributor: 'People',
+  isRef_mentions: 'People', // People referenced or depicted (schema:mentions)
   isRef_geo: 'Places',
   isRef_sameAs: 'Licenses',
   isRef_isPartOf: 'RepositoryCollection',
@@ -17,6 +18,7 @@ export const FIELD_VOCABULARIES: Record<string, ControlledVocabularySource> = {
 export const MULTI_SELECT_FIELDS = new Set<string>([
   'isRef_creator',
   'isRef_contributor',
+  'isRef_mentions',
 ])
 
 export const isMultiSelectField = (fieldName: string): boolean =>

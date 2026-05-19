@@ -34,6 +34,10 @@ export type RepositoryObject = BaseItem & {
   inLanguage?: string
   isRef_creator?: string
   isRef_contributor?: string
+  /**
+   * People referenced or depicted in this resource (schema:mentions)
+   */
+  isRef_mentions?: string
 }
 
 export type License = BaseItem & {
@@ -86,6 +90,7 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     'inLanguage',
     'isRef_creator',
     'isRef_contributor',
+    'isRef_mentions',
   ],
   Language: ['@id', '@type', 'name', 'description'],
   Dataset: ['@id', '@type', 'name', 'description'],
