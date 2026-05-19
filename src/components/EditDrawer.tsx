@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { getControlledVocabularyForField } from '../config/field-vocabularies'
+import { getControlledVocabularyForField, isMultiSelectField } from '../config/field-vocabularies'
+import Select from 'react-select'
 import { useAppSelector } from '../ducks/hooks'
 import { selectPeople } from '../ducks/people'
 import { toCamelCase } from '../helpers/string-formatters'
@@ -69,8 +70,18 @@ export default function EditDrawer({
       if (source !== 'People') continue
       const selectedValue = (values[i] ?? '').trim()
       if (!selectedValue) continue
-      if (!peopleOptionIds.has(selectedValue)) {
-        return `✗ ${field} must be selected from People`
+      if (isMultiSelectField(field)) {
+        // Multi-select: validate all IDs
+        const ids = selectedValue.split(/,\s*/).filter(Boolean)
+        for (const id of ids) {
+          if (!peopleOptionIds.has(id)) {
+            return `✗ ${field} must be selected from People`
+          }
+        }
+      } else {
+        if (!peopleOptionIds.has(selectedValue)) {
+          return `✗ ${field} must be selected from People`
+        }
       }
     }
     return null
@@ -185,6 +196,27 @@ export default function EditDrawer({
                     </option>
                   ))}
                 </select>
+              ) : isPeopleControlled && isMultiSelectField(key) ? (
+                <Select
+                  isMulti
+                  isDisabled={peopleOptions.length === 0}
+                  options={peopleOptions}
+                  value={(values[i] ?? '').split(/,\s*/).filter(Boolean).map(
+                    (id) => peopleOptions.find((o) => o.value === id) || { value: id, label: id, searchText: id }
+                  )}
+                  onChange={(selected) => {
+                    const ids = (selected as VocabOption[]).map((o) => o.value)
+                    const next = [...values]
+                    next[i] = ids.join(', ')
+                    setValues(next)
+                  }}
+                  placeholder={peopleOptions.length === 0 ? 'People vocabulary unavailable' : 'Select people…'}
+                  styles={{
+                    multiValue: (base) => ({ ...base, background: 'rgba(166,43,43,0.15)' }),
+                    multiValueLabel: (base) => ({ ...base, color: '#a62b2b' }),
+                    control: (base) => ({ ...base, borderColor: '#a62b2b', minHeight: 34 }),
+                  }}
+                />
               ) : isPeopleControlled ? (
                 <>
                   <input

@@ -13,6 +13,15 @@ export const FIELD_VOCABULARIES: Record<string, ControlledVocabularySource> = {
   isRef_isPartOf: 'RepositoryCollection',
 }
 
+// Multi-select fields (comma-separated @ids)
+export const MULTI_SELECT_FIELDS = new Set<string>([
+  'isRef_creator',
+  'isRef_contributor',
+])
+
+export const isMultiSelectField = (fieldName: string): boolean =>
+  MULTI_SELECT_FIELDS.has(fieldName)
+
 export const getControlledVocabularyForField = (
   fieldName: string,
 ): ControlledVocabularySource | null => {
