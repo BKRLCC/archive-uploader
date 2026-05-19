@@ -22,27 +22,17 @@ function PeopleBootstrap() {
     if (hasBootstrappedPeople) return
     hasBootstrappedPeople = true
 
-    let cancelled = false
-
     const run = async () => {
       dispatch(setLoading(true))
       try {
         const people = await loadPeopleFromSpreadsheet()
-        if (!cancelled) {
-          dispatch(setPeople(people))
-        }
+        dispatch(setPeople(people))
       } finally {
-        if (!cancelled) {
-          dispatch(setLoading(false))
-        }
+        dispatch(setLoading(false))
       }
     }
 
     void run()
-
-    return () => {
-      cancelled = true
-    }
   }, [dispatch])
 
   return null

@@ -1,5 +1,5 @@
 import { Person } from 'src/types/types'
-import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { createSlice, createSelector, PayloadAction } from '@reduxjs/toolkit'
 import type { RootState } from './store'
 
 type PeopleDictionary = Record<string, Person>
@@ -35,8 +35,10 @@ const peopleSlice = createSlice({
 export const { setPeople, setLoading } = peopleSlice.actions
 
 // Selectors
-export const selectPeople = (state: RootState) =>
-  Object.values(state.people.people)
+const selectPeopleDictionary = (state: RootState) => state.people.people
+export const selectPeople = createSelector(selectPeopleDictionary, (people) =>
+  Object.values(people),
+)
 export const selectPeopleLoading = (state: RootState) => state.people.loading
 
 export default peopleSlice.reducer

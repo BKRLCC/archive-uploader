@@ -50,6 +50,9 @@ const mapRowsToPeople = (sheet: SheetData): Person[] => {
   let droppedRows = 0
 
   sheet.rows.forEach((row) => {
+    // Skip entirely empty rows (Excel trailing rows)
+    if (row.every((cell) => !cell || !String(cell).trim())) return
+
     const id = getCell(row, indexMap, '@id')
     const rawType = getCell(row, indexMap, '@type')
     const name = getCell(row, indexMap, 'name')
