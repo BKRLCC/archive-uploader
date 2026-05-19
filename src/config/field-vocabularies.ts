@@ -7,6 +7,7 @@ export type ControlledVocabularySource =
 // Display labels are for humans; persisted cell values remain the target entity @id.
 export const FIELD_VOCABULARIES: Record<string, ControlledVocabularySource> = {
   isRef_creator: 'People',
+  isRef_contributor: 'People',
   isRef_geo: 'Places',
   isRef_sameAs: 'Licenses',
   isRef_isPartOf: 'RepositoryCollection',
