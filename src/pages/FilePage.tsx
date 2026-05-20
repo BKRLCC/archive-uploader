@@ -1,26 +1,27 @@
-import React, { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import ArchiveView from "../components/ArchiveView";
-import type { FileInfo } from "../api";
+import React, { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import ArchiveView from '../components/ArchiveView'
+import type { FileInfo } from '../api'
+import { isArchiveWorkbookPath } from '../helpers/archive-workbooks'
 
 export default function FilePage() {
-  const [searchParams] = useSearchParams();
-  const filePath = searchParams.get("path") ?? "";
+  const [searchParams] = useSearchParams()
+  const filePath = searchParams.get('path') ?? ''
 
-  const [info, setInfo] = useState<FileInfo | null>(null);
+  const [info, setInfo] = useState<FileInfo | null>(null)
 
   useEffect(() => {
-    if (!filePath || filePath.endsWith("metadata.xlsx")) return;
-    window.api.getFileInfo(filePath).then(setInfo);
-  }, [filePath]);
+    if (!filePath || isArchiveWorkbookPath(filePath)) return
+    window.api.getFileInfo(filePath).then(setInfo)
+  }, [filePath])
 
-  if (!filePath) return <p>No file specified.</p>;
+  if (!filePath) return <p>No file specified.</p>
 
-  if (filePath.endsWith("metadata.xlsx")) {
-    return <ArchiveView xlsxPath={filePath} />;
+  if (isArchiveWorkbookPath(filePath)) {
+    return <ArchiveView xlsxPath={filePath} />
   }
 
-  const name = filePath.split(/[/\\]/).pop() ?? filePath;
+  const name = filePath.split(/[/\\]/).pop() ?? filePath
 
   return (
     <div className="file-page">
@@ -46,5 +47,5 @@ export default function FilePage() {
         <p className="items-state">Loading…</p>
       )}
     </div>
-  );
+  )
 }

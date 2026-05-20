@@ -1,11 +1,15 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import type { DirEntry, FileInfo } from "../api";
-import FilePreview, { type Selected } from "../components/FilePreview";
-import Drawer from "../components/Drawer";
-import CreateArchiveForm from "../components/CreateArchiveForm";
-import FilePage from "./FilePage";
-import { UiIcons } from "../config/icons";
+import React, { useCallback, useEffect, useState } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import type { DirEntry, FileInfo } from '../api'
+import FilePreview, { type Selected } from '../components/FilePreview'
+import Drawer from '../components/Drawer'
+import CreateArchiveForm from '../components/CreateArchiveForm'
+import FilePage from './FilePage'
+import { UiIcons } from '../config/icons'
+import {
+  getArchiveWorkbookLabel,
+  isArchiveWorkbookName,
+} from '../helpers/archive-workbooks'
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -15,133 +19,133 @@ const EMOJI = {
   audio: UiIcons.audio,
   video: UiIcons.video,
   doc: UiIcons.doc,
-};
+}
 
-const AUDIO_EXTS = new Set(["mp3", "wav", "flac", "aac", "ogg", "m4a"]);
-const VIDEO_EXTS = new Set(["mp4", "mov", "avi", "mkv", "webm"]);
+const AUDIO_EXTS = new Set(['mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a'])
+const VIDEO_EXTS = new Set(['mp4', 'mov', 'avi', 'mkv', 'webm'])
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
-const IMAGE_EXTS_BROWSER = new Set(["jpg", "jpeg", "png", "gif", "webp"]);
+const IMAGE_EXTS_BROWSER = new Set(['jpg', 'jpeg', 'png', 'gif', 'webp'])
 
 function emojiFor(entry: DirEntry) {
-  if (entry.name === "People" && entry.isDirectory) return "👥";
-  if (entry.name === "Places" && entry.isDirectory) return "📍";
-  if (entry.name === "Licenses" && entry.isDirectory) return "📜";
-  if (entry.isDirectory) return EMOJI.folder;
-  if (entry.name === "metadata.xlsx") return "⭐";
-  if (IMAGE_EXTS_BROWSER.has(entry.ext)) return EMOJI.image;
-  if (AUDIO_EXTS.has(entry.ext)) return EMOJI.audio;
-  if (VIDEO_EXTS.has(entry.ext)) return EMOJI.video;
-  return EMOJI.doc;
+  if (entry.name === 'People' && entry.isDirectory) return '👥'
+  if (entry.name === 'Places' && entry.isDirectory) return '📍'
+  if (entry.name === 'Licenses' && entry.isDirectory) return '📜'
+  if (entry.isDirectory) return EMOJI.folder
+  if (isArchiveWorkbookName(entry.name)) return '⭐'
+  if (IMAGE_EXTS_BROWSER.has(entry.ext)) return EMOJI.image
+  if (AUDIO_EXTS.has(entry.ext)) return EMOJI.audio
+  if (VIDEO_EXTS.has(entry.ext)) return EMOJI.video
+  return EMOJI.doc
 }
 
 // ── Component ────────────────────────────────────────────────────────────────
 
 export default function BrowserPage() {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
-  const [rootFolder, setRootFolder] = useState<string | null>(null);
-  const [entries, setEntries] = useState<DirEntry[]>([]);
+  const [rootFolder, setRootFolder] = useState<string | null>(null)
+  const [entries, setEntries] = useState<DirEntry[]>([])
 
-  const [searchParams, setSearchParams] = useSearchParams();
-  const pathParam = searchParams.get("path");
-  const currentPath = pathParam ?? rootFolder;
-  const isFile = searchParams.get("type") === "file";
-  const showCreate = searchParams.get("showCreate") === "1";
-  const refreshKey = searchParams.get("r");
-  const [selected, setSelected] = useState<Selected | null>(null);
-  const [fileInfo, setFileInfo] = useState<FileInfo | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams()
+  const pathParam = searchParams.get('path')
+  const currentPath = pathParam ?? rootFolder
+  const isFile = searchParams.get('type') === 'file'
+  const showCreate = searchParams.get('showCreate') === '1'
+  const refreshKey = searchParams.get('r')
+  const [selected, setSelected] = useState<Selected | null>(null)
+  const [fileInfo, setFileInfo] = useState<FileInfo | null>(null)
   const [contextMenu, setContextMenu] = useState<{
-    x: number;
-    y: number;
-    filePath: string;
-    entry: DirEntry;
-  } | null>(null);
+    x: number
+    y: number
+    filePath: string
+    entry: DirEntry
+  } | null>(null)
 
   const navigateTo = useCallback(
     (folderPath: string) => {
-      navigate(`/browser?path=${encodeURIComponent(folderPath)}`);
+      navigate(`/browser?path=${encodeURIComponent(folderPath)}`)
     },
     [navigate],
-  );
+  )
 
   const navigateToFile = useCallback(
     (filePath: string) => {
-      navigate(`/browser?path=${encodeURIComponent(filePath)}&type=file`);
+      navigate(`/browser?path=${encodeURIComponent(filePath)}&type=file`)
     },
     [navigate],
-  );
+  )
 
   const refreshCurrentFolder = useCallback(async () => {
-    if (!currentPath) return;
-    const result = await window.api.listFolder(currentPath);
-    setEntries(result);
-  }, [currentPath]);
+    if (!currentPath) return
+    const result = await window.api.listFolder(currentPath)
+    setEntries(result)
+  }, [currentPath])
 
   // Load rootFolder once on mount
   useEffect(() => {
-    window.api.getRootFolder().then(setRootFolder);
-  }, []);
+    window.api.getRootFolder().then(setRootFolder)
+  }, [])
 
   // When rootFolder loads and no ?path= is set, navigate there (replace so it's not a history entry)
   useEffect(() => {
     if (rootFolder && !pathParam) {
       navigate(`/browser?path=${encodeURIComponent(rootFolder)}`, {
         replace: true,
-      });
+      })
     }
-  }, [rootFolder, pathParam, navigate]);
+  }, [rootFolder, pathParam, navigate])
 
   // Load entries and clear selection whenever the displayed folder changes
   useEffect(() => {
-    if (!currentPath || isFile) return;
-    setSelected(null);
-    setFileInfo(null);
-    setContextMenu(null);
-    window.api.listFolder(currentPath).then(setEntries);
-  }, [currentPath, isFile, refreshKey]);
+    if (!currentPath || isFile) return
+    setSelected(null)
+    setFileInfo(null)
+    setContextMenu(null)
+    window.api.listFolder(currentPath).then(setEntries)
+  }, [currentPath, isFile, refreshKey])
 
   const handleSelect = useCallback(
     async (entry: DirEntry, filePath: string) => {
-      setSelected({ entry, filePath });
-      setFileInfo(null);
-      const info = await window.api.getFileInfo(filePath);
-      setFileInfo(info);
+      setSelected({ entry, filePath })
+      setFileInfo(null)
+      const info = await window.api.getFileInfo(filePath)
+      setFileInfo(info)
     },
     [],
-  );
+  )
 
   const handleEntryClick = useCallback(
     (e: React.MouseEvent, entry: DirEntry, filePath: string) => {
-      e.stopPropagation();
-      handleSelect(entry, filePath);
+      e.stopPropagation()
+      handleSelect(entry, filePath)
     },
     [handleSelect],
-  );
+  )
 
   const handleEntryDblClick = useCallback(
     (e: React.MouseEvent, entry: DirEntry, filePath: string) => {
-      e.stopPropagation();
+      e.stopPropagation()
       if (entry.isDirectory) {
-        navigateTo(filePath);
+        navigateTo(filePath)
       } else {
-        navigateToFile(filePath);
+        navigateToFile(filePath)
       }
     },
     [navigateTo, navigateToFile],
-  );
+  )
 
   const closePanel = useCallback(() => {
-    setSelected(null);
-    setFileInfo(null);
-    setContextMenu(null);
-    if (searchParams.has("showCreate")) {
-      const next = new URLSearchParams(searchParams);
-      next.delete("showCreate");
-      setSearchParams(next, { replace: true });
+    setSelected(null)
+    setFileInfo(null)
+    setContextMenu(null)
+    if (searchParams.has('showCreate')) {
+      const next = new URLSearchParams(searchParams)
+      next.delete('showCreate')
+      setSearchParams(next, { replace: true })
     }
-  }, [searchParams, setSearchParams]);
+  }, [searchParams, setSearchParams])
 
   // ── Render ──────────────────────────────────────────────────────────────────
 
@@ -149,15 +153,15 @@ export default function BrowserPage() {
     return (
       <div className="browser-page">
         <p className="empty-state">
-          No root folder set.{" "}
+          No root folder set.{' '}
           <Link to="/settings">Choose one in Settings →</Link>
         </p>
       </div>
-    );
+    )
   }
 
   if (isFile) {
-    return <FilePage />;
+    return <FilePage />
   }
 
   return (
@@ -170,38 +174,38 @@ export default function BrowserPage() {
                 <li className="empty">This folder is empty.</li>
               ) : (
                 entries.map((entry) => {
-                  const filePath = currentPath + "/" + entry.name;
-                  const isSelected = selected?.filePath === filePath;
+                  const filePath = currentPath + '/' + entry.name
+                  const isSelected = selected?.filePath === filePath
                   return (
                     <li
                       key={entry.name}
                       className={[
-                        entry.isDirectory || entry.name === "metadata.xlsx"
-                          ? "folder"
-                          : "",
-                        isSelected ? "selected" : "",
+                        entry.isDirectory || isArchiveWorkbookName(entry.name)
+                          ? 'folder'
+                          : '',
+                        isSelected ? 'selected' : '',
                       ]
-                        .join(" ")
+                        .join(' ')
                         .trim()}
                       onClick={(e) => handleEntryClick(e, entry, filePath)}
                       onDoubleClick={(e) =>
                         handleEntryDblClick(e, entry, filePath)
                       }
                       onContextMenu={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
+                        e.preventDefault()
+                        e.stopPropagation()
                         setContextMenu({
                           x: e.clientX,
                           y: e.clientY,
                           filePath,
                           entry,
-                        });
+                        })
                       }}
                     >
                       {emojiFor(entry)}&nbsp;&nbsp;
-                      {entry.name === "metadata.xlsx" ? "Metadata" : entry.name}
+                      {getArchiveWorkbookLabel(entry.name)}
                     </li>
-                  );
+                  )
                 })
               )}
             </ul>
@@ -212,8 +216,8 @@ export default function BrowserPage() {
             <CreateArchiveForm
               folderPath={currentPath}
               onCreated={async () => {
-                closePanel();
-                await refreshCurrentFolder();
+                closePanel()
+                await refreshCurrentFolder()
               }}
               onClose={closePanel}
             />
@@ -231,19 +235,19 @@ export default function BrowserPage() {
           <button
             onClick={() => {
               if (contextMenu.entry.isDirectory) {
-                navigateTo(contextMenu.filePath);
+                navigateTo(contextMenu.filePath)
               } else {
-                navigateToFile(contextMenu.filePath);
+                navigateToFile(contextMenu.filePath)
               }
-              setContextMenu(null);
+              setContextMenu(null)
             }}
           >
             Open
           </button>
           <button
             onClick={() => {
-              window.api.showInFinder(contextMenu.filePath);
-              setContextMenu(null);
+              window.api.showInFinder(contextMenu.filePath)
+              setContextMenu(null)
             }}
           >
             Show in Finder
@@ -252,14 +256,14 @@ export default function BrowserPage() {
             <button
               className="context-menu-danger"
               onClick={async () => {
-                const name = contextMenu.entry.name;
-                const fp = contextMenu.filePath;
-                setContextMenu(null);
+                const name = contextMenu.entry.name
+                const fp = contextMenu.filePath
+                setContextMenu(null)
                 if (!window.confirm(`Delete "${name}"? This cannot be undone.`))
-                  return;
-                await window.api.deleteFile(fp);
-                closePanel();
-                await refreshCurrentFolder();
+                  return
+                await window.api.deleteFile(fp)
+                closePanel()
+                await refreshCurrentFolder()
               }}
             >
               Delete
@@ -268,5 +272,5 @@ export default function BrowserPage() {
         </div>
       )}
     </div>
-  );
+  )
 }

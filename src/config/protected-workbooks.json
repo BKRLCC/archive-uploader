@@ -1,0 +1,9 @@
+{
+  "names": ["metadata.xlsx", "people.xlsx", "places.xlsx", "licenses.xlsx"],
+  "labels": {
+    "metadata.xlsx": "Metadata",
+    "people.xlsx": "People",
+    "places.xlsx": "Places",
+    "licenses.xlsx": "Licenses"
+  }
+}
