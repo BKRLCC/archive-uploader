@@ -1,87 +1,88 @@
-import React, { useCallback, useEffect, useState } from "react";
-import type { SheetData } from "../api";
-import EditDrawer from "./EditDrawer";
-import EditRootDatasetForm from "./EditRootDatasetForm";
-import Drawer from "./Drawer";
+import React, { useCallback, useEffect, useState } from 'react'
+import type { SheetData } from '../api'
+import EditDrawer from './EditDrawer'
+import EditRootDatasetForm from './EditRootDatasetForm'
+import Drawer from './Drawer'
+import ClickableImagePreview from './ClickableImagePreview'
 
-type SheetState = SheetData | null | "empty" | "missing";
+type SheetState = SheetData | null | 'empty' | 'missing'
 
 interface EditingRow {
-  rowIndex: number;
-  row: string[];
-  sheetName: string;
+  rowIndex: number
+  row: string[]
+  sheetName: string
 }
 
 function sheetStateFromData(data: SheetData | null): SheetState {
-  if (data === null) return "missing";
-  if (data.headers.length === 0) return "empty";
-  return data;
+  if (data === null) return 'missing'
+  if (data.headers.length === 0) return 'empty'
+  return data
 }
 
 interface Props {
-  xlsxPath: string;
+  xlsxPath: string
 }
 
 export default function ArchiveView({ xlsxPath }: Props) {
-  const [sheetNames, setSheetNames] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState<string>("RootDataset");
-  const [sheets, setSheets] = useState<Record<string, SheetState>>({});
+  const [sheetNames, setSheetNames] = useState<string[]>([])
+  const [activeTab, setActiveTab] = useState<string>('RootDataset')
+  const [sheets, setSheets] = useState<Record<string, SheetState>>({})
 
-  const [editingRow, setEditingRow] = useState<EditingRow | null>(null);
-  const [addingItem, setAddingItem] = useState<string | false>(false);
-  const [editingRootDataset, setEditingRootDataset] = useState(false);
+  const [editingRow, setEditingRow] = useState<EditingRow | null>(null)
+  const [addingItem, setAddingItem] = useState<string | false>(false)
+  const [editingRootDataset, setEditingRootDataset] = useState(false)
 
-  const [populateFeedback, setPopulateFeedback] = useState("");
-  const [populateBusy, setPopulateBusy] = useState(false);
+  const [populateFeedback, setPopulateFeedback] = useState('')
+  const [populateBusy, setPopulateBusy] = useState(false)
 
-  const folder = xlsxPath.replace(/[/\\][^/\\]+$/, "");
+  const folder = xlsxPath.replace(/[/\\][^/\\]+$/, '')
 
   const closeDrawer = useCallback(() => {
-    setEditingRow(null);
-    setAddingItem(false);
-    setEditingRootDataset(false);
-  }, []);
+    setEditingRow(null)
+    setAddingItem(false)
+    setEditingRootDataset(false)
+  }, [])
 
   const reloadSheet = useCallback(
     async (name: string) => {
-      const data = await window.api.readSheet(xlsxPath, name);
-      setSheets((prev) => ({ ...prev, [name]: sheetStateFromData(data) }));
+      const data = await window.api.readSheet(xlsxPath, name)
+      setSheets((prev) => ({ ...prev, [name]: sheetStateFromData(data) }))
     },
     [xlsxPath],
-  );
+  )
 
   const loadAll = useCallback(async () => {
-    const names = await window.api.getSheetNames(xlsxPath);
-    setSheetNames(names);
-    if (names.length > 0) setActiveTab(names[0]);
+    const names = await window.api.getSheetNames(xlsxPath)
+    setSheetNames(names)
+    if (names.length > 0) setActiveTab(names[0])
     const results = await Promise.all(
       names.map(async (name) => {
-        const data = await window.api.readSheet(xlsxPath, name);
-        return [name, sheetStateFromData(data)] as const;
+        const data = await window.api.readSheet(xlsxPath, name)
+        return [name, sheetStateFromData(data)] as const
       }),
-    );
-    setSheets(Object.fromEntries(results));
-  }, [xlsxPath]);
+    )
+    setSheets(Object.fromEntries(results))
+  }, [xlsxPath])
 
   useEffect(() => {
-    loadAll();
-  }, [loadAll]);
+    loadAll()
+  }, [loadAll])
 
   // ── Populate Files tab ──────────────────────────────────────────────────────
 
   async function handlePopulate() {
-    const rootFolder = await window.api.getRootFolder();
-    if (!folder || !rootFolder) return;
-    setPopulateBusy(true);
-    setPopulateFeedback("Working…");
+    const rootFolder = await window.api.getRootFolder()
+    if (!folder || !rootFolder) return
+    setPopulateBusy(true)
+    setPopulateFeedback('Working…')
     try {
-      const { count } = await window.api.populateFilesTab(folder, rootFolder);
-      setPopulateFeedback(`✓ Updated (${count} file${count !== 1 ? "s" : ""})`);
-      await reloadSheet("Files");
+      const { count } = await window.api.populateFilesTab(folder, rootFolder)
+      setPopulateFeedback(`✓ Updated (${count} file${count !== 1 ? 's' : ''})`)
+      await reloadSheet('Files')
     } catch (err) {
-      setPopulateFeedback(`✗ ${(err as Error).message}`);
+      setPopulateFeedback(`✗ ${(err as Error).message}`)
     } finally {
-      setPopulateBusy(false);
+      setPopulateBusy(false)
     }
   }
 
@@ -93,16 +94,16 @@ export default function ArchiveView({ xlsxPath }: Props) {
     sheetName: string,
   ) {
     setSheets((prev) => {
-      const sheet = prev[sheetName];
-      if (!sheet || typeof sheet === "string") return prev;
+      const sheet = prev[sheetName]
+      if (!sheet || typeof sheet === 'string') return prev
       return {
         ...prev,
         [sheetName]: {
           ...sheet,
           rows: sheet.rows.map((r, i) => (i === rowIndex ? updated : r)),
         },
-      };
-    });
+      }
+    })
   }
 
   function handleAddRow(
@@ -111,21 +112,21 @@ export default function ArchiveView({ xlsxPath }: Props) {
     sheetName: string,
   ) {
     setSheets((prev) => {
-      const sheet = prev[sheetName];
-      if (!sheet || typeof sheet === "string") return prev;
+      const sheet = prev[sheetName]
+      if (!sheet || typeof sheet === 'string') return prev
       return {
         ...prev,
         [sheetName]: { ...sheet, rows: [...sheet.rows, newRow] },
-      };
-    });
+      }
+    })
   }
 
   // ── Generic read-only table ─────────────────────────────────────────────────
 
   function renderGenericTable(sheet: SheetState, emptyLabel: string) {
-    if (sheet === "missing") return <p className="items-state">Not found.</p>;
-    if (sheet === "empty") return <p className="items-state">{emptyLabel}</p>;
-    if (!sheet) return <p className="items-state">Loading…</p>;
+    if (sheet === 'missing') return <p className="items-state">Not found.</p>
+    if (sheet === 'empty') return <p className="items-state">{emptyLabel}</p>
+    if (!sheet) return <p className="items-state">Loading…</p>
     return (
       <div className="table-scroll">
         <table className="sheet-table">
@@ -147,22 +148,27 @@ export default function ArchiveView({ xlsxPath }: Props) {
           </tbody>
         </table>
       </div>
-    );
+    )
   }
 
   // ── Editable Items-style table ──────────────────────────────────────────────
 
   function renderEditableTable(sheet: SheetState, sheetName: string) {
-    if (sheet === "missing")
-      return <p className="items-state">Sheet not found in metadata.xlsx.</p>;
-    if (sheet === "empty")
-      return <p className="items-state">This tab is empty.</p>;
-    if (!sheet) return <p className="items-state">Loading…</p>;
+    if (sheet === 'missing')
+      return <p className="items-state">Sheet not found in metadata.xlsx.</p>
+    if (sheet === 'empty')
+      return <p className="items-state">This tab is empty.</p>
+    if (!sheet) return <p className="items-state">Loading…</p>
+
+    const depictionIndex = sheet.headers.indexOf('depiction')
+    const hasDepiction = depictionIndex !== -1
 
     const visibleIndices = sheet.headers
       .map((h, i) => ({ h, i }))
-      .filter(({ h }) => h === "@type" || !h.startsWith("@"))
-      .map(({ i }) => i);
+      .filter(
+        ({ h }) => (h === '@type' || !h.startsWith('@')) && h !== 'depiction',
+      )
+      .map(({ i }) => i)
 
     return (
       <div className="table-scroll">
@@ -170,6 +176,9 @@ export default function ArchiveView({ xlsxPath }: Props) {
           <thead>
             <tr>
               <th></th>
+              {hasDepiction && (
+                <th className="depiction-thumb-header">depiction</th>
+              )}
               {visibleIndices.map((i) => (
                 <th key={i}>{sheet.headers[i]}</th>
               ))}
@@ -181,28 +190,43 @@ export default function ArchiveView({ xlsxPath }: Props) {
                 <td
                   className="edit-btn-cell"
                   onClick={(e) => {
-                    e.stopPropagation();
-                    setEditingRootDataset(false);
-                    setAddingItem(false);
-                    setEditingRow({ rowIndex, row, sheetName });
+                    e.stopPropagation()
+                    setEditingRootDataset(false)
+                    setAddingItem(false)
+                    setEditingRow({ rowIndex, row, sheetName })
                   }}
                 >
                   ✏️
                 </td>
+                {hasDepiction && (
+                  <td className="depiction-thumb-cell">
+                    {String(row[depictionIndex] ?? '').trim() ? (
+                      <ClickableImagePreview
+                        imageUrl={`localfile://${`${folder.replace(/\\/g, '/')}/${String(
+                          row[depictionIndex] ?? '',
+                        )
+                          .trim()
+                          .replace(/^[/\\]+/, '')
+                          .replace(/\\/g, '/')}`}`}
+                        altText="Depiction Thumbnail"
+                      />
+                    ) : null}
+                  </td>
+                )}
                 {visibleIndices.map((i) => (
-                  <td key={i}>{row[i] ?? ""}</td>
+                  <td key={i}>{row[i] ?? ''}</td>
                 ))}
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-    );
+    )
   }
 
-  const rootDatasetSheet = sheets["RootDataset"] ?? null;
+  const rootDatasetSheet = sheets['RootDataset'] ?? null
   const drawerOpen =
-    editingRootDataset || editingRow !== null || addingItem !== false;
+    editingRootDataset || editingRow !== null || addingItem !== false
 
   return (
     <div className="archive-page" onClick={closeDrawer}>
@@ -213,11 +237,11 @@ export default function ArchiveView({ xlsxPath }: Props) {
           {sheetNames.map((tab) => (
             <button
               key={tab}
-              className={`tab${activeTab === tab ? " active" : ""}`}
+              className={`tab${activeTab === tab ? ' active' : ''}`}
               onClick={(e) => {
-                e.stopPropagation();
-                setActiveTab(tab);
-                closeDrawer();
+                e.stopPropagation()
+                setActiveTab(tab)
+                closeDrawer()
               }}
             >
               {tab}
@@ -225,51 +249,51 @@ export default function ArchiveView({ xlsxPath }: Props) {
           ))}
         </div>
 
-        {activeTab === "RootDataset" && (
+        {activeTab === 'RootDataset' && (
           <section>
             <div className="section-toolbar">
               <h2>Root Dataset</h2>
               <button
                 className="refresh-btn"
                 onClick={(e) => {
-                  e.stopPropagation();
-                  closeDrawer();
-                  setEditingRootDataset(true);
+                  e.stopPropagation()
+                  closeDrawer()
+                  setEditingRootDataset(true)
                 }}
               >
                 ✏️ Edit
               </button>
             </div>
-            {renderGenericTable(rootDatasetSheet, "RootDataset tab is empty.")}
+            {renderGenericTable(rootDatasetSheet, 'RootDataset tab is empty.')}
           </section>
         )}
 
-        {activeTab === "Files" && (
+        {activeTab === 'Files' && (
           <section>
             <div className="section-toolbar">
               <h2>Files</h2>
               <div>
                 <button
                   onClick={(e) => {
-                    e.stopPropagation();
-                    handlePopulate();
+                    e.stopPropagation()
+                    handlePopulate()
                   }}
                   disabled={populateBusy}
                   className="refresh-btn"
                 >
                   ↻ Update Files tab
-                </button>{" "}
+                </button>{' '}
                 <span className="populate-feedback">{populateFeedback}</span>
               </div>
             </div>
-            {renderGenericTable(sheets["Files"] ?? null, "Files tab is empty.")}
+            {renderGenericTable(sheets['Files'] ?? null, 'Files tab is empty.')}
           </section>
         )}
 
-        {activeTab !== "RootDataset" &&
-          activeTab !== "Files" &&
+        {activeTab !== 'RootDataset' &&
+          activeTab !== 'Files' &&
           (() => {
-            const sheet = sheets[activeTab] ?? null;
+            const sheet = sheets[activeTab] ?? null
             return (
               <section>
                 <div className="section-toolbar">
@@ -278,19 +302,19 @@ export default function ArchiveView({ xlsxPath }: Props) {
                     <button
                       className="refresh-btn"
                       onClick={(e) => {
-                        e.stopPropagation();
-                        reloadSheet(activeTab);
+                        e.stopPropagation()
+                        reloadSheet(activeTab)
                       }}
                     >
                       ↻ Refresh
-                    </button>{" "}
-                    {sheet && typeof sheet !== "string" && (
+                    </button>{' '}
+                    {sheet && typeof sheet !== 'string' && (
                       <button
                         className="refresh-btn"
                         onClick={(e) => {
-                          e.stopPropagation();
-                          closeDrawer();
-                          setAddingItem(activeTab);
+                          e.stopPropagation()
+                          closeDrawer()
+                          setAddingItem(activeTab)
                         }}
                       >
                         + Add item
@@ -300,14 +324,14 @@ export default function ArchiveView({ xlsxPath }: Props) {
                 </div>
                 {renderEditableTable(sheet, activeTab)}
               </section>
-            );
+            )
           })()}
       </div>
 
       <Drawer open={drawerOpen} width={320}>
         {editingRootDataset &&
           rootDatasetSheet &&
-          typeof rootDatasetSheet !== "string" && (
+          typeof rootDatasetSheet !== 'string' && (
             <EditRootDatasetForm
               sheetData={rootDatasetSheet}
               xlsxPath={xlsxPath}
@@ -319,8 +343,8 @@ export default function ArchiveView({ xlsxPath }: Props) {
           )}
         {editingRow &&
           (() => {
-            const sheet = sheets[editingRow.sheetName];
-            return sheet && typeof sheet !== "string" ? (
+            const sheet = sheets[editingRow.sheetName]
+            return sheet && typeof sheet !== 'string' ? (
               <EditDrawer
                 headers={sheet.headers}
                 row={editingRow.row}
@@ -332,15 +356,15 @@ export default function ArchiveView({ xlsxPath }: Props) {
                 }
                 onClose={closeDrawer}
               />
-            ) : null;
+            ) : null
           })()}
         {addingItem &&
           (() => {
-            const sheet = sheets[addingItem];
-            return sheet && typeof sheet !== "string" ? (
+            const sheet = sheets[addingItem]
+            return sheet && typeof sheet !== 'string' ? (
               <EditDrawer
                 headers={sheet.headers}
-                row={sheet.headers.map(() => "")}
+                row={sheet.headers.map(() => '')}
                 rowIndex={-1}
                 xlsxPath={xlsxPath}
                 sheetName={addingItem}
@@ -350,9 +374,9 @@ export default function ArchiveView({ xlsxPath }: Props) {
                 onClose={closeDrawer}
                 isNew
               />
-            ) : null;
+            ) : null
           })()}
       </Drawer>
     </div>
-  );
+  )
 }

@@ -1,24 +1,35 @@
 // See the Electron documentation for details on how to use preload scripts:
 // https://www.electronjs.org/docs/latest/tutorial/process-model#preload-scripts
 
-import { contextBridge, ipcRenderer } from "electron";
+import { contextBridge, ipcRenderer } from 'electron'
 
-contextBridge.exposeInMainWorld("api", {
+contextBridge.exposeInMainWorld('api', {
   getRootFolder: (): Promise<string | null> =>
-    ipcRenderer.invoke("get-root-folder"),
+    ipcRenderer.invoke('get-root-folder'),
   chooseRootFolder: (): Promise<string | null> =>
-    ipcRenderer.invoke("choose-root-folder"),
-  listFolder: (folderPath: string): Promise<import("./api").DirEntry[]> =>
-    ipcRenderer.invoke("list-folder", folderPath),
-  getFileInfo: (filePath: string): Promise<import("./api").FileInfo> =>
-    ipcRenderer.invoke("get-file-info", filePath),
+    ipcRenderer.invoke('choose-root-folder'),
+  pickDepictionFile: (archiveFolderPath: string): Promise<string | null> =>
+    ipcRenderer.invoke('pick-depiction-file', archiveFolderPath),
+  validateDepictionPath: (
+    archiveFolderPath: string,
+    depictionPath: string,
+  ): Promise<{ ok: boolean; normalizedPath?: string; error?: string }> =>
+    ipcRenderer.invoke(
+      'validate-depiction-path',
+      archiveFolderPath,
+      depictionPath,
+    ),
+  listFolder: (folderPath: string): Promise<import('./api').DirEntry[]> =>
+    ipcRenderer.invoke('list-folder', folderPath),
+  getFileInfo: (filePath: string): Promise<import('./api').FileInfo> =>
+    ipcRenderer.invoke('get-file-info', filePath),
   getSheetNames: (xlsxPath: string): Promise<string[]> =>
-    ipcRenderer.invoke("get-sheet-names", xlsxPath),
+    ipcRenderer.invoke('get-sheet-names', xlsxPath),
   readSheet: (
     xlsxPath: string,
     sheetName: string,
-  ): Promise<import("./api").SheetData | null> =>
-    ipcRenderer.invoke("read-sheet", xlsxPath, sheetName),
+  ): Promise<import('./api').SheetData | null> =>
+    ipcRenderer.invoke('read-sheet', xlsxPath, sheetName),
   updateSheetRow: (
     xlsxPath: string,
     sheetName: string,
@@ -26,7 +37,7 @@ contextBridge.exposeInMainWorld("api", {
     updatedValues: Record<string, string>,
   ): Promise<string[]> =>
     ipcRenderer.invoke(
-      "update-sheet-row",
+      'update-sheet-row',
       xlsxPath,
       sheetName,
       rowIndex,
@@ -36,33 +47,33 @@ contextBridge.exposeInMainWorld("api", {
     folder: string,
     rootFolder: string,
   ): Promise<{ count: number }> =>
-    ipcRenderer.invoke("populate-files-tab", folder, rootFolder),
+    ipcRenderer.invoke('populate-files-tab', folder, rootFolder),
   createArchive: (
     folderPath: string,
     meta: { name: string; description: string },
   ): Promise<{ path: string }> =>
-    ipcRenderer.invoke("create-archive", folderPath, meta),
+    ipcRenderer.invoke('create-archive', folderPath, meta),
   addSheetRow: (
     xlsxPath: string,
     sheetName: string,
     values: Record<string, string>,
   ): Promise<string[]> =>
-    ipcRenderer.invoke("add-sheet-row", xlsxPath, sheetName, values),
+    ipcRenderer.invoke('add-sheet-row', xlsxPath, sheetName, values),
   updateRootDataset: (
     xlsxPath: string,
     updates: Record<string, string>,
-  ): Promise<import("./api").SheetData> =>
-    ipcRenderer.invoke("update-root-dataset", xlsxPath, updates),
+  ): Promise<import('./api').SheetData> =>
+    ipcRenderer.invoke('update-root-dataset', xlsxPath, updates),
   createPeopleFolder: (rootFolder: string): Promise<{ path: string }> =>
-    ipcRenderer.invoke("create-people-folder", rootFolder),
+    ipcRenderer.invoke('create-people-folder', rootFolder),
   createPlacesFolder: (rootFolder: string): Promise<{ path: string }> =>
-    ipcRenderer.invoke("create-places-folder", rootFolder),
+    ipcRenderer.invoke('create-places-folder', rootFolder),
   createLicensesFolder: (rootFolder: string): Promise<{ path: string }> =>
-    ipcRenderer.invoke("create-licenses-folder", rootFolder),
+    ipcRenderer.invoke('create-licenses-folder', rootFolder),
   openFile: (filePath: string): Promise<string> =>
-    ipcRenderer.invoke("open-file", filePath),
+    ipcRenderer.invoke('open-file', filePath),
   showInFinder: (filePath: string): Promise<void> =>
-    ipcRenderer.invoke("show-in-finder", filePath),
+    ipcRenderer.invoke('show-in-finder', filePath),
   deleteFile: (filePath: string): Promise<void> =>
-    ipcRenderer.invoke("delete-file", filePath),
-});
+    ipcRenderer.invoke('delete-file', filePath),
+})

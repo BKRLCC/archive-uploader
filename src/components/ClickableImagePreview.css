@@ -1,0 +1,11 @@
+.clickable-thumbnail {
+  max-width: 150px;
+  max-height: 150px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: transform 0.2s;
+}
+
+.clickable-thumbnail:hover {
+  transform: scale(1.05);
+}

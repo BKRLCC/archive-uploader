@@ -7,6 +7,12 @@ import Select from 'react-select'
 import { useAppSelector } from '../ducks/hooks'
 import { selectPeople } from '../ducks/people'
 import { toCamelCase } from '../helpers/string-formatters'
+import {
+  DEPICTION_FIELD_NAME,
+  DEPICTION_FOLDER_HINT,
+  hasAllowedDepictionExtension,
+} from '../config/depiction-config'
+import ClickableImagePreview from './ClickableImagePreview'
 
 function generateId(type: string, name: string): string {
   const rand = Math.floor(Math.random() * 1000)
@@ -50,8 +56,13 @@ export default function EditDrawer({
 }: Props) {
   const [values, setValues] = useState<string[]>(() => [...row])
   const [vocabSearch, setVocabSearch] = useState<Record<string, string>>({})
+  const [depictionPickingField, setDepictionPickingField] = useState<
+    string | null
+  >(null)
   const [saving, setSaving] = useState(false)
   const [feedback, setFeedback] = useState('')
+
+  const archiveFolderPath = xlsxPath.replace(/[/\\][^/\\]+$/, '')
 
   const people = useAppSelector(selectPeople)
   const peopleOptions: VocabOption[] = people.map((person) => {
@@ -66,12 +77,32 @@ export default function EditDrawer({
   })
   const peopleOptionIds = new Set(peopleOptions.map((option) => option.value))
 
-  const validateControlledFields = (): string | null => {
+  const validateFields = async (): Promise<string | null> => {
     for (let i = 0; i < headers.length; i += 1) {
       const field = headers[i]
+      const selectedValue = (values[i] ?? '').trim()
+
+      if (field === DEPICTION_FIELD_NAME) {
+        if (!selectedValue) continue
+        if (!hasAllowedDepictionExtension(selectedValue)) {
+          return '✗ depiction must be an image path (jpg, jpeg, png, gif, webp)'
+        }
+        const result = await window.api.validateDepictionPath(
+          archiveFolderPath,
+          selectedValue,
+        )
+        if (!result.ok) {
+          return `✗ ${result.error ?? 'Invalid depiction path'}`
+        }
+        // Persist normalized relative path to keep separators consistent.
+        const next = [...values]
+        next[i] = result.normalizedPath ?? selectedValue
+        setValues(next)
+        continue
+      }
+
       const source = getControlledVocabularyForField(field)
       if (source !== 'People') continue
-      const selectedValue = (values[i] ?? '').trim()
       if (!selectedValue) continue
       if (isMultiSelectField(field)) {
         // Multi-select: validate all IDs
@@ -90,11 +121,27 @@ export default function EditDrawer({
     return null
   }
 
+  const handlePickDepiction = async (index: number) => {
+    setDepictionPickingField(headers[index])
+    try {
+      const picked = await window.api.pickDepictionFile(archiveFolderPath)
+      if (!picked) return
+      const next = [...values]
+      next[index] = picked
+      setValues(next)
+      setFeedback('')
+    } catch (err) {
+      setFeedback(`✗ ${(err as Error).message}`)
+    } finally {
+      setDepictionPickingField(null)
+    }
+  }
+
   async function handleSave() {
     setSaving(true)
     setFeedback('Saving…')
 
-    const validationError = validateControlledFields()
+    const validationError = await validateFields()
     if (validationError) {
       setFeedback(validationError)
       setSaving(false)
@@ -158,6 +205,7 @@ export default function EditDrawer({
           if (isNew && key === '@id') return null
           const isReadOnly = key === '@id'
           const isTypeField = key === '@type'
+          const isDepictionField = key === DEPICTION_FIELD_NAME
           const vocabularySource = getControlledVocabularyForField(key)
           const isPeopleControlled = vocabularySource === 'People'
           const peopleSearch = vocabSearch[key] ?? ''
@@ -176,6 +224,13 @@ export default function EditDrawer({
                 ),
               ]
             : filteredPeopleOptions
+          const previewPath =
+            isDepictionField && currentValue.trim()
+              ? `${archiveFolderPath.replace(/\\/g, '/')}/${currentValue
+                  .trim()
+                  .replace(/^[/\\]+/, '')
+                  .replace(/\\/g, '/')}`
+              : ''
           return (
             <label key={key} className="edit-field">
               <span className="edit-field-key">{key}</span>
@@ -199,6 +254,47 @@ export default function EditDrawer({
                     </option>
                   ))}
                 </select>
+              ) : isDepictionField ? (
+                <>
+                  <input
+                    type="text"
+                    value={currentValue}
+                    placeholder={`Relative image path (e.g., ${DEPICTION_FOLDER_HINT}photo.jpg)`}
+                    onChange={(e) => {
+                      const next = [...values]
+                      next[i] = e.target.value
+                      setValues(next)
+                    }}
+                  />
+                  <div className="depiction-actions">
+                    <button
+                      type="button"
+                      onClick={() => void handlePickDepiction(i)}
+                      disabled={depictionPickingField === key}
+                    >
+                      {depictionPickingField === key
+                        ? 'Choosing…'
+                        : 'Choose image…'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const next = [...values]
+                        next[i] = ''
+                        setValues(next)
+                      }}
+                      disabled={!currentValue}
+                    >
+                      Clear
+                    </button>
+                  </div>
+                  {previewPath && (
+                    <ClickableImagePreview
+                      imageUrl={`localfile://${previewPath}`}
+                      altText="Depiction Preview"
+                    />
+                  )}
+                </>
               ) : isPeopleControlled && isMultiSelectField(key) ? (
                 <Select
                   isMulti

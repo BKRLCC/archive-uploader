@@ -1,6 +1,6 @@
 @font-face {
-  font-family: "Meloso";
-  src: url("./fonts/meloso/MelosoVariable-Regular.ttf") format("truetype");
+  font-family: 'Meloso';
+  src: url('./fonts/meloso/MelosoVariable-Regular.ttf') format('truetype');
   font-weight: 100 900;
   font-style: normal;
 }
@@ -49,7 +49,7 @@
 
 .back-btn {
   all: unset;
-  font-family: "Muli", sans-serif;
+  font-family: 'Muli', sans-serif;
   font-size: 0.85em;
   color: rgba(255, 255, 255, 0.9);
   cursor: pointer;
@@ -66,7 +66,7 @@
 .app-header-title {
   flex: 1;
   text-align: center;
-  font-family: "Meloso", sans-serif;
+  font-family: 'Meloso', sans-serif;
   font-size: 1.05em;
   font-weight: 600;
   letter-spacing: 0.03em;
@@ -111,75 +111,75 @@
   flex-wrap: wrap;
 }
 @font-face {
-  font-family: "Meloso";
-  src: url("./fonts/meloso/Meloso-Italic.otf") format("opentype");
+  font-family: 'Meloso';
+  src: url('./fonts/meloso/Meloso-Italic.otf') format('opentype');
   font-weight: 400;
   font-style: italic;
 }
 
 @font-face {
-  font-family: "Muli";
-  src: url("./fonts/muli/Muli.ttf") format("truetype");
+  font-family: 'Muli';
+  src: url('./fonts/muli/Muli.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
 }
 @font-face {
-  font-family: "Muli";
-  src: url("./fonts/muli/Muli-Italic.ttf") format("truetype");
+  font-family: 'Muli';
+  src: url('./fonts/muli/Muli-Italic.ttf') format('truetype');
   font-weight: 400;
   font-style: italic;
 }
 @font-face {
-  font-family: "Muli";
-  src: url("./fonts/muli/Muli-Light.ttf") format("truetype");
+  font-family: 'Muli';
+  src: url('./fonts/muli/Muli-Light.ttf') format('truetype');
   font-weight: 300;
   font-style: normal;
 }
 @font-face {
-  font-family: "Muli";
-  src: url("./fonts/muli/Muli-LightItalic.ttf") format("truetype");
+  font-family: 'Muli';
+  src: url('./fonts/muli/Muli-LightItalic.ttf') format('truetype');
   font-weight: 300;
   font-style: italic;
 }
 @font-face {
-  font-family: "Muli";
-  src: url("./fonts/muli/Muli-SemiBold.ttf") format("truetype");
+  font-family: 'Muli';
+  src: url('./fonts/muli/Muli-SemiBold.ttf') format('truetype');
   font-weight: 600;
   font-style: normal;
 }
 @font-face {
-  font-family: "Muli";
-  src: url("./fonts/muli/Muli-Semi-BoldItalic.ttf") format("truetype");
+  font-family: 'Muli';
+  src: url('./fonts/muli/Muli-Semi-BoldItalic.ttf') format('truetype');
   font-weight: 600;
   font-style: italic;
 }
 @font-face {
-  font-family: "Muli";
-  src: url("./fonts/muli/Muli-Bold.ttf") format("truetype");
+  font-family: 'Muli';
+  src: url('./fonts/muli/Muli-Bold.ttf') format('truetype');
   font-weight: 700;
   font-style: normal;
 }
 @font-face {
-  font-family: "Muli";
-  src: url("./fonts/muli/Muli-BoldItalic.ttf") format("truetype");
+  font-family: 'Muli';
+  src: url('./fonts/muli/Muli-BoldItalic.ttf') format('truetype');
   font-weight: 700;
   font-style: italic;
 }
 @font-face {
-  font-family: "Muli";
-  src: url("./fonts/muli/Muli-ExtraLight.ttf") format("truetype");
+  font-family: 'Muli';
+  src: url('./fonts/muli/Muli-ExtraLight.ttf') format('truetype');
   font-weight: 200;
   font-style: normal;
 }
 @font-face {
-  font-family: "Muli";
-  src: url("./fonts/muli/Muli-ExtraLightItalic.ttf") format("truetype");
+  font-family: 'Muli';
+  src: url('./fonts/muli/Muli-ExtraLightItalic.ttf') format('truetype');
   font-weight: 200;
   font-style: italic;
 }
 
 body {
-  font-family: "Muli", sans-serif;
+  font-family: 'Muli', sans-serif;
   margin: 0;
 }
 
@@ -190,12 +190,12 @@ h4,
 h5,
 h6 {
   color: hsl(0, 59%, 38%);
-  font-family: "Meloso", sans-serif;
+  font-family: 'Meloso', sans-serif;
 }
 
 button,
 .button-link {
-  font-family: "Meloso", sans-serif;
+  font-family: 'Meloso', sans-serif;
   background-color: #a62b2b;
   color: #fff;
   border: none;
@@ -208,7 +208,7 @@ button,
 
 input,
 textarea {
-  font-family: "Muli", sans-serif;
+  font-family: 'Muli', sans-serif;
   padding: 0.4em 0.75em;
   border: 1px solid rgba(0, 0, 0, 0.2);
   border-radius: 4px;
@@ -395,6 +395,39 @@ textarea {
   cursor: pointer;
 }
 
+.depiction-thumb-header {
+  width: 52px;
+}
+
+.depiction-thumb-cell {
+  width: 52px;
+  min-width: 52px;
+  padding: 0.25em !important;
+}
+
+.depiction-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  display: block;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.depiction-thumb-cell .clickable-thumbnail {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+}
+
+.edit-field .clickable-thumbnail {
+  max-width: 100px;
+  max-height: 100px;
+  width: auto;
+  height: auto;
+  object-fit: cover;
+}
+
 /* ── Archive page ────────────────────────────────────────── */
 
 .items-area {
@@ -458,8 +491,30 @@ textarea {
 .edit-field select {
   width: 100%;
   box-sizing: border-box;
-  font-family: "Muli", sans-serif;
+  font-family: 'Muli', sans-serif;
   font-size: 1em;
+}
+
+.depiction-actions {
+  margin-top: 0.4em;
+  display: flex;
+  gap: 0.4em;
+}
+
+.depiction-actions button {
+  font-size: 0.75em;
+  border-radius: 6px;
+  padding: 0.3em 0.7em;
+}
+
+.depiction-preview {
+  margin-top: 0.5em;
+  width: 100%;
+  max-height: 160px;
+  object-fit: contain;
+  display: block;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.04);
 }
 
 .edit-actions {

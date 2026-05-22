@@ -20,6 +20,8 @@ export type BaseItem = {
   '@type': ItemDataType
   name: string
   description?: string
+  // Relative path to an identifying image under the archive folder (future LD mapping: foaf:depiction).
+  depiction?: string
 }
 
 // People
@@ -81,30 +83,40 @@ type ItemTypeMap = {
 
 // Runtime column definitions — each entry is constrained to the keys of the corresponding type.
 export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
-  Person: ['@id', '@type', 'name', 'description', 'gender', 'birthDate'],
+  Person: [
+    '@id',
+    '@type',
+    'name',
+    'description',
+    'depiction',
+    'gender',
+    'birthDate',
+  ],
   RepositoryObject: [
     '@id',
     '@type',
     'name',
     'description',
+    'depiction',
     'inLanguage',
     'isRef_creator',
     'isRef_contributor',
     'isRef_mentions',
   ],
-  Language: ['@id', '@type', 'name', 'description'],
-  Dataset: ['@id', '@type', 'name', 'description'],
-  RepositoryCollection: ['@id', '@type', 'name', 'description'],
+  Language: ['@id', '@type', 'name', 'description', 'depiction'],
+  Dataset: ['@id', '@type', 'name', 'description', 'depiction'],
+  RepositoryCollection: ['@id', '@type', 'name', 'description', 'depiction'],
   'ldac:DataReuseLicense': [
     '@id',
     '@type',
     'name',
     'description',
+    'depiction',
     'ldac:allowTextIndex',
     'isRef_sameAs',
     'isRef_isPartOf',
   ],
-  Place: ['@id', '@type', 'name', 'description', 'isRef_geo'],
+  Place: ['@id', '@type', 'name', 'description', 'depiction', 'isRef_geo'],
   Geometry: ['@id', '@type', '.latitude', '.longitude', 'asWKT'],
   File: ['@id', '@type', '.folder', '.filename'],
 }
