@@ -12,8 +12,15 @@ import store from './ducks/store'
 import { useAppDispatch } from './ducks/hooks'
 import { setLoading, setPeople } from './ducks/people'
 import { loadPeopleFromSpreadsheet } from './ducks/people-loader'
+import {
+  setTagVocabularies,
+  setTagsError,
+  setTagsLoading,
+} from './ducks/tags'
+import { loadTagVocabulariesFromFolder } from './ducks/tags-loader'
 
 let hasBootstrappedPeople = false
+let hasBootstrappedTags = false
 
 function PeopleBootstrap() {
   const dispatch = useAppDispatch()
@@ -29,6 +36,36 @@ function PeopleBootstrap() {
         dispatch(setPeople(people))
       } finally {
         dispatch(setLoading(false))
+      }
+    }
+
+    void run()
+  }, [dispatch])
+
+  return null
+}
+
+function TagsBootstrap() {
+  const dispatch = useAppDispatch()
+
+  React.useEffect(() => {
+    if (hasBootstrappedTags) return
+    hasBootstrappedTags = true
+
+    const run = async () => {
+      dispatch(setTagsLoading(true))
+      dispatch(setTagsError(null))
+      try {
+        const vocabularies = await loadTagVocabulariesFromFolder()
+        dispatch(setTagVocabularies(vocabularies))
+      } catch (error) {
+        dispatch(
+          setTagsError(
+            error instanceof Error ? error.message : 'Failed to load tag vocabularies',
+          ),
+        )
+      } finally {
+        dispatch(setTagsLoading(false))
       }
     }
 
@@ -55,6 +92,7 @@ root.render(
   <React.StrictMode>
     <Provider store={store}>
       <PeopleBootstrap />
+      <TagsBootstrap />
       <HashRouter>
         <Routes>
           <Route element={<Layout />}>

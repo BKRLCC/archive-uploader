@@ -2,10 +2,18 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import type { DirEntry } from "../api";
 import Breadcrumb from "./Breadcrumb";
+import { useAppDispatch } from "../ducks/hooks";
+import { loadTagVocabulariesFromFolder } from "../ducks/tags-loader";
+import {
+  setTagVocabularies,
+  setTagsError,
+  setTagsLoading,
+} from "../ducks/tags";
 
 export default function AppSubHeader() {
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const [searchParams] = useSearchParams();
 
   const [rootFolder, setRootFolder] = useState<string | null>(null);
@@ -36,6 +44,25 @@ export default function AppSubHeader() {
     setEntries(result);
   };
 
+  const handleRefreshTags = async () => {
+    dispatch(setTagsLoading(true));
+    dispatch(setTagsError(null));
+    try {
+      const vocabularies = await loadTagVocabulariesFromFolder();
+      dispatch(setTagVocabularies(vocabularies));
+    } catch (error) {
+      dispatch(
+        setTagsError(
+          error instanceof Error
+            ? error.message
+            : "Failed to refresh tag vocabularies",
+        ),
+      );
+    } finally {
+      dispatch(setTagsLoading(false));
+    }
+  };
+
   return (
     <div className="app-subheader">
       <nav className="breadcrumb-nav">
@@ -47,6 +74,15 @@ export default function AppSubHeader() {
       </nav>
       {!isFile && (
         <div className="subheader-actions">
+          <button
+            className="create-archive-btn"
+            onClick={async (e) => {
+              e.stopPropagation();
+              await handleRefreshTags();
+            }}
+          >
+            🏷️ Refresh tags vocab
+          </button>
           {currentPath !== rootFolder &&
             !entries.some((e) => e.name === "metadata.xlsx") && (
               <button
