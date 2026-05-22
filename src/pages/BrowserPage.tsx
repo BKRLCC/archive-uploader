@@ -8,7 +8,7 @@ import FilePage from './FilePage'
 import { UiIcons } from '../config/icons'
 import {
   getArchiveWorkbookLabel,
-  isArchiveWorkbookName,
+  isArchiveEditableWorkbookPath,
 } from '../helpers/archive-workbooks'
 
 // ── Constants ────────────────────────────────────────────────────────────────
@@ -28,12 +28,12 @@ const VIDEO_EXTS = new Set(['mp4', 'mov', 'avi', 'mkv', 'webm'])
 
 const IMAGE_EXTS_BROWSER = new Set(['jpg', 'jpeg', 'png', 'gif', 'webp'])
 
-function emojiFor(entry: DirEntry) {
+function emojiFor(entry: DirEntry, isArchiveEditable: boolean) {
   if (entry.name === 'People' && entry.isDirectory) return '👥'
   if (entry.name === 'Places' && entry.isDirectory) return '📍'
   if (entry.name === 'Licenses' && entry.isDirectory) return '📜'
   if (entry.isDirectory) return EMOJI.folder
-  if (isArchiveWorkbookName(entry.name)) return '⭐'
+  if (isArchiveEditable) return '⭐'
   if (IMAGE_EXTS_BROWSER.has(entry.ext)) return EMOJI.image
   if (AUDIO_EXTS.has(entry.ext)) return EMOJI.audio
   if (VIDEO_EXTS.has(entry.ext)) return EMOJI.video
@@ -176,13 +176,14 @@ export default function BrowserPage() {
                 entries.map((entry) => {
                   const filePath = currentPath + '/' + entry.name
                   const isSelected = selected?.filePath === filePath
+                  const isArchiveEditable =
+                    !entry.isDirectory &&
+                    isArchiveEditableWorkbookPath(filePath, rootFolder)
                   return (
                     <li
                       key={entry.name}
                       className={[
-                        entry.isDirectory || isArchiveWorkbookName(entry.name)
-                          ? 'folder'
-                          : '',
+                        entry.isDirectory || isArchiveEditable ? 'folder' : '',
                         isSelected ? 'selected' : '',
                       ]
                         .join(' ')
@@ -202,7 +203,7 @@ export default function BrowserPage() {
                         })
                       }}
                     >
-                      {emojiFor(entry)}&nbsp;&nbsp;
+                      {emojiFor(entry, isArchiveEditable)}&nbsp;&nbsp;
                       {getArchiveWorkbookLabel(entry.name)}
                     </li>
                   )

@@ -2,22 +2,41 @@ import React, { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import ArchiveView from '../components/ArchiveView'
 import type { FileInfo } from '../api'
-import { isArchiveWorkbookPath } from '../helpers/archive-workbooks'
+import {
+  isArchiveEditableWorkbookPath,
+  isArchiveWorkbookPath,
+} from '../helpers/archive-workbooks'
 
 export default function FilePage() {
   const [searchParams] = useSearchParams()
   const filePath = searchParams.get('path') ?? ''
 
   const [info, setInfo] = useState<FileInfo | null>(null)
+  const [rootFolder, setRootFolder] = useState<string | null>(null)
+  const [rootFolderResolved, setRootFolderResolved] = useState(false)
 
   useEffect(() => {
-    if (!filePath || isArchiveWorkbookPath(filePath)) return
+    window.api
+      .getRootFolder()
+      .then(setRootFolder)
+      .finally(() => setRootFolderResolved(true))
+  }, [])
+
+  const isProtectedArchive = isArchiveWorkbookPath(filePath)
+  const isArchiveEditable = isArchiveEditableWorkbookPath(filePath, rootFolder)
+
+  useEffect(() => {
+    if (!filePath || !rootFolderResolved || isArchiveEditable) return
     window.api.getFileInfo(filePath).then(setInfo)
-  }, [filePath])
+  }, [filePath, rootFolderResolved, isArchiveEditable])
 
   if (!filePath) return <p>No file specified.</p>
 
-  if (isArchiveWorkbookPath(filePath)) {
+  if (!rootFolderResolved && !isProtectedArchive) {
+    return <p className="items-state">Loading…</p>
+  }
+
+  if (isArchiveEditable) {
     return <ArchiveView xlsxPath={filePath} />
   }
 
