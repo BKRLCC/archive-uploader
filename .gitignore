@@ -93,4 +93,4 @@ out/
 tsc_errors_new.txt
 tsc_errors_new2.txt
 tsc_tags_impl.txt
-*.txt
+tsc_tags_fix.txt
