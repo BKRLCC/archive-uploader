@@ -13,8 +13,13 @@ export const normalizeTagVocabularyKey = (value: string): string =>
 export const getTagVocabularyKeyFromField = (
   fieldName: string,
 ): string | null => {
-  if (!fieldName.startsWith(TAG_FIELD_PREFIX)) return null
-  const rawSuffix = fieldName.slice(TAG_FIELD_PREFIX.length)
+  const normalizedFieldName = String(fieldName ?? '').trim()
+  if (!normalizedFieldName) return null
+
+  const prefixLower = TAG_FIELD_PREFIX.toLowerCase()
+  if (!normalizedFieldName.toLowerCase().startsWith(prefixLower)) return null
+
+  const rawSuffix = normalizedFieldName.slice(TAG_FIELD_PREFIX.length)
   const normalized = normalizeTagVocabularyKey(rawSuffix)
   return normalized || null
 }

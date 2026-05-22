@@ -221,9 +221,26 @@ ipcMain.handle(
       header: 1,
       defval: '',
     })
-    const headers = rows[0].map((h) => String(h ?? ''))
+    const headers = (rows[0] ?? []).map((h) => String(h ?? ''))
+
+    const missingHeaders = Object.keys(updatedValues).filter(
+      (key) => !headers.includes(key),
+    )
+    if (missingHeaders.length > 0) {
+      headers.push(...missingHeaders)
+      rows[0] = headers
+      for (let i = 1; i < rows.length; i += 1) {
+        if (!rows[i]) rows[i] = []
+        while (rows[i].length < headers.length) rows[i].push('')
+      }
+    }
+
     const dataRowIndex = rowIndex + 1 // +1 for header
     if (!rows[dataRowIndex]) rows[dataRowIndex] = headers.map(() => '')
+    while (rows[dataRowIndex].length < headers.length) {
+      rows[dataRowIndex].push('')
+    }
+
     for (const [key, value] of Object.entries(updatedValues)) {
       const col = headers.indexOf(key)
       if (col !== -1) rows[dataRowIndex][col] = value
@@ -313,6 +330,15 @@ ipcMain.handle(
       defval: '',
     })
     const headers = (rows[0] ?? []).map((h) => String(h ?? ''))
+    const missingHeaders = Object.keys(values).filter((key) => !headers.includes(key))
+    if (missingHeaders.length > 0) {
+      headers.push(...missingHeaders)
+      rows[0] = headers
+      for (let i = 1; i < rows.length; i += 1) {
+        if (!rows[i]) rows[i] = []
+        while (rows[i].length < headers.length) rows[i].push('')
+      }
+    }
     const newRow = headers.map((h) => values[h] ?? '')
     rows.push(newRow)
     workbook.Sheets[actualName] = XLSX.utils.aoa_to_sheet(rows)

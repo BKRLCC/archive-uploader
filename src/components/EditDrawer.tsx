@@ -57,6 +57,7 @@ export default function EditDrawer({
   isNew = false,
 }: Props) {
   const [values, setValues] = useState<string[]>(() => [...row])
+  const [virtualValues, setVirtualValues] = useState<Record<string, string>>({})
   const [vocabSearch, setVocabSearch] = useState<Record<string, string>>({})
   const [depictionPickingField, setDepictionPickingField] = useState<
     string | null
@@ -80,16 +81,57 @@ export default function EditDrawer({
   const peopleOptionIds = new Set(peopleOptions.map((option) => option.value))
   const tagVocabularies = useAppSelector(selectTagVocabularies)
 
+  const isRepositoryObjectSheet =
+    headers.includes('inLanguage') ||
+    headers.includes('isRef_creator') ||
+    headers.includes('isRef_contributor')
+
+  const missingTagFieldNames = isRepositoryObjectSheet
+    ? tagVocabularies
+        .map((vocabulary) => vocabulary.fieldName)
+        .filter(
+          (fieldName) =>
+            !headers.some(
+              (header) =>
+                header.trim().toLowerCase() === fieldName.trim().toLowerCase(),
+            ),
+        )
+    : []
+
+  const renderedFields = [...headers, ...missingTagFieldNames]
+
   const getTagVocabularyForField = (fieldName: string) => {
     const key = getTagVocabularyKeyFromField(fieldName)
     if (!key) return null
     return tagVocabularies.find((vocabulary) => vocabulary.key === key) ?? null
   }
 
+  const getHeaderIndex = (fieldName: string): number => {
+    return headers.findIndex(
+      (header) => header.trim().toLowerCase() === fieldName.trim().toLowerCase(),
+    )
+  }
+
+  const getFieldValue = (fieldName: string): string => {
+    const index = getHeaderIndex(fieldName)
+    if (index >= 0) return values[index] ?? ''
+    return virtualValues[fieldName] ?? ''
+  }
+
+  const setFieldValue = (fieldName: string, nextValue: string) => {
+    const index = getHeaderIndex(fieldName)
+    if (index >= 0) {
+      const next = [...values]
+      next[index] = nextValue
+      setValues(next)
+      return
+    }
+    setVirtualValues((prev) => ({ ...prev, [fieldName]: nextValue }))
+  }
+
   const validateFields = async (): Promise<string | null> => {
-    for (let i = 0; i < headers.length; i += 1) {
-      const field = headers[i]
-      const selectedValue = (values[i] ?? '').trim()
+    for (const field of renderedFields) {
+      const selectedValue = getFieldValue(field).trim()
 
       if (field === DEPICTION_FIELD_NAME) {
         if (!selectedValue) continue
@@ -103,10 +145,7 @@ export default function EditDrawer({
         if (!result.ok) {
           return `✗ ${result.error ?? 'Invalid depiction path'}`
         }
-        // Persist normalized relative path to keep separators consistent.
-        const next = [...values]
-        next[i] = result.normalizedPath ?? selectedValue
-        setValues(next)
+        setFieldValue(field, result.normalizedPath ?? selectedValue)
         continue
       }
 
@@ -192,6 +231,10 @@ export default function EditDrawer({
       headers.forEach((h, i) => {
         updatedValues[h] = values[i] ?? ''
       })
+      Object.entries(virtualValues).forEach(([field, value]) => {
+        const trimmed = String(value ?? '').trim()
+        if (trimmed) updatedValues[field] = trimmed
+      })
       try {
         const updated = await window.api.addSheetRow(
           xlsxPath,
@@ -210,6 +253,10 @@ export default function EditDrawer({
     const updatedValues: Record<string, string> = {}
     headers.forEach((h, i) => {
       if (h !== '@id') updatedValues[h] = values[i] ?? ''
+    })
+    Object.entries(virtualValues).forEach(([field, value]) => {
+      const trimmed = String(value ?? '').trim()
+      if (trimmed) updatedValues[field] = trimmed
     })
     try {
       const updated = await window.api.updateSheetRow(
@@ -230,7 +277,8 @@ export default function EditDrawer({
     <div className="drawer-inner">
       <h3>Edit item</h3>
       <div className="edit-fields">
-        {headers.map((key, i) => {
+        {renderedFields.map((key) => {
+          const headerIndex = getHeaderIndex(key)
           if (isNew && key === '@id') return null
           const isReadOnly = key === '@id'
           const isTypeField = key === '@type'
@@ -244,7 +292,7 @@ export default function EditDrawer({
           const filteredPeopleOptions = peopleOptions.filter((option) =>
             option.searchText.includes(peopleSearch.toLowerCase()),
           )
-          const currentValue = values[i] ?? ''
+          const currentValue = getFieldValue(key)
           const currentOption = peopleOptions.find(
             (option) => option.value === currentValue,
           )
@@ -267,18 +315,16 @@ export default function EditDrawer({
             <label key={key} className="edit-field">
               <span className="edit-field-key">{key}</span>
               {isReadOnly ? (
-                <span className="edit-field-readonly">{values[i] || '—'}</span>
+                <span className="edit-field-readonly">{currentValue || '—'}</span>
               ) : isTypeField ? (
                 <select
-                  value={values[i] ?? ''}
+                  value={currentValue}
                   onChange={(e) => {
-                    const next = [...values]
-                    next[i] = e.target.value
-                    setValues(next)
+                    setFieldValue(key, e.target.value)
                   }}
                 >
-                  {!TYPE_OPTIONS.some((o) => o.value === values[i]) && (
-                    <option value={values[i] ?? ''}>{values[i] || '—'}</option>
+                  {!TYPE_OPTIONS.some((o) => o.value === currentValue) && (
+                    <option value={currentValue}>{currentValue || '—'}</option>
                   )}
                   {TYPE_OPTIONS.map((o) => (
                     <option key={o.value} value={o.value}>
@@ -293,16 +339,16 @@ export default function EditDrawer({
                     value={currentValue}
                     placeholder={`Relative image path (e.g., ${DEPICTION_FOLDER_HINT}photo.jpg)`}
                     onChange={(e) => {
-                      const next = [...values]
-                      next[i] = e.target.value
-                      setValues(next)
+                      setFieldValue(key, e.target.value)
                     }}
                   />
                   <div className="depiction-actions">
                     <button
                       type="button"
-                      onClick={() => void handlePickDepiction(i)}
-                      disabled={depictionPickingField === key}
+                      onClick={() => {
+                        if (headerIndex >= 0) void handlePickDepiction(headerIndex)
+                      }}
+                      disabled={headerIndex < 0 || depictionPickingField === key}
                     >
                       {depictionPickingField === key
                         ? 'Choosing…'
@@ -311,9 +357,7 @@ export default function EditDrawer({
                     <button
                       type="button"
                       onClick={() => {
-                        const next = [...values]
-                        next[i] = ''
-                        setValues(next)
+                        setFieldValue(key, '')
                       }}
                       disabled={!currentValue}
                     >
@@ -333,7 +377,7 @@ export default function EditDrawer({
                     isMulti
                     isDisabled={tagOptions.length === 0}
                     options={tagOptions}
-                    value={(values[i] ?? '')
+                    value={currentValue
                       .split(/,\s*/)
                       .filter(Boolean)
                       .map(
@@ -346,9 +390,7 @@ export default function EditDrawer({
                       )}
                     onChange={(selected) => {
                       const ids = (selected as VocabOption[]).map((o) => o.value)
-                      const next = [...values]
-                      next[i] = ids.join(', ')
-                      setValues(next)
+                      setFieldValue(key, ids.join(', '))
                     }}
                     placeholder={
                       tagOptions.length === 0
@@ -383,7 +425,7 @@ export default function EditDrawer({
                   isMulti
                   isDisabled={peopleOptions.length === 0}
                   options={peopleOptions}
-                  value={(values[i] ?? '')
+                  value={currentValue
                     .split(/,\s*/)
                     .filter(Boolean)
                     .map(
@@ -396,9 +438,7 @@ export default function EditDrawer({
                     )}
                   onChange={(selected) => {
                     const ids = (selected as VocabOption[]).map((o) => o.value)
-                    const next = [...values]
-                    next[i] = ids.join(', ')
-                    setValues(next)
+                    setFieldValue(key, ids.join(', '))
                   }}
                   placeholder={
                     peopleOptions.length === 0
@@ -435,9 +475,7 @@ export default function EditDrawer({
                   <select
                     value={currentValue}
                     onChange={(e) => {
-                      const next = [...values]
-                      next[i] = e.target.value
-                      setValues(next)
+                      setFieldValue(key, e.target.value)
                     }}
                     disabled={peopleOptions.length === 0}
                   >
@@ -457,11 +495,9 @@ export default function EditDrawer({
               ) : (
                 <input
                   type="text"
-                  value={values[i] ?? ''}
+                  value={currentValue}
                   onChange={(e) => {
-                    const next = [...values]
-                    next[i] = e.target.value
-                    setValues(next)
+                    setFieldValue(key, e.target.value)
                   }}
                 />
               )}

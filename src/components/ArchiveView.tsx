@@ -4,6 +4,9 @@ import EditDrawer from './EditDrawer'
 import EditRootDatasetForm from './EditRootDatasetForm'
 import Drawer from './Drawer'
 import ClickableImagePreview from './ClickableImagePreview'
+import { useAppDispatch } from '../ducks/hooks'
+import { loadTagVocabulariesFromFolder } from '../ducks/tags-loader'
+import { setTagVocabularies, setTagsError, setTagsLoading } from '../ducks/tags'
 
 type SheetState = SheetData | null | 'empty' | 'missing'
 
@@ -24,6 +27,7 @@ interface Props {
 }
 
 export default function ArchiveView({ xlsxPath }: Props) {
+  const dispatch = useAppDispatch()
   const [sheetNames, setSheetNames] = useState<string[]>([])
   const [activeTab, setActiveTab] = useState<string>('RootDataset')
   const [sheets, setSheets] = useState<Record<string, SheetState>>({})
@@ -34,6 +38,8 @@ export default function ArchiveView({ xlsxPath }: Props) {
 
   const [populateFeedback, setPopulateFeedback] = useState('')
   const [populateBusy, setPopulateBusy] = useState(false)
+  const [tagsBusy, setTagsBusy] = useState(false)
+  const [tagsFeedback, setTagsFeedback] = useState('')
 
   const folder = xlsxPath.replace(/[/\\][^/\\]+$/, '')
 
@@ -83,6 +89,25 @@ export default function ArchiveView({ xlsxPath }: Props) {
       setPopulateFeedback(`✗ ${(err as Error).message}`)
     } finally {
       setPopulateBusy(false)
+    }
+  }
+
+  async function handleRefreshTags() {
+    setTagsBusy(true)
+    setTagsFeedback('Refreshing…')
+    dispatch(setTagsLoading(true))
+    dispatch(setTagsError(null))
+    try {
+      const vocabularies = await loadTagVocabulariesFromFolder()
+      dispatch(setTagVocabularies(vocabularies))
+      setTagsFeedback(`✓ Loaded ${vocabularies.length} tag vocab${vocabularies.length === 1 ? '': 's'}`)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to refresh tags'
+      dispatch(setTagsError(message))
+      setTagsFeedback(`✗ ${message}`)
+    } finally {
+      dispatch(setTagsLoading(false))
+      setTagsBusy(false)
     }
   }
 
@@ -231,7 +256,22 @@ export default function ArchiveView({ xlsxPath }: Props) {
   return (
     <div className="archive-page" onClick={closeDrawer}>
       <div className="archive-main">
-        <h1>⭐ Metadata</h1>
+        <div className="section-toolbar">
+          <h1>⭐ Metadata</h1>
+          <div>
+            <button
+              className="refresh-btn"
+              onClick={(e) => {
+                e.stopPropagation()
+                void handleRefreshTags()
+              }}
+              disabled={tagsBusy}
+            >
+              🏷️ Refresh tags vocab
+            </button>{' '}
+            <span className="populate-feedback">{tagsFeedback}</span>
+          </div>
+        </div>
 
         <div className="tab-bar">
           {sheetNames.map((tab) => (
@@ -351,9 +391,10 @@ export default function ArchiveView({ xlsxPath }: Props) {
                 rowIndex={editingRow.rowIndex}
                 xlsxPath={xlsxPath}
                 sheetName={editingRow.sheetName}
-                onSave={(rowIndex, updated) =>
+                onSave={(rowIndex, updated) => {
                   handleSaveRow(rowIndex, updated, editingRow.sheetName)
-                }
+                  void reloadSheet(editingRow.sheetName)
+                }}
                 onClose={closeDrawer}
               />
             ) : null
@@ -368,9 +409,10 @@ export default function ArchiveView({ xlsxPath }: Props) {
                 rowIndex={-1}
                 xlsxPath={xlsxPath}
                 sheetName={addingItem}
-                onSave={(rowIndex, newRow) =>
+                onSave={(rowIndex, newRow) => {
                   handleAddRow(rowIndex, newRow, addingItem)
-                }
+                  void reloadSheet(addingItem)
+                }}
                 onClose={closeDrawer}
                 isNew
               />

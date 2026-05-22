@@ -8,7 +8,7 @@ import {
 
 const TAGS_FOLDER_NAME = 'Tags'
 const IGNORED_SHEET_NAMES = new Set(['rootdataset', 'files'])
-const REQUIRED_COLUMNS = ['@id', '@type', 'name'] as const
+const REQUIRED_COLUMNS = ['@id', 'name'] as const
 
 type HeaderIndexMap = Record<string, number>
 
