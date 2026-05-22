@@ -17,6 +17,7 @@ import {
   hasAllowedDepictionExtension,
 } from './config/depiction-config'
 import { updateElectronApp } from 'update-electron-app'
+import contextMenu from 'electron-context-menu'
 
 // Must be called before app is ready
 protocol.registerSchemesAsPrivileged([
@@ -27,6 +28,10 @@ import Store from 'electron-store'
 const store = new Store()
 
 const isDev = !app.isPackaged
+
+contextMenu({
+  showInspectElement: isDev,
+})
 
 function isPathWithin(parentPath: string, targetPath: string): boolean {
   const rel = path.relative(parentPath, targetPath)

@@ -421,11 +421,11 @@ textarea {
 }
 
 .edit-field .clickable-thumbnail {
-  max-width: 100px;
-  max-height: 100px;
+  max-width: 100%;
   width: auto;
   height: auto;
   object-fit: cover;
+  margin-top: 1rem;
 }
 
 /* ── Archive page ────────────────────────────────────────── */
