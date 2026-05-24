@@ -242,6 +242,7 @@ textarea {
 .breadcrumb-bar {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .breadcrumb-bar .sep {

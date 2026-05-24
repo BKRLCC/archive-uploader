@@ -1,0 +1,28 @@
+.file-preview-popup-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.file-preview-popup-title {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #333;
+  word-break: break-word;
+}
+
+.file-preview-popup-image {
+  max-width: 90vw;
+  max-height: 80vh;
+  border-radius: 8px;
+  display: block;
+}
+
+.file-preview-popup-audio {
+  width: min(560px, 86vw);
+}
+
+.file-preview-popup-fallback {
+  margin: 0;
+  color: #666;
+}

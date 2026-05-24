@@ -2,10 +2,18 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import type { DirEntry, FileInfo } from '../api'
 import FilePreview, { type Selected } from '../components/FilePreview'
+import FilePreviewPopup from '../components/FilePreviewPopup'
 import Drawer from '../components/Drawer'
 import CreateArchiveForm from '../components/CreateArchiveForm'
 import FilePage from './FilePage'
 import { UiIcons } from '../config/icons'
+import {
+  getPreviewKindByExtension,
+  isPreviewableExtension,
+  PREVIEWABLE_AUDIO_EXTENSIONS,
+  PREVIEWABLE_IMAGE_EXTENSIONS,
+  type PreviewKind,
+} from '../config/previewable-file-types'
 import {
   getArchiveWorkbookLabel,
   isArchiveEditableWorkbookPath,
@@ -21,12 +29,9 @@ const EMOJI = {
   doc: UiIcons.doc,
 }
 
-const AUDIO_EXTS = new Set(['mp3', 'wav', 'flac', 'aac', 'ogg', 'm4a'])
 const VIDEO_EXTS = new Set(['mp4', 'mov', 'avi', 'mkv', 'webm'])
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
-
-const IMAGE_EXTS_BROWSER = new Set(['jpg', 'jpeg', 'png', 'gif', 'webp'])
 
 function emojiFor(entry: DirEntry, isArchiveEditable: boolean) {
   if (entry.name === 'People' && entry.isDirectory) return '👥'
@@ -35,8 +40,8 @@ function emojiFor(entry: DirEntry, isArchiveEditable: boolean) {
   if (entry.name === 'Licenses' && entry.isDirectory) return '📜'
   if (entry.isDirectory) return EMOJI.folder
   if (isArchiveEditable) return '⭐'
-  if (IMAGE_EXTS_BROWSER.has(entry.ext)) return EMOJI.image
-  if (AUDIO_EXTS.has(entry.ext)) return EMOJI.audio
+  if (PREVIEWABLE_IMAGE_EXTENSIONS.has(entry.ext)) return EMOJI.image
+  if (PREVIEWABLE_AUDIO_EXTENSIONS.has(entry.ext)) return EMOJI.audio
   if (VIDEO_EXTS.has(entry.ext)) return EMOJI.video
   return EMOJI.doc
 }
@@ -62,6 +67,11 @@ export default function BrowserPage() {
     y: number
     filePath: string
     entry: DirEntry
+  } | null>(null)
+  const [previewTarget, setPreviewTarget] = useState<{
+    filePath: string
+    fileName: string
+    previewKind: PreviewKind
   } | null>(null)
 
   const navigateTo = useCallback(
@@ -254,6 +264,29 @@ export default function BrowserPage() {
           >
             Show in Finder
           </button>
+          {!contextMenu.entry.isDirectory &&
+            isPreviewableExtension(contextMenu.entry.ext) && (
+              <button
+                onClick={() => {
+                  const previewKind = getPreviewKindByExtension(
+                    contextMenu.entry.ext,
+                  )
+                  if (!previewKind) {
+                    setContextMenu(null)
+                    return
+                  }
+
+                  setPreviewTarget({
+                    filePath: contextMenu.filePath,
+                    fileName: contextMenu.entry.name,
+                    previewKind,
+                  })
+                  setContextMenu(null)
+                }}
+              >
+                Preview
+              </button>
+            )}
           {!contextMenu.entry.isDirectory && (
             <button
               className="context-menu-danger"
@@ -272,6 +305,15 @@ export default function BrowserPage() {
             </button>
           )}
         </div>
+      )}
+      {previewTarget && (
+        <FilePreviewPopup
+          isOpen={true}
+          onClose={() => setPreviewTarget(null)}
+          filePath={previewTarget.filePath}
+          fileName={previewTarget.fileName}
+          previewKind={previewTarget.previewKind}
+        />
       )}
     </div>
   )

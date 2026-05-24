@@ -1,85 +1,84 @@
-import React, { useEffect, useRef, useState } from "react";
-import type { DirEntry, FileInfo } from "../api";
+import React, { useEffect, useRef, useState } from 'react'
+import type { DirEntry, FileInfo } from '../api'
+import { isImagePreviewExtension } from '../config/previewable-file-types'
 
 export interface Selected {
-  entry: DirEntry;
-  filePath: string;
+  entry: DirEntry
+  filePath: string
 }
 
-const IMAGE_EXTS = new Set(["jpg", "jpeg", "png", "gif", "webp"]);
-
 const TYPE_LABELS: Record<string, string> = {
-  jpg: "JPEG image",
-  jpeg: "JPEG image",
-  png: "PNG image",
-  gif: "GIF image",
-  webp: "WebP image",
-  mp3: "MP3 audio",
-  wav: "WAV audio",
-  flac: "FLAC audio",
-  aac: "AAC audio",
-  ogg: "OGG audio",
-  m4a: "M4A audio",
-  mp4: "MP4 video",
-  mov: "QuickTime video",
-  avi: "AVI video",
-  mkv: "MKV video",
-  webm: "WebM video",
-  pdf: "PDF document",
-  txt: "Plain text",
-  html: "HTML file",
-  js: "JavaScript file",
-  json: "JSON file",
-  md: "Markdown file",
-  xlsx: "Excel spreadsheet",
-  docx: "Word document",
-  pptx: "PowerPoint",
-  zip: "ZIP archive",
-  gz: "GZ archive",
-};
+  jpg: 'JPEG image',
+  jpeg: 'JPEG image',
+  png: 'PNG image',
+  gif: 'GIF image',
+  webp: 'WebP image',
+  mp3: 'MP3 audio',
+  wav: 'WAV audio',
+  flac: 'FLAC audio',
+  aac: 'AAC audio',
+  ogg: 'OGG audio',
+  m4a: 'M4A audio',
+  mp4: 'MP4 video',
+  mov: 'QuickTime video',
+  avi: 'AVI video',
+  mkv: 'MKV video',
+  webm: 'WebM video',
+  pdf: 'PDF document',
+  txt: 'Plain text',
+  html: 'HTML file',
+  js: 'JavaScript file',
+  json: 'JSON file',
+  md: 'Markdown file',
+  xlsx: 'Excel spreadsheet',
+  docx: 'Word document',
+  pptx: 'PowerPoint',
+  zip: 'ZIP archive',
+  gz: 'GZ archive',
+}
 
 function typeLabel(entry: DirEntry) {
-  if (entry.isDirectory) return "Folder";
+  if (entry.isDirectory) return 'Folder'
   return (
     TYPE_LABELS[entry.ext] ??
-    (entry.ext ? `${entry.ext.toUpperCase()} file` : "File")
-  );
+    (entry.ext ? `${entry.ext.toUpperCase()} file` : 'File')
+  )
 }
 
 function formatSize(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
   if (bytes < 1024 * 1024 * 1024)
-    return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
-  return `${(bytes / 1024 / 1024 / 1024).toFixed(2)} GB`;
+    return `${(bytes / 1024 / 1024).toFixed(1)} MB`
+  return `${(bytes / 1024 / 1024 / 1024).toFixed(2)} GB`
 }
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleString("en-GB", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return new Date(iso).toLocaleString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }
 
 interface Props {
-  selected: Selected | null;
-  fileInfo: FileInfo | null;
+  selected: Selected | null
+  fileInfo: FileInfo | null
 }
 
 export default function FilePreview({ selected, fileInfo }: Props) {
-  const imgRef = useRef<HTMLImageElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null)
   const [imageDims, setImageDims] = useState<{ w: number; h: number } | null>(
     null,
-  );
+  )
 
   useEffect(() => {
-    setImageDims(null);
-  }, [selected?.filePath]);
+    setImageDims(null)
+  }, [selected?.filePath])
 
-  const isImage = selected ? IMAGE_EXTS.has(selected.entry.ext) : false;
+  const isImage = selected ? isImagePreviewExtension(selected.entry.ext) : false
 
   return (
     <div className="drawer-inner">
@@ -90,9 +89,8 @@ export default function FilePreview({ selected, fileInfo }: Props) {
           alt=""
           src={`localfile://${selected.filePath}`}
           onLoad={() => {
-            const img = imgRef.current;
-            if (img)
-              setImageDims({ w: img.naturalWidth, h: img.naturalHeight });
+            const img = imgRef.current
+            if (img) setImageDims({ w: img.naturalWidth, h: img.naturalHeight })
           }}
         />
       )}
@@ -117,12 +115,12 @@ export default function FilePreview({ selected, fileInfo }: Props) {
             {isImage && (
               <tr>
                 <td>Dimensions</td>
-                <td>{imageDims ? `${imageDims.w} × ${imageDims.h}` : "—"}</td>
+                <td>{imageDims ? `${imageDims.w} × ${imageDims.h}` : '—'}</td>
               </tr>
             )}
           </tbody>
         </table>
       )}
     </div>
-  );
+  )
 }

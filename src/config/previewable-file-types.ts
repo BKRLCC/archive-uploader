@@ -1,0 +1,41 @@
+export type PreviewKind = 'image' | 'audio'
+
+export const PREVIEWABLE_IMAGE_EXTENSIONS = new Set([
+  'jpg',
+  'jpeg',
+  'png',
+  'gif',
+  'webp',
+])
+
+export const PREVIEWABLE_AUDIO_EXTENSIONS = new Set([
+  'mp3',
+  'wav',
+  'flac',
+  'aac',
+  'ogg',
+  'm4a',
+])
+
+const normalizeExtension = (extension: string): string =>
+  String(extension ?? '')
+    .trim()
+    .toLowerCase()
+    .replace(/^\./, '')
+
+export const isImagePreviewExtension = (extension: string): boolean =>
+  PREVIEWABLE_IMAGE_EXTENSIONS.has(normalizeExtension(extension))
+
+export const isAudioPreviewExtension = (extension: string): boolean =>
+  PREVIEWABLE_AUDIO_EXTENSIONS.has(normalizeExtension(extension))
+
+export const isPreviewableExtension = (extension: string): boolean =>
+  isImagePreviewExtension(extension) || isAudioPreviewExtension(extension)
+
+export const getPreviewKindByExtension = (
+  extension: string,
+): PreviewKind | null => {
+  if (isImagePreviewExtension(extension)) return 'image'
+  if (isAudioPreviewExtension(extension)) return 'audio'
+  return null
+}
