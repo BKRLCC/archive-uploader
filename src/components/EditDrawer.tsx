@@ -124,7 +124,7 @@ export default function EditDrawer({
     : []
 
   const renderedFields = [
-    ...headers,
+    ...headers.filter((h) => String(h ?? '').trim() !== ''),
     ...missingModelFieldNames,
     ...missingTagFieldNames,
   ]
@@ -377,12 +377,22 @@ export default function EditDrawer({
                     <button
                       type="button"
                       onClick={() => {
-                        if (headerIndex >= 0)
+                        if (headerIndex >= 0) {
                           void handlePickDepiction(headerIndex)
+                        } else {
+                          setDepictionPickingField(key)
+                          void window.api
+                            .pickDepictionFile(archiveFolderPath)
+                            .then((picked) => {
+                              if (picked) setFieldValue(key, picked)
+                            })
+                            .catch((err: unknown) => {
+                              setFeedback(`✗ ${(err as Error).message}`)
+                            })
+                            .finally(() => setDepictionPickingField(null))
+                        }
                       }}
-                      disabled={
-                        headerIndex < 0 || depictionPickingField === key
-                      }
+                      disabled={depictionPickingField === key}
                     >
                       {depictionPickingField === key
                         ? 'Choosing…'
