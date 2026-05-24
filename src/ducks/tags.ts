@@ -8,6 +8,7 @@ import {
   normalizeTagVocabularyKey,
   TAG_FIELD_PREFIX,
 } from '../config/field-vocabularies'
+import type { Tag } from '../types/types'
 import type { RootState } from './store'
 
 export interface TagVocabularyOption {
@@ -22,6 +23,7 @@ export interface TagVocabulary {
   workbookPath: string
   sourceSheetName: string
   fieldName: string
+  terms: Record<string, Tag>
   options: TagVocabularyOption[]
 }
 
@@ -70,6 +72,14 @@ export const selectTagVocabularies = createSelector(
   selectTagVocabularyDictionary,
   (vocabularies) => Object.values(vocabularies),
 )
+
+export const selectTagVocabularyTermsForField = (
+  state: RootState,
+  fieldName: string,
+): Record<string, Tag> => {
+  const vocabulary = selectTagVocabularyForField(state, fieldName)
+  return vocabulary?.terms ?? {}
+}
 
 export const selectTagVocabularyForField = (
   state: RootState,

@@ -24,6 +24,16 @@ export type BaseItem = {
   depiction?: string
 }
 
+export type DefinedTermType = 'DefinedTerm'
+
+export type Tag = {
+  '@id': string
+  '@type': DefinedTermType
+  name: string
+  description?: string
+  depiction?: string
+}
+
 // People
 // https://www.ldaca.edu.au/resources/user-guides/crate-o/convert-spreadsheet/#people
 export type Person = BaseItem & {

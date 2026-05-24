@@ -1,4 +1,5 @@
 import type { DirEntry, SheetData } from '../api'
+import type { Tag } from '../types/types'
 import {
   workbookNameToTagFieldName,
   workbookNameToTagVocabularyKey,
@@ -32,10 +33,10 @@ const getCell = (
   return normaliseCell(index === undefined ? '' : row[index])
 }
 
-const mapRowsToOptions = (
+const mapRowsToVocabulary = (
   workbookName: string,
   sheet: SheetData,
-): TagVocabularyOption[] => {
+): { terms: Record<string, Tag>; options: TagVocabularyOption[] } => {
   const indexMap = buildHeaderIndexMap(sheet.headers)
   const missingColumns = REQUIRED_COLUMNS.filter(
     (column) => indexMap[column] === undefined,
@@ -45,18 +46,38 @@ const mapRowsToOptions = (
     console.warn(
       `[tags-loader] Missing required columns in ${workbookName}: ${missingColumns.join(', ')}`,
     )
-    return []
+    return { terms: {}, options: [] }
   }
 
   const optionsById = new Map<string, TagVocabularyOption>()
+  const termsById = new Map<string, Tag>()
 
   sheet.rows.forEach((row) => {
     if (row.every((cell) => !cell || !String(cell).trim())) return
 
     const id = getCell(row, indexMap, '@id')
     const name = getCell(row, indexMap, 'name')
+    const rawType = getCell(row, indexMap, '@type')
+    const description = getCell(row, indexMap, 'description')
+    const depiction = getCell(row, indexMap, 'depiction')
 
     if (!id || !name) return
+
+    if (rawType && rawType !== 'DefinedTerm') {
+      console.warn(
+        `[tags-loader] ${workbookName} row ${id} has @type='${rawType}', normalizing to DefinedTerm`,
+      )
+    }
+
+    const term: Tag = {
+      '@id': id,
+      '@type': 'DefinedTerm',
+      name,
+    }
+    if (description) term.description = description
+    if (depiction) term.depiction = depiction
+
+    termsById.set(id, term)
 
     if (!optionsById.has(id)) {
       optionsById.set(id, {
@@ -67,7 +88,10 @@ const mapRowsToOptions = (
     }
   })
 
-  return Array.from(optionsById.values())
+  return {
+    terms: Object.fromEntries(termsById),
+    options: Array.from(optionsById.values()),
+  }
 }
 
 const getTagsFolderPath = (rootFolder: string): string => {
@@ -132,7 +156,7 @@ export const loadTagVocabulariesFromFolder = async (): Promise<
         continue
       }
 
-      const options = mapRowsToOptions(workbookName, sheet)
+      const { terms, options } = mapRowsToVocabulary(workbookName, sheet)
       const key = workbookNameToTagVocabularyKey(workbookName)
 
       if (!key) {
@@ -148,6 +172,7 @@ export const loadTagVocabulariesFromFolder = async (): Promise<
         workbookPath,
         sourceSheetName,
         fieldName: workbookNameToTagFieldName(workbookName),
+        terms,
         options,
       })
     } catch (error) {
