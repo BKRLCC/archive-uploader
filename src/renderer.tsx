@@ -12,11 +12,7 @@ import store from './ducks/store'
 import { useAppDispatch } from './ducks/hooks'
 import { setLoading, setPeople } from './ducks/people'
 import { loadPeopleFromSpreadsheet } from './ducks/people-loader'
-import {
-  setTagVocabularies,
-  setTagsError,
-  setTagsLoading,
-} from './ducks/tags'
+import { setTagVocabularies, setTagsError, setTagsLoading } from './ducks/tags'
 import { loadTagVocabulariesFromFolder } from './ducks/tags-loader'
 
 let hasBootstrappedPeople = false
@@ -61,7 +57,9 @@ function TagsBootstrap() {
       } catch (error) {
         dispatch(
           setTagsError(
-            error instanceof Error ? error.message : 'Failed to load tag vocabularies',
+            error instanceof Error
+              ? error.message
+              : 'Failed to load tag vocabularies',
           ),
         )
       } finally {

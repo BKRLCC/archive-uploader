@@ -23,7 +23,11 @@ const buildHeaderIndexMap = (headers: string[]): HeaderIndexMap => {
   return map
 }
 
-const getCell = (row: string[], indexMap: HeaderIndexMap, key: string): string => {
+const getCell = (
+  row: string[],
+  indexMap: HeaderIndexMap,
+  key: string,
+): string => {
   const index = indexMap[key]
   return normaliseCell(index === undefined ? '' : row[index])
 }
@@ -82,7 +86,9 @@ const pickSourceSheetName = (sheetNames: string[]): string | null => {
   return null
 }
 
-export const loadTagVocabulariesFromFolder = async (): Promise<TagVocabulary[]> => {
+export const loadTagVocabulariesFromFolder = async (): Promise<
+  TagVocabulary[]
+> => {
   const rootFolder = await window.api.getRootFolder()
   if (!rootFolder) {
     console.warn('[tags-loader] No root folder set, skipping Tags load')

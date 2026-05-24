@@ -1,67 +1,63 @@
-import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import type { DirEntry } from "../api";
-import Breadcrumb from "./Breadcrumb";
-import { useAppDispatch } from "../ducks/hooks";
-import { loadTagVocabulariesFromFolder } from "../ducks/tags-loader";
-import {
-  setTagVocabularies,
-  setTagsError,
-  setTagsLoading,
-} from "../ducks/tags";
+import React, { useEffect, useState } from 'react'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import type { DirEntry } from '../api'
+import Breadcrumb from './Breadcrumb'
+import { useAppDispatch } from '../ducks/hooks'
+import { loadTagVocabulariesFromFolder } from '../ducks/tags-loader'
+import { setTagVocabularies, setTagsError, setTagsLoading } from '../ducks/tags'
 
 export default function AppSubHeader() {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const dispatch = useAppDispatch();
-  const [searchParams] = useSearchParams();
+  const location = useLocation()
+  const navigate = useNavigate()
+  const dispatch = useAppDispatch()
+  const [searchParams] = useSearchParams()
 
-  const [rootFolder, setRootFolder] = useState<string | null>(null);
-  const [entries, setEntries] = useState<DirEntry[]>([]);
+  const [rootFolder, setRootFolder] = useState<string | null>(null)
+  const [entries, setEntries] = useState<DirEntry[]>([])
 
-  const isOnBrowser = location.pathname === "/browser";
-  const currentPath = searchParams.get("path");
-  const isFile = searchParams.get("type") === "file";
-
-  useEffect(() => {
-    window.api.getRootFolder().then(setRootFolder);
-  }, []);
+  const isOnBrowser = location.pathname === '/browser'
+  const currentPath = searchParams.get('path')
+  const isFile = searchParams.get('type') === 'file'
 
   useEffect(() => {
-    if (!isOnBrowser || !currentPath || isFile) return;
-    window.api.listFolder(currentPath).then(setEntries);
-  }, [isOnBrowser, currentPath, isFile]);
+    window.api.getRootFolder().then(setRootFolder)
+  }, [])
 
-  if (!isOnBrowser || !currentPath || !rootFolder) return null;
+  useEffect(() => {
+    if (!isOnBrowser || !currentPath || isFile) return
+    window.api.listFolder(currentPath).then(setEntries)
+  }, [isOnBrowser, currentPath, isFile])
+
+  if (!isOnBrowser || !currentPath || !rootFolder) return null
 
   const navigateTo = (path: string) => {
-    navigate(`/browser?path=${encodeURIComponent(path)}`);
-  };
+    navigate(`/browser?path=${encodeURIComponent(path)}`)
+  }
 
   const refreshEntries = async () => {
-    if (!currentPath || isFile) return;
-    const result = await window.api.listFolder(currentPath);
-    setEntries(result);
-  };
+    if (!currentPath || isFile) return
+    const result = await window.api.listFolder(currentPath)
+    setEntries(result)
+  }
 
   const handleRefreshTags = async () => {
-    dispatch(setTagsLoading(true));
-    dispatch(setTagsError(null));
+    dispatch(setTagsLoading(true))
+    dispatch(setTagsError(null))
     try {
-      const vocabularies = await loadTagVocabulariesFromFolder();
-      dispatch(setTagVocabularies(vocabularies));
+      const vocabularies = await loadTagVocabulariesFromFolder()
+      dispatch(setTagVocabularies(vocabularies))
     } catch (error) {
       dispatch(
         setTagsError(
           error instanceof Error
             ? error.message
-            : "Failed to refresh tag vocabularies",
+            : 'Failed to refresh tag vocabularies',
         ),
-      );
+      )
     } finally {
-      dispatch(setTagsLoading(false));
+      dispatch(setTagsLoading(false))
     }
-  };
+  }
 
   return (
     <div className="app-subheader">
@@ -77,71 +73,69 @@ export default function AppSubHeader() {
           <button
             className="create-archive-btn"
             onClick={async (e) => {
-              e.stopPropagation();
-              await handleRefreshTags();
+              e.stopPropagation()
+              await handleRefreshTags()
             }}
           >
             🏷️ Refresh tags vocab
           </button>
           {currentPath !== rootFolder &&
-            !entries.some((e) => e.name === "metadata.xlsx") && (
+            !entries.some((e) => e.name === 'metadata.xlsx') && (
               <button
                 className="create-archive-btn"
                 onClick={(e) => {
-                  e.stopPropagation();
+                  e.stopPropagation()
                   navigate(
                     `/browser?path=${encodeURIComponent(currentPath)}&showCreate=1`,
-                  );
+                  )
                 }}
               >
                 🌟 Create metadata file
               </button>
             )}
           {currentPath === rootFolder &&
-            !entries.some(
-              (e) => e.name === "People" && e.isDirectory,
-            ) && (
+            !entries.some((e) => e.name === 'People' && e.isDirectory) && (
               <button
                 className="create-archive-btn"
                 onClick={async (e) => {
-                  e.stopPropagation();
-                  await window.api.createPeopleFolder(rootFolder);
+                  e.stopPropagation()
+                  await window.api.createPeopleFolder(rootFolder)
                   navigate(
                     `/browser?path=${encodeURIComponent(currentPath)}&r=${Date.now()}`,
                     { replace: true },
-                  );
+                  )
                 }}
               >
                 👥 Create People folder
               </button>
             )}
           {currentPath === rootFolder &&
-            !entries.some((e) => e.name === "Places" && e.isDirectory) && (
+            !entries.some((e) => e.name === 'Places' && e.isDirectory) && (
               <button
                 className="create-archive-btn"
                 onClick={async (e) => {
-                  e.stopPropagation();
-                  await window.api.createPlacesFolder(rootFolder);
+                  e.stopPropagation()
+                  await window.api.createPlacesFolder(rootFolder)
                   navigate(
                     `/browser?path=${encodeURIComponent(currentPath)}&r=${Date.now()}`,
                     { replace: true },
-                  );
+                  )
                 }}
               >
                 📍 Create Places folder
               </button>
             )}
           {currentPath === rootFolder &&
-            !entries.some((e) => e.name === "Licenses" && e.isDirectory) && (
+            !entries.some((e) => e.name === 'Licenses' && e.isDirectory) && (
               <button
                 className="create-archive-btn"
                 onClick={async (e) => {
-                  e.stopPropagation();
-                  await window.api.createLicensesFolder(rootFolder);
+                  e.stopPropagation()
+                  await window.api.createLicensesFolder(rootFolder)
                   navigate(
                     `/browser?path=${encodeURIComponent(currentPath)}&r=${Date.now()}`,
                     { replace: true },
-                  );
+                  )
                 }}
               >
                 📜 Create Licenses folder
@@ -150,5 +144,5 @@ export default function AppSubHeader() {
         </div>
       )}
     </div>
-  );
+  )
 }

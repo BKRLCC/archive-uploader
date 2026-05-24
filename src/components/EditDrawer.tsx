@@ -108,7 +108,8 @@ export default function EditDrawer({
 
   const getHeaderIndex = (fieldName: string): number => {
     return headers.findIndex(
-      (header) => header.trim().toLowerCase() === fieldName.trim().toLowerCase(),
+      (header) =>
+        header.trim().toLowerCase() === fieldName.trim().toLowerCase(),
     )
   }
 
@@ -315,7 +316,9 @@ export default function EditDrawer({
             <label key={key} className="edit-field">
               <span className="edit-field-key">{key}</span>
               {isReadOnly ? (
-                <span className="edit-field-readonly">{currentValue || '—'}</span>
+                <span className="edit-field-readonly">
+                  {currentValue || '—'}
+                </span>
               ) : isTypeField ? (
                 <select
                   value={currentValue}
@@ -346,9 +349,12 @@ export default function EditDrawer({
                     <button
                       type="button"
                       onClick={() => {
-                        if (headerIndex >= 0) void handlePickDepiction(headerIndex)
+                        if (headerIndex >= 0)
+                          void handlePickDepiction(headerIndex)
                       }}
-                      disabled={headerIndex < 0 || depictionPickingField === key}
+                      disabled={
+                        headerIndex < 0 || depictionPickingField === key
+                      }
                     >
                       {depictionPickingField === key
                         ? 'Choosing…'
@@ -389,7 +395,9 @@ export default function EditDrawer({
                           },
                       )}
                     onChange={(selected) => {
-                      const ids = (selected as VocabOption[]).map((o) => o.value)
+                      const ids = (selected as VocabOption[]).map(
+                        (o) => o.value,
+                      )
                       setFieldValue(key, ids.join(', '))
                     }}
                     placeholder={
@@ -415,8 +423,8 @@ export default function EditDrawer({
                   />
                   {tagOptions.length === 0 && (
                     <span className="edit-field-readonly">
-                      Tag vocabulary is unavailable. Use the refresh action in the
-                      subheader.
+                      Tag vocabulary is unavailable. Use the refresh action in
+                      the subheader.
                     </span>
                   )}
                 </>

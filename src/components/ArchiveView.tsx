@@ -100,9 +100,12 @@ export default function ArchiveView({ xlsxPath }: Props) {
     try {
       const vocabularies = await loadTagVocabulariesFromFolder()
       dispatch(setTagVocabularies(vocabularies))
-      setTagsFeedback(`✓ Loaded ${vocabularies.length} tag vocab${vocabularies.length === 1 ? '': 's'}`)
+      setTagsFeedback(
+        `✓ Loaded ${vocabularies.length} tag vocab${vocabularies.length === 1 ? '' : 's'}`,
+      )
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to refresh tags'
+      const message =
+        error instanceof Error ? error.message : 'Failed to refresh tags'
       dispatch(setTagsError(message))
       setTagsFeedback(`✗ ${message}`)
     } finally {

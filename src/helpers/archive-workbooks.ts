@@ -46,7 +46,9 @@ export function isArchiveEditableWorkbookPath(
   filePath: string,
   rootFolder: string | null | undefined,
 ): boolean {
-  return isArchiveWorkbookPath(filePath) || isTagsWorkbookPath(filePath, rootFolder)
+  return (
+    isArchiveWorkbookPath(filePath) || isTagsWorkbookPath(filePath, rootFolder)
+  )
 }
 
 export function getArchiveWorkbookLabel(fileName: string): string {

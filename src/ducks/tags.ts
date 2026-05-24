@@ -1,4 +1,8 @@
-import { createSelector, createSlice, type PayloadAction } from '@reduxjs/toolkit'
+import {
+  createSelector,
+  createSlice,
+  type PayloadAction,
+} from '@reduxjs/toolkit'
 import {
   getTagVocabularyKeyFromField,
   normalizeTagVocabularyKey,
@@ -59,7 +63,8 @@ const tagsSlice = createSlice({
 export const { setTagVocabularies, setTagsLoading, setTagsError } =
   tagsSlice.actions
 
-const selectTagVocabularyDictionary = (state: RootState) => state.tags.vocabularies
+const selectTagVocabularyDictionary = (state: RootState) =>
+  state.tags.vocabularies
 
 export const selectTagVocabularies = createSelector(
   selectTagVocabularyDictionary,

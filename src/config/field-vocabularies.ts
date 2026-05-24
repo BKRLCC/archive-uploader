@@ -42,7 +42,8 @@ export const MULTI_SELECT_FIELDS = new Set<string>([
 ])
 
 export const isMultiSelectField = (fieldName: string): boolean =>
-  MULTI_SELECT_FIELDS.has(fieldName) || getTagVocabularyKeyFromField(fieldName) !== null
+  MULTI_SELECT_FIELDS.has(fieldName) ||
+  getTagVocabularyKeyFromField(fieldName) !== null
 
 export const getControlledVocabularyForField = (
   fieldName: string,

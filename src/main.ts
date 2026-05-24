@@ -330,7 +330,9 @@ ipcMain.handle(
       defval: '',
     })
     const headers = (rows[0] ?? []).map((h) => String(h ?? ''))
-    const missingHeaders = Object.keys(values).filter((key) => !headers.includes(key))
+    const missingHeaders = Object.keys(values).filter(
+      (key) => !headers.includes(key),
+    )
     if (missingHeaders.length > 0) {
       headers.push(...missingHeaders)
       rows[0] = headers
