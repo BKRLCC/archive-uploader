@@ -9,6 +9,7 @@ import { useAppSelector } from '../ducks/hooks'
 import { selectPeople } from '../ducks/people'
 import { selectTagVocabularies } from '../ducks/tags'
 import { toCamelCase } from '../helpers/string-formatters'
+import { getEntityFieldModel, resolveEditableEntityType } from '../types/types'
 import {
   DEPICTION_FIELD_NAME,
   DEPICTION_FOLDER_HINT,
@@ -27,6 +28,7 @@ const TYPE_OPTIONS = [
   { label: 'Resource', value: 'RepositoryObject', icon: '📜' },
   { label: 'Person', value: 'Person', icon: '👤' },
   { label: 'Language', value: 'Language', icon: '🔤' },
+  { label: 'Defined term', value: 'DefinedTerm', icon: '🏷️' },
 ]
 
 interface Props {
@@ -81,7 +83,30 @@ export default function EditDrawer({
   const peopleOptionIds = new Set(peopleOptions.map((option) => option.value))
   const tagVocabularies = useAppSelector(selectTagVocabularies)
 
+  const normalizeFieldName = (fieldName: string): string =>
+    String(fieldName ?? '')
+      .trim()
+      .toLowerCase()
+
+  const typeHeaderIndex = headers.findIndex(
+    (header) => normalizeFieldName(header) === '@type',
+  )
+  const resolvedEntityType = resolveEditableEntityType(
+    typeHeaderIndex >= 0 ? (values[typeHeaderIndex] ?? '') : '',
+  )
+  const modelFieldNames = resolvedEntityType
+    ? getEntityFieldModel(resolvedEntityType)
+    : []
+  const missingModelFieldNames = modelFieldNames.filter(
+    (fieldName) =>
+      !headers.some(
+        (header) =>
+          normalizeFieldName(header) === normalizeFieldName(fieldName),
+      ),
+  )
+
   const isRepositoryObjectSheet =
+    resolvedEntityType === 'RepositoryObject' ||
     headers.includes('inLanguage') ||
     headers.includes('isRef_creator') ||
     headers.includes('isRef_contributor')
@@ -91,14 +116,18 @@ export default function EditDrawer({
         .map((vocabulary) => vocabulary.fieldName)
         .filter(
           (fieldName) =>
-            !headers.some(
+            ![...headers, ...missingModelFieldNames].some(
               (header) =>
-                header.trim().toLowerCase() === fieldName.trim().toLowerCase(),
+                normalizeFieldName(header) === normalizeFieldName(fieldName),
             ),
         )
     : []
 
-  const renderedFields = [...headers, ...missingTagFieldNames]
+  const renderedFields = [
+    ...headers,
+    ...missingModelFieldNames,
+    ...missingTagFieldNames,
+  ]
 
   const getTagVocabularyForField = (fieldName: string) => {
     const key = getTagVocabularyKeyFromField(fieldName)
@@ -108,8 +137,7 @@ export default function EditDrawer({
 
   const getHeaderIndex = (fieldName: string): number => {
     return headers.findIndex(
-      (header) =>
-        header.trim().toLowerCase() === fieldName.trim().toLowerCase(),
+      (header) => normalizeFieldName(header) === normalizeFieldName(fieldName),
     )
   }
 

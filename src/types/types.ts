@@ -34,6 +34,28 @@ export type Tag = {
   depiction?: string
 }
 
+type MissingKeys<T extends object, A extends readonly string[]> = Exclude<
+  keyof T,
+  A[number]
+>
+
+type ExtraKeys<T extends object, A extends readonly string[]> = Exclude<
+  A[number],
+  keyof T
+>
+
+type ExactFieldArray<T extends object, A extends readonly string[]> =
+  MissingKeys<T, A> extends never
+    ? ExtraKeys<T, A> extends never
+      ? A
+      : never
+    : never
+
+const defineEntityFields =
+  <T extends object>() =>
+  <A extends readonly string[]>(fields: ExactFieldArray<T, A>) =>
+    fields as readonly (keyof T)[]
+
 // People
 // https://www.ldaca.edu.au/resources/user-guides/crate-o/convert-spreadsheet/#people
 export type Person = BaseItem & {
@@ -89,6 +111,123 @@ type ItemTypeMap = {
   Place: Place
   Geometry: Geometry
   File: File
+}
+
+type EditableEntityTypeMap = ItemTypeMap & {
+  DefinedTerm: Tag
+}
+
+export type EditableEntityType = keyof EditableEntityTypeMap
+
+export const ENTITY_FIELD_REGISTRY: {
+  [K in EditableEntityType]: readonly (keyof EditableEntityTypeMap[K])[]
+} = {
+  Person: defineEntityFields<Person>()([
+    '@id',
+    '@type',
+    'name',
+    'description',
+    'depiction',
+    'gender',
+    'birthDate',
+  ]),
+  RepositoryObject: defineEntityFields<RepositoryObject>()([
+    '@id',
+    '@type',
+    'name',
+    'description',
+    'depiction',
+    'inLanguage',
+    'isRef_creator',
+    'isRef_contributor',
+    'isRef_mentions',
+  ]),
+  Language: defineEntityFields<BaseItem>()([
+    '@id',
+    '@type',
+    'name',
+    'description',
+    'depiction',
+  ]),
+  Dataset: defineEntityFields<BaseItem>()([
+    '@id',
+    '@type',
+    'name',
+    'description',
+    'depiction',
+  ]),
+  RepositoryCollection: defineEntityFields<BaseItem>()([
+    '@id',
+    '@type',
+    'name',
+    'description',
+    'depiction',
+  ]),
+  'ldac:DataReuseLicense': defineEntityFields<License>()([
+    '@id',
+    '@type',
+    'name',
+    'description',
+    'depiction',
+    'ldac:allowTextIndex',
+    'isRef_sameAs',
+    'isRef_isPartOf',
+  ]),
+  Place: defineEntityFields<Place>()([
+    '@id',
+    '@type',
+    'name',
+    'description',
+    'depiction',
+    'isRef_geo',
+  ]),
+  Geometry: defineEntityFields<Geometry>()([
+    '@id',
+    '@type',
+    '.latitude',
+    '.longitude',
+    'asWKT',
+  ]),
+  File: defineEntityFields<File>()(['@id', '@type', '.folder', '.filename']),
+  DefinedTerm: defineEntityFields<Tag>()([
+    '@id',
+    '@type',
+    'name',
+    'description',
+    'depiction',
+  ]),
+}
+
+const hasEntityFieldModel = (
+  entityType: string,
+): entityType is EditableEntityType => {
+  return Object.prototype.hasOwnProperty.call(ENTITY_FIELD_REGISTRY, entityType)
+}
+
+export function resolveEditableEntityType(
+  rawType: string,
+): EditableEntityType | null {
+  const cleaned = String(rawType ?? '').trim()
+  if (!cleaned) return null
+
+  const candidates =
+    cleaned.startsWith('[') && cleaned.endsWith(']')
+      ? cleaned
+          .slice(1, -1)
+          .split(',')
+          .map((part) => part.trim())
+          .filter(Boolean)
+      : [cleaned]
+
+  for (const candidate of candidates) {
+    if (hasEntityFieldModel(candidate)) return candidate
+  }
+
+  return null
+}
+
+export function getEntityFieldModel(entityType: EditableEntityType): string[] {
+  return ENTITY_FIELD_REGISTRY[entityType].map((field) => String(field))
 }
 
 // Runtime column definitions — each entry is constrained to the keys of the corresponding type.
