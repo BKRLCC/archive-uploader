@@ -122,7 +122,7 @@ export default function AppSubHeader() {
                   )
                 }}
               >
-                🔤 Create Languages folder
+                🗣️ Create Languages folder
               </button>
             )}
           {currentPath === rootFolder &&
