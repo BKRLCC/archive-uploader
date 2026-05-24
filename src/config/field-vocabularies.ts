@@ -1,5 +1,6 @@
 export type ControlledVocabularySource =
   | 'People'
+  | 'Languages'
   | 'Places'
   | 'Licenses'
   | 'RepositoryCollection'
@@ -26,6 +27,7 @@ export const getTagVocabularyKeyFromField = (
 
 // Display labels are for humans; persisted cell values remain the target entity @id.
 export const FIELD_VOCABULARIES: Record<string, ControlledVocabularySource> = {
+  isRef_inLanguage: 'Languages',
   isRef_creator: 'People',
   isRef_contributor: 'People',
   isRef_mentions: 'People', // People referenced or depicted (schema:mentions)
@@ -36,6 +38,7 @@ export const FIELD_VOCABULARIES: Record<string, ControlledVocabularySource> = {
 
 // Multi-select fields (comma-separated @ids)
 export const MULTI_SELECT_FIELDS = new Set<string>([
+  'isRef_inLanguage',
   'isRef_creator',
   'isRef_contributor',
   'isRef_mentions',

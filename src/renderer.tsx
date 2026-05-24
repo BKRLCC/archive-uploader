@@ -10,13 +10,39 @@ import BrowserPage from './pages/BrowserPage'
 import SettingsPage from './pages/SettingsPage'
 import store from './ducks/store'
 import { useAppDispatch } from './ducks/hooks'
+import { loadLanguagesFromSpreadsheet } from './ducks/languages-loader'
+import { setLanguages, setLanguagesLoading } from './ducks/languages'
 import { setLoading, setPeople } from './ducks/people'
 import { loadPeopleFromSpreadsheet } from './ducks/people-loader'
 import { setTagVocabularies, setTagsError, setTagsLoading } from './ducks/tags'
 import { loadTagVocabulariesFromFolder } from './ducks/tags-loader'
 
+let hasBootstrappedLanguages = false
 let hasBootstrappedPeople = false
 let hasBootstrappedTags = false
+
+function LanguagesBootstrap() {
+  const dispatch = useAppDispatch()
+
+  React.useEffect(() => {
+    if (hasBootstrappedLanguages) return
+    hasBootstrappedLanguages = true
+
+    const run = async () => {
+      dispatch(setLanguagesLoading(true))
+      try {
+        const languages = await loadLanguagesFromSpreadsheet()
+        dispatch(setLanguages(languages))
+      } finally {
+        dispatch(setLanguagesLoading(false))
+      }
+    }
+
+    void run()
+  }, [dispatch])
+
+  return null
+}
 
 function PeopleBootstrap() {
   const dispatch = useAppDispatch()
@@ -89,6 +115,7 @@ const root = createRoot(document.getElementById('root')!)
 root.render(
   <React.StrictMode>
     <Provider store={store}>
+      <LanguagesBootstrap />
       <PeopleBootstrap />
       <TagsBootstrap />
       <HashRouter>

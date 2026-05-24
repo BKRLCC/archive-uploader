@@ -30,6 +30,7 @@ const IMAGE_EXTS_BROWSER = new Set(['jpg', 'jpeg', 'png', 'gif', 'webp'])
 
 function emojiFor(entry: DirEntry, isArchiveEditable: boolean) {
   if (entry.name === 'People' && entry.isDirectory) return '👥'
+  if (entry.name === 'Languages' && entry.isDirectory) return '🗣️'
   if (entry.name === 'Places' && entry.isDirectory) return '📍'
   if (entry.name === 'Licenses' && entry.isDirectory) return '📜'
   if (entry.isDirectory) return EMOJI.folder

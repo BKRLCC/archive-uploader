@@ -110,6 +110,22 @@ export default function AppSubHeader() {
               </button>
             )}
           {currentPath === rootFolder &&
+            !entries.some((e) => e.name === 'Languages' && e.isDirectory) && (
+              <button
+                className="create-archive-btn"
+                onClick={async (e) => {
+                  e.stopPropagation()
+                  await window.api.createLanguagesFolder(rootFolder)
+                  navigate(
+                    `/browser?path=${encodeURIComponent(currentPath)}&r=${Date.now()}`,
+                    { replace: true },
+                  )
+                }}
+              >
+                🔤 Create Languages folder
+              </button>
+            )}
+          {currentPath === rootFolder &&
             !entries.some((e) => e.name === 'Places' && e.isDirectory) && (
               <button
                 className="create-archive-btn"

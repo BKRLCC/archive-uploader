@@ -63,9 +63,12 @@ export type Person = BaseItem & {
   birthDate?: string
 }
 
+// Language
+export type Language = BaseItem & {}
+
 // https://www.ldaca.edu.au/resources/user-guides/crate-o/convert-spreadsheet/#objects
 export type RepositoryObject = BaseItem & {
-  inLanguage?: string
+  isRef_inLanguage?: string
   isRef_creator?: string
   isRef_contributor?: string
   /**
@@ -104,7 +107,7 @@ export type File = {
 type ItemTypeMap = {
   Person: Person
   RepositoryObject: RepositoryObject
-  Language: BaseItem
+  Language: Language
   Dataset: BaseItem
   RepositoryCollection: BaseItem
   'ldac:DataReuseLicense': License
@@ -137,7 +140,7 @@ export const ENTITY_FIELD_REGISTRY: {
     'name',
     'description',
     'depiction',
-    'inLanguage',
+    'isRef_inLanguage',
     'isRef_creator',
     'isRef_contributor',
     'isRef_mentions',
@@ -247,7 +250,7 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     'name',
     'description',
     'depiction',
-    'inLanguage',
+    'isRef_inLanguage',
     'isRef_creator',
     'isRef_contributor',
     'isRef_mentions',
@@ -291,6 +294,7 @@ export type SpreadsheetSchema = {
 export type SpreadsheetType =
   | 'RepositoryObject'
   | 'People'
+  | 'Language'
   | 'Places'
   | 'ldac:DataReuseLicense'
 
@@ -317,6 +321,16 @@ export const spreadsheets: Record<SpreadsheetType, SpreadsheetSchema> = {
         name: DataTypeLabels.Person.label,
         type: 'Person',
         headers: TypeColumns.Person,
+      },
+    ],
+  },
+  Language: {
+    folderName: 'Languages',
+    tabs: [
+      {
+        name: DataTypeLabels.Language.label,
+        type: 'Language',
+        headers: TypeColumns.Language,
       },
     ],
   },

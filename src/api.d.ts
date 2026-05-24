@@ -53,6 +53,7 @@ export interface Api {
     updates: Record<string, string>,
   ) => Promise<SheetData>
   createPeopleFolder: (rootFolder: string) => Promise<{ path: string }>
+  createLanguagesFolder: (rootFolder: string) => Promise<{ path: string }>
   createPlacesFolder: (rootFolder: string) => Promise<{ path: string }>
   createLicensesFolder: (rootFolder: string) => Promise<{ path: string }>
   openFile: (filePath: string) => Promise<string>

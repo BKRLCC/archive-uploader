@@ -6,6 +6,7 @@ import {
 } from '../config/field-vocabularies'
 import Select from 'react-select'
 import { useAppSelector } from '../ducks/hooks'
+import { selectLanguages } from '../ducks/languages'
 import { selectPeople } from '../ducks/people'
 import { selectTagVocabularies } from '../ducks/tags'
 import { toCamelCase } from '../helpers/string-formatters'
@@ -70,6 +71,20 @@ export default function EditDrawer({
   const archiveFolderPath = xlsxPath.replace(/[/\\][^/\\]+$/, '')
 
   const people = useAppSelector(selectPeople)
+  const languages = useAppSelector(selectLanguages)
+  const languageOptions: VocabOption[] = languages.map((language) => {
+    const id = language['@id']
+    const name = language.name
+    const label = `${name} (${id})`
+    return {
+      value: id,
+      label,
+      searchText: `${name} ${id}`.toLowerCase(),
+    }
+  })
+  const languageOptionIds = new Set(
+    languageOptions.map((option) => option.value),
+  )
   const peopleOptions: VocabOption[] = people.map((person) => {
     const id = person['@id']
     const name = person.name
@@ -107,9 +122,11 @@ export default function EditDrawer({
 
   const isRepositoryObjectSheet =
     resolvedEntityType === 'RepositoryObject' ||
-    headers.includes('inLanguage') ||
-    headers.includes('isRef_creator') ||
-    headers.includes('isRef_contributor')
+    headers.some(
+      (header) => normalizeFieldName(header) === 'isref_inlanguage',
+    ) ||
+    headers.some((header) => normalizeFieldName(header) === 'isref_creator') ||
+    headers.some((header) => normalizeFieldName(header) === 'isref_contributor')
 
   const missingTagFieldNames = isRepositoryObjectSheet
     ? tagVocabularies
@@ -179,7 +196,8 @@ export default function EditDrawer({
       }
 
       const source = getControlledVocabularyForField(field)
-      if (source !== 'People' && source !== 'Tags') continue
+      if (source !== 'People' && source !== 'Languages' && source !== 'Tags')
+        continue
       if (!selectedValue) continue
 
       if (source === 'Tags') {
@@ -196,6 +214,19 @@ export default function EditDrawer({
         for (const id of ids) {
           if (!optionIds.has(id)) {
             return `✗ ${field} must be selected from ${tagVocabulary.workbookName}`
+          }
+        }
+        continue
+      }
+
+      if (source === 'Languages') {
+        const ids = isMultiSelectField(field)
+          ? selectedValue.split(/,\s*/).filter(Boolean)
+          : [selectedValue]
+
+        for (const id of ids) {
+          if (!languageOptionIds.has(id)) {
+            return `✗ ${field} must be selected from Languages`
           }
         }
         continue
@@ -314,6 +345,7 @@ export default function EditDrawer({
           const isDepictionField = key === DEPICTION_FIELD_NAME
           const vocabularySource = getControlledVocabularyForField(key)
           const isPeopleControlled = vocabularySource === 'People'
+          const isLanguagesControlled = vocabularySource === 'Languages'
           const isTagsControlled = vocabularySource === 'Tags'
           const tagVocabulary = getTagVocabularyForField(key)
           const tagOptions = tagVocabulary?.options ?? []
@@ -466,6 +498,59 @@ export default function EditDrawer({
                     </span>
                   )}
                 </>
+              ) : isLanguagesControlled && isMultiSelectField(key) ? (
+                <Select
+                  isMulti
+                  isDisabled={languageOptions.length === 0}
+                  options={languageOptions}
+                  value={currentValue
+                    .split(/,\s*/)
+                    .filter(Boolean)
+                    .map(
+                      (id) =>
+                        languageOptions.find((o) => o.value === id) || {
+                          value: id,
+                          label: id,
+                          searchText: id,
+                        },
+                    )}
+                  onChange={(selected) => {
+                    const ids = (selected as VocabOption[]).map((o) => o.value)
+                    setFieldValue(key, ids.join(', '))
+                  }}
+                  placeholder={
+                    languageOptions.length === 0
+                      ? 'Languages vocabulary unavailable'
+                      : 'Select languages…'
+                  }
+                  styles={{
+                    multiValue: (base) => ({
+                      ...base,
+                      background: 'rgba(166,43,43,0.15)',
+                    }),
+                    multiValueLabel: (base) => ({ ...base, color: '#a62b2b' }),
+                    control: (base) => ({
+                      ...base,
+                      borderColor: '#a62b2b',
+                      minHeight: 34,
+                    }),
+                  }}
+                />
+              ) : isLanguagesControlled ? (
+                <select
+                  value={currentValue}
+                  onChange={(e) => {
+                    setFieldValue(key, e.target.value)
+                  }}
+                  disabled={languageOptions.length === 0}
+                >
+                  <option value="">Select language…</option>
+                  {languageOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
               ) : isPeopleControlled && isMultiSelectField(key) ? (
                 <Select
                   isMulti
