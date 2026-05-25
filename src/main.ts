@@ -527,7 +527,9 @@ ipcMain.handle(
 
     const headers = (rows[0] ?? []).map((header) => String(header ?? ''))
     const idIndex = headers.findIndex((header) => header === '@id')
-    const hasPartIndex = headers.findIndex((header) => header === 'isRef_hasPart')
+    const hasPartIndex = headers.findIndex(
+      (header) => header === 'isRef_hasPart',
+    )
 
     if (idIndex < 0 || hasPartIndex < 0) {
       return {
@@ -631,30 +633,33 @@ ipcMain.handle('pick-files', async (event, archiveFolderPath: string) => {
   return relativePaths
 })
 
-ipcMain.handle('pick-linked-files', async (event, archiveFolderPath: string) => {
-  const win = BrowserWindow.fromWebContents(event.sender)
-  win.focus()
-  const archiveFolderAbsolute = path.resolve(archiveFolderPath)
-  const { canceled, filePaths } = await dialog.showOpenDialog(win, {
-    properties: ['openFile', 'multiSelections'],
-    defaultPath: archiveFolderAbsolute,
-    title: 'Choose files for this item',
-  })
-  if (canceled || filePaths.length === 0) return null
+ipcMain.handle(
+  'pick-linked-files',
+  async (event, archiveFolderPath: string) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    win.focus()
+    const archiveFolderAbsolute = path.resolve(archiveFolderPath)
+    const { canceled, filePaths } = await dialog.showOpenDialog(win, {
+      properties: ['openFile', 'multiSelections'],
+      defaultPath: archiveFolderAbsolute,
+      title: 'Choose files for this item',
+    })
+    if (canceled || filePaths.length === 0) return null
 
-  const relativePaths = filePaths.map((filePath) => {
-    const selectedAbsolute = path.resolve(filePath)
-    if (!isPathWithin(archiveFolderAbsolute, selectedAbsolute)) {
-      throw new Error('All selected files must be inside the archive folder.')
-    }
-    return path
-      .relative(archiveFolderAbsolute, selectedAbsolute)
-      .split(path.sep)
-      .join('/')
-  })
+    const relativePaths = filePaths.map((filePath) => {
+      const selectedAbsolute = path.resolve(filePath)
+      if (!isPathWithin(archiveFolderAbsolute, selectedAbsolute)) {
+        throw new Error('All selected files must be inside the archive folder.')
+      }
+      return path
+        .relative(archiveFolderAbsolute, selectedAbsolute)
+        .split(path.sep)
+        .join('/')
+    })
 
-  return relativePaths
-})
+    return relativePaths
+  },
+)
 
 ipcMain.handle('get-video-preview-path', async (_event, filePath: string) => {
   if (!resolvedFfmpegPath) {

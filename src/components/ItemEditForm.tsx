@@ -371,6 +371,7 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
         {renderedFields.map((fieldName) => {
           const isReadOnly = fieldName === '@id'
           const isTypeField = fieldName === '@type'
+          const isDescriptionField = fieldName === 'description'
           const isDepictionField = fieldName === DEPICTION_FIELD_NAME
           const isFileLinksField =
             normalizeFieldName(fieldName) ===
@@ -476,6 +477,14 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                     />
                   )}
                 </>
+              ) : isDescriptionField ? (
+                <textarea
+                  rows={5}
+                  value={currentValue}
+                  onChange={(e) => {
+                    setFieldValue(fieldName, e.target.value)
+                  }}
+                />
               ) : isFileLinksField ? (
                 <FileLinksField
                   value={currentValue}

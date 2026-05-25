@@ -513,6 +513,11 @@ textarea {
   font-size: 1em;
 }
 
+.edit-field textarea {
+  min-height: 7em;
+  resize: vertical;
+}
+
 .depiction-actions {
   margin-top: 0.4em;
   display: flex;

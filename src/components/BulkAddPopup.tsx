@@ -193,7 +193,13 @@ export default function BulkAddPopup({
               initialValues={headers.map(() => '')}
               xlsxPath={xlsxPath}
               sheetName={sheetName}
-              hiddenFields={['@id', '@type', 'name', 'depiction', 'isRef_hasPart']}
+              hiddenFields={[
+                '@id',
+                '@type',
+                'name',
+                'depiction',
+                'isRef_hasPart',
+              ]}
               lockedFieldValues={{ '@type': 'RepositoryObject' }}
               onFeedback={setFeedback}
             />
