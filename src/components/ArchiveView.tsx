@@ -9,6 +9,7 @@ import ClickableImagePreview from './ClickableImagePreview'
 import { useAppDispatch } from '../ducks/hooks'
 import { loadTagVocabulariesFromFolder } from '../ducks/tags-loader'
 import { setTagVocabularies, setTagsError, setTagsLoading } from '../ducks/tags'
+import { getFieldDisplayLabel } from '../config/field-labels'
 
 type SheetState = SheetData | null | 'empty' | 'missing'
 
@@ -247,7 +248,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
           <thead>
             <tr>
               {sheet.headers.map((h) => (
-                <th key={h}>{h}</th>
+                <th key={h}>{getFieldDisplayLabel(h)}</th>
               ))}
             </tr>
           </thead>
@@ -312,10 +313,12 @@ export default function ArchiveView({ xlsxPath }: Props) {
               </th>
               <th></th>
               {hasDepiction && (
-                <th className="depiction-thumb-header">depiction</th>
+                <th className="depiction-thumb-header">
+                  {getFieldDisplayLabel('depiction')}
+                </th>
               )}
               {visibleIndices.map((i) => (
-                <th key={i}>{sheet.headers[i]}</th>
+                <th key={i}>{getFieldDisplayLabel(sheet.headers[i])}</th>
               ))}
             </tr>
           </thead>

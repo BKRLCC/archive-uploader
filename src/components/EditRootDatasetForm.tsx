@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import type { SheetData } from "../api";
+import { getFieldDisplayLabel } from "../config/field-labels";
 
 const EDITABLE_ROWS = ["name", "description"];
 
@@ -52,7 +53,7 @@ export default function EditRootDatasetForm({
           const isEditable = EDITABLE_ROWS.includes(key);
           return (
             <label key={key} className="edit-field">
-              <span className="edit-field-key">{key}</span>
+              <span className="edit-field-key">{getFieldDisplayLabel(key)}</span>
               {!isEditable ? (
                 <span className="edit-field-readonly">
                   {values[key] || "—"}

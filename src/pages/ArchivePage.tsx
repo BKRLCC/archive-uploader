@@ -6,6 +6,7 @@ import BulkAddPopup from '../components/BulkAddPopup'
 import EditDrawer from '../components/EditDrawer'
 import EditRootDatasetForm from '../components/EditRootDatasetForm'
 import Drawer from '../components/Drawer'
+import { getFieldDisplayLabel } from '../config/field-labels'
 
 type SheetState = SheetData | null | 'empty' | 'missing'
 
@@ -231,7 +232,7 @@ export default function ArchivePage() {
           <thead>
             <tr>
               {sheet.headers.map((h) => (
-                <th key={h}>{h}</th>
+                <th key={h}>{getFieldDisplayLabel(h)}</th>
               ))}
             </tr>
           </thead>
@@ -292,7 +293,7 @@ export default function ArchivePage() {
               </th>
               <th></th>
               {visibleIndices.map((i) => (
-                <th key={i}>{sheet.headers[i]}</th>
+                <th key={i}>{getFieldDisplayLabel(sheet.headers[i])}</th>
               ))}
             </tr>
           </thead>

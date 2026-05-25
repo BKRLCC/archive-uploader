@@ -20,6 +20,7 @@ import { selectLanguages } from '../ducks/languages'
 import { selectPeople } from '../ducks/people'
 import { selectTagVocabularies } from '../ducks/tags'
 import { getEntityFieldModel, resolveEditableEntityType } from '../types/types'
+import { getFieldDisplayLabel } from '../config/field-labels'
 import ClickableImagePreview from './ClickableImagePreview'
 
 interface VocabOption {
@@ -403,7 +404,9 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
 
           return (
             <label key={fieldName} className="edit-field">
-              <span className="edit-field-key">{fieldName}</span>
+              <span className="edit-field-key">
+                {getFieldDisplayLabel(fieldName)}
+              </span>
               {isReadOnly ? (
                 <span className="edit-field-readonly">
                   {currentValue || '—'}
