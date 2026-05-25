@@ -22,6 +22,7 @@ import { selectTagVocabularies } from '../ducks/tags'
 import { getEntityFieldModel, resolveEditableEntityType } from '../types/types'
 import { getFieldDisplayLabel } from '../config/field-labels'
 import ClickableImagePreview from './ClickableImagePreview'
+import FileLinksField, { FILE_LINKS_FIELD_NAME } from './FileLinksField'
 
 interface VocabOption {
   value: string
@@ -371,6 +372,9 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
           const isReadOnly = fieldName === '@id'
           const isTypeField = fieldName === '@type'
           const isDepictionField = fieldName === DEPICTION_FIELD_NAME
+          const isFileLinksField =
+            normalizeFieldName(fieldName) ===
+            normalizeFieldName(FILE_LINKS_FIELD_NAME)
           const vocabularySource = getControlledVocabularyForField(fieldName)
           const isPeopleControlled = vocabularySource === 'People'
           const isLanguagesControlled = vocabularySource === 'Languages'
@@ -472,6 +476,15 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                     />
                   )}
                 </>
+              ) : isFileLinksField ? (
+                <FileLinksField
+                  value={currentValue}
+                  archiveFolderPath={archiveFolderPath}
+                  onChange={(nextValue) => {
+                    setFieldValue(fieldName, nextValue)
+                  }}
+                  onFeedback={onFeedback}
+                />
               ) : isTagsControlled ? (
                 <>
                   <Select

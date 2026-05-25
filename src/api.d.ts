@@ -22,6 +22,7 @@ export interface Api {
   chooseRootFolder: () => Promise<string | null>
   pickDepictionFile: (archiveFolderPath: string) => Promise<string | null>
   pickFiles: (archiveFolderPath: string) => Promise<string[] | null>
+  pickLinkedFiles: (archiveFolderPath: string) => Promise<string[] | null>
   generateVideoDepiction: (
     archiveFolderPath: string,
     videoRelativePath: string,
