@@ -45,6 +45,12 @@ contextBridge.exposeInMainWorld('api', {
       rowIndex,
       updatedValues,
     ),
+  deleteSheetRows: (
+    xlsxPath: string,
+    sheetName: string,
+    rowIndices: number[],
+  ): Promise<{ deletedCount: number }> =>
+    ipcRenderer.invoke('delete-sheet-rows', xlsxPath, sheetName, rowIndices),
   populateFilesTab: (
     folder: string,
     rootFolder: string,

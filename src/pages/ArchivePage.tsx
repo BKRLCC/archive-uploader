@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import type { SheetData } from "../api";
+import BulkEditDrawer from "../components/BulkEditDrawer";
 import BulkAddPopup from "../components/BulkAddPopup";
 import EditDrawer from "../components/EditDrawer";
 import EditRootDatasetForm from "../components/EditRootDatasetForm";
@@ -11,6 +12,12 @@ type SheetState = SheetData | null | "empty" | "missing";
 interface EditingRow {
   rowIndex: number;
   row: string[];
+  sheetName: string;
+}
+
+interface BulkEditingRows {
+  rowIndices: number[];
+  rows: string[][];
   sheetName: string;
 }
 
@@ -33,28 +40,39 @@ export default function ArchivePage() {
   const [editingRow, setEditingRow] = useState<EditingRow | null>(null);
   const [addingItem, setAddingItem] = useState<string | false>(false); // sheetName or false
   const [bulkAddingItem, setBulkAddingItem] = useState<string | false>(false);
+  const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
+  const [bulkEditingRows, setBulkEditingRows] = useState<BulkEditingRows | null>(null);
   const [editingRootDataset, setEditingRootDataset] = useState(false);
 
   const [populateFeedback, setPopulateFeedback] = useState("");
   const [populateBusy, setPopulateBusy] = useState(false);
   const [bulkFeedback, setBulkFeedback] = useState("");
+  const [bulkActionFeedback, setBulkActionFeedback] = useState("");
 
   const xlsxPath = folder ? folder + "/metadata.xlsx" : null;
+
+  const clearSelection = useCallback(() => {
+    setSelectedRows(new Set());
+    setBulkEditingRows(null);
+    setBulkActionFeedback("");
+  }, []);
 
   const closeDrawer = useCallback(() => {
     setEditingRow(null);
     setAddingItem(false);
     setBulkAddingItem(false);
+    clearSelection();
     setEditingRootDataset(false);
-  }, []);
+  }, [clearSelection]);
 
   const reloadSheet = useCallback(
     async (name: string) => {
       if (!xlsxPath) return;
       const data = await window.api.readSheet(xlsxPath, name);
       setSheets((prev) => ({ ...prev, [name]: sheetStateFromData(data) }));
+      clearSelection();
     },
-    [xlsxPath],
+    [clearSelection, xlsxPath],
   );
 
   const loadAll = useCallback(async () => {
@@ -75,6 +93,10 @@ export default function ArchivePage() {
     window.api.getRootFolder().then(setRootFolder);
     loadAll();
   }, [loadAll]);
+
+  useEffect(() => {
+    clearSelection();
+  }, [activeTab, clearSelection]);
 
   // ── Breadcrumb ──────────────────────────────────────────────────────────────
 
@@ -149,6 +171,53 @@ export default function ArchivePage() {
     });
   }
 
+  function toggleRowSelection(rowIndex: number, checked: boolean) {
+    setSelectedRows((prev) => {
+      const next = new Set(prev);
+      if (checked) {
+        next.add(rowIndex);
+      } else {
+        next.delete(rowIndex);
+      }
+      return next;
+    });
+  }
+
+  function toggleAllRows(rowIndices: number[], checked: boolean) {
+    setSelectedRows(() => {
+      if (!checked) return new Set();
+      return new Set(rowIndices);
+    });
+  }
+
+  async function handleBulkDelete(
+    sheetName: string,
+    rowIndices: number[],
+  ): Promise<void> {
+    const count = rowIndices.length;
+    if (
+      count === 0 ||
+      !window.confirm(`Delete ${count} selected row${count === 1 ? "" : "s"}?`)
+    ) {
+      return;
+    }
+
+    setBulkActionFeedback("Deleting…");
+    try {
+      const result = await window.api.deleteSheetRows(
+        xlsxPath!,
+        sheetName,
+        rowIndices,
+      );
+      setBulkActionFeedback(
+        `✓ Deleted ${result.deletedCount} row${result.deletedCount === 1 ? "" : "s"}`,
+      );
+      await reloadSheet(sheetName);
+    } catch (err) {
+      setBulkActionFeedback(`✗ ${(err as Error).message}`);
+    }
+  }
+
   // ── Generic read-only table ─────────────────────────────────────────────────
 
   function renderGenericTable(sheet: SheetState, emptyLabel: string) {
@@ -188,6 +257,20 @@ export default function ArchivePage() {
       return <p className="items-state">This tab is empty.</p>;
     if (!sheet) return <p className="items-state">Loading…</p>;
 
+    const visibleRows = sheet.rows
+      .map((row, rowIndex) => ({ row, rowIndex }))
+      .filter(({ row }) =>
+        row.some((cell) => String(cell ?? '').trim() !== ''),
+      );
+    const visibleRowIndices = visibleRows.map(({ rowIndex }) => rowIndex);
+    const visibleRowIndexSet = new Set(visibleRowIndices);
+    const selectedVisibleRowIndices = Array.from(selectedRows)
+      .filter((rowIndex) => visibleRowIndexSet.has(rowIndex))
+      .sort((a, b) => a - b);
+    const selectedCount = selectedVisibleRowIndices.length;
+    const allRowsSelected =
+      visibleRows.length > 0 && selectedCount === visibleRows.length;
+
     const visibleIndices = sheet.headers
       .map((h, i) => ({ h, i }))
       .filter(({ h }) => h === "@type" || !h.startsWith("@"))
@@ -198,6 +281,16 @@ export default function ArchivePage() {
         <table className="sheet-table">
           <thead>
             <tr>
+              <th className="select-row-cell">
+                <input
+                  type="checkbox"
+                  checked={allRowsSelected}
+                  onChange={(e) => {
+                    toggleAllRows(visibleRowIndices, e.target.checked);
+                  }}
+                  aria-label="Select all rows"
+                />
+              </th>
               <th></th>
               {visibleIndices.map((i) => (
                 <th key={i}>{sheet.headers[i]}</th>
@@ -205,8 +298,20 @@ export default function ArchivePage() {
             </tr>
           </thead>
           <tbody>
-            {sheet.rows.map((row, rowIndex) => (
-              <tr key={rowIndex}>
+            {visibleRows.map(({ row, rowIndex }) => (
+              <tr key={rowIndex} className={selectedRows.has(rowIndex) ? "selected-row" : ""}>
+                <td className="select-row-cell">
+                  <input
+                    type="checkbox"
+                    checked={selectedRows.has(rowIndex)}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      toggleRowSelection(rowIndex, e.target.checked);
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                    aria-label={`Select row ${rowIndex + 1}`}
+                  />
+                </td>
                 <td
                   className="edit-btn-cell"
                   onClick={(e) => {
@@ -310,6 +415,20 @@ export default function ArchivePage() {
           activeTab !== "Files" &&
           (() => {
             const sheet = sheets[activeTab] ?? null;
+            const visibleRowIndices =
+              sheet && typeof sheet !== "string"
+                ? sheet.rows
+                    .map((row, rowIndex) => ({ row, rowIndex }))
+                    .filter(({ row }) =>
+                      row.some((cell) => String(cell ?? "").trim() !== ""),
+                    )
+                    .map(({ rowIndex }) => rowIndex)
+                : [];
+            const visibleRowIndexSet = new Set(visibleRowIndices);
+            const selectedRowIndices = Array.from(selectedRows)
+              .filter((rowIndex) => visibleRowIndexSet.has(rowIndex))
+              .sort((a, b) => a - b);
+            const selectedCount = selectedRowIndices.length;
             return (
               <section>
                 <div className="section-toolbar">
@@ -352,6 +471,48 @@ export default function ArchivePage() {
                     <span className="populate-feedback">{bulkFeedback}</span>
                   </div>
                 </div>
+                {sheet && typeof sheet !== "string" && selectedCount > 0 && (
+                  <div className="bulk-actions-bar">
+                    <span>
+                      {selectedCount} row{selectedCount === 1 ? "" : "s"} selected
+                    </span>
+                    <button
+                      className="refresh-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const rows = selectedRowIndices.map(
+                          (rowIndex) => sheet.rows[rowIndex] ?? [],
+                        );
+                        setBulkEditingRows({
+                          rowIndices: selectedRowIndices,
+                          rows,
+                          sheetName: activeTab,
+                        });
+                      }}
+                    >
+                      Edit selected
+                    </button>
+                    <button
+                      className="refresh-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        void handleBulkDelete(activeTab, selectedRowIndices);
+                      }}
+                    >
+                      Delete selected
+                    </button>
+                    <button
+                      className="refresh-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        clearSelection();
+                      }}
+                    >
+                      Clear selection
+                    </button>
+                    <span className="populate-feedback">{bulkActionFeedback}</span>
+                  </div>
+                )}
                 {renderEditableTable(sheet, activeTab)}
               </section>
             );
@@ -407,6 +568,26 @@ export default function ArchivePage() {
             ) : null;
           })()}
       </Drawer>
+
+      {bulkEditingRows && (
+        <BulkEditDrawer
+          open
+          headers={sheets[bulkEditingRows.sheetName]?.headers ?? []}
+          rows={bulkEditingRows.rows}
+          rowIndices={bulkEditingRows.rowIndices}
+          xlsxPath={xlsxPath!}
+          sheetName={bulkEditingRows.sheetName}
+          onComplete={async () => {
+            const sheetName = bulkEditingRows.sheetName;
+            clearSelection();
+            setBulkEditingRows(null);
+            await reloadSheet(sheetName);
+          }}
+          onClose={() => {
+            setBulkEditingRows(null);
+          }}
+        />
+      )}
 
       {bulkAddingItem &&
         (() => {

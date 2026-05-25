@@ -381,6 +381,10 @@ textarea {
   text-overflow: ellipsis;
 }
 
+.sheet-table tr.selected-row {
+  background: rgba(166, 43, 43, 0.08);
+}
+
 .sheet-table th {
   background: rgba(0, 0, 0, 0.04);
   font-weight: 600;
@@ -394,6 +398,19 @@ textarea {
   width: 2em;
   text-align: center;
   cursor: pointer;
+}
+
+.select-row-cell {
+  width: 2.25em;
+  min-width: 2.25em;
+  text-align: center;
+  padding-left: 0.4em;
+  padding-right: 0.4em;
+}
+
+.select-row-cell input {
+  width: auto;
+  margin: 0;
 }
 
 .depiction-thumb-header {
@@ -531,6 +548,23 @@ textarea {
 }
 
 .populate-feedback {
+  font-size: 0.85em;
+  color: #555;
+}
+
+.bulk-actions-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  flex-wrap: wrap;
+  margin: 0.5em 0 0.75em;
+  padding: 0.5em 0.75em;
+  border: 1px solid rgba(166, 43, 43, 0.15);
+  border-radius: 10px;
+  background: rgba(166, 43, 43, 0.04);
+}
+
+.bulk-actions-bar span {
   font-size: 0.85em;
   color: #555;
 }

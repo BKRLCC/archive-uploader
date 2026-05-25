@@ -256,6 +256,51 @@ ipcMain.handle(
 )
 
 ipcMain.handle(
+  'delete-sheet-rows',
+  async (
+    _event,
+    xlsxPath: string,
+    sheetName: string,
+    rowIndices: number[],
+  ) => {
+    const buf = await fs.promises.readFile(xlsxPath)
+    const workbook = XLSX.read(buf)
+    const actualName = workbook.SheetNames.find(
+      (n) => n.toLowerCase() === sheetName.toLowerCase(),
+    )
+    if (!actualName) throw new Error(`No ${sheetName} sheet found`)
+    const sheet = workbook.Sheets[actualName]
+    const rows: string[][] = XLSX.utils.sheet_to_json(sheet, {
+      header: 1,
+      defval: '',
+    })
+    if (rows.length <= 1 || rowIndices.length === 0) {
+      return { deletedCount: 0 }
+    }
+
+    const indices = Array.from(new Set(rowIndices))
+      .filter((index) => Number.isInteger(index) && index >= 0)
+      .sort((a, b) => b - a)
+
+    let deletedCount = 0
+    for (const rowIndex of indices) {
+      const dataRowIndex = rowIndex + 1 // +1 for header
+      if (dataRowIndex >= 1 && dataRowIndex < rows.length) {
+        rows.splice(dataRowIndex, 1)
+        deletedCount += 1
+      }
+    }
+
+    workbook.Sheets[actualName] = XLSX.utils.aoa_to_sheet(rows)
+    await fs.promises.writeFile(
+      xlsxPath,
+      XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' }),
+    )
+    return { deletedCount }
+  },
+)
+
+ipcMain.handle(
   'populate-files-tab',
   async (_event, folder: string, rootFolder: string) => {
     const dirents = await fs.promises.readdir(folder, { withFileTypes: true })

@@ -36,6 +36,11 @@ export interface Api {
     rowIndex: number,
     updatedValues: Record<string, string>,
   ) => Promise<string[]>
+  deleteSheetRows: (
+    xlsxPath: string,
+    sheetName: string,
+    rowIndices: number[],
+  ) => Promise<{ deletedCount: number }>
   populateFilesTab: (
     folder: string,
     rootFolder: string,
