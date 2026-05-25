@@ -1,4 +1,5 @@
 import React, { useMemo, useRef, useState } from 'react'
+import { getItemTypeForSheetName } from '../helpers/item-types'
 import Drawer from './Drawer'
 import ItemEditForm, { type ItemEditFormHandle } from './ItemEditForm'
 
@@ -109,6 +110,9 @@ export default function BulkEditDrawer({
           xlsxPath={xlsxPath}
           sheetName={sheetName}
           hiddenFields={['@id']}
+          lockedFieldValues={{
+            '@type': getItemTypeForSheetName(sheetName),
+          }}
           onFeedback={setFeedback}
         />
         <div className="edit-actions">

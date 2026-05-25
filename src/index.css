@@ -363,10 +363,18 @@ textarea {
   overflow-y: auto;
 }
 
+.virtualized-table-scroll {
+  height: min(62vh, 560px);
+}
+
 .sheet-table {
   border-collapse: collapse;
   width: 100%;
   font-size: 0.9em;
+}
+
+.sheet-table.virtualized-table {
+  table-layout: fixed;
 }
 
 .sheet-table th,
@@ -392,6 +400,16 @@ textarea {
 
 .sheet-table tbody tr:nth-child(even) {
   background: rgba(0, 0, 0, 0.02);
+}
+
+.sheet-table.virtualized-table tbody tr {
+  height: 52px;
+}
+
+.virtual-spacer-row td {
+  border: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
 }
 
 .edit-btn-cell {

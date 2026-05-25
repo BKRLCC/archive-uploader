@@ -3,6 +3,7 @@ import {
   isImagePreviewExtension,
   isVideoPreviewExtension,
 } from '../config/previewable-file-types'
+import { getItemTypeForSheetName } from '../helpers/item-types'
 import { toCamelCase } from '../helpers/string-formatters'
 import ItemEditForm, { type ItemEditFormHandle } from './ItemEditForm'
 import PopupOverlay from './PopupOverlay'
@@ -193,14 +194,10 @@ export default function BulkAddPopup({
               initialValues={headers.map(() => '')}
               xlsxPath={xlsxPath}
               sheetName={sheetName}
-              hiddenFields={[
-                '@id',
-                '@type',
-                'name',
-                'depiction',
-                'isRef_hasPart',
-              ]}
-              lockedFieldValues={{ '@type': 'RepositoryObject' }}
+              hiddenFields={['@id', 'name', 'depiction', 'isRef_hasPart']}
+              lockedFieldValues={{
+                '@type': getItemTypeForSheetName(sheetName),
+              }}
               onFeedback={setFeedback}
             />
 

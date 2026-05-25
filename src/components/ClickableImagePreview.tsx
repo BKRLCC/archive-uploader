@@ -14,6 +14,8 @@ const ClickableImagePreview: React.FC<{
         src={imageUrl}
         alt={altText || 'Thumbnail'}
         className="clickable-thumbnail"
+        loading="lazy"
+        decoding="async"
         onClick={() => setPopupOpen(true)}
       />
       <ImagePreviewPopup

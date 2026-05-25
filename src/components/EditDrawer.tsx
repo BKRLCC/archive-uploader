@@ -1,4 +1,5 @@
 import React, { useRef, useState } from 'react'
+import { getItemTypeForSheetName } from '../helpers/item-types'
 import { toCamelCase } from '../helpers/string-formatters'
 import ItemEditForm, { type ItemEditFormHandle } from './ItemEditForm'
 
@@ -120,6 +121,9 @@ export default function EditDrawer({
         xlsxPath={xlsxPath}
         sheetName={sheetName}
         hiddenFields={isNew ? ['@id'] : []}
+        lockedFieldValues={{
+          '@type': getItemTypeForSheetName(sheetName),
+        }}
         onFeedback={setFeedback}
       />
       <div className="edit-actions">

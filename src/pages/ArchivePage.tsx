@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import type { SheetData } from '../api'
 import BulkEditDrawer from '../components/BulkEditDrawer'
@@ -21,6 +21,9 @@ interface BulkEditingRows {
   rows: string[][]
   sheetName: string
 }
+
+const VIRTUAL_ROW_HEIGHT_PX = 52
+const VIRTUAL_OVERSCAN_ROWS = 10
 
 function sheetStateFromData(data: SheetData | null): SheetState {
   if (data === null) return 'missing'
@@ -50,6 +53,10 @@ export default function ArchivePage() {
   const [populateBusy, setPopulateBusy] = useState(false)
   const [bulkFeedback, setBulkFeedback] = useState('')
   const [bulkActionFeedback, setBulkActionFeedback] = useState('')
+  const [tableScrollTop, setTableScrollTop] = useState(0)
+  const [tableViewportHeight, setTableViewportHeight] = useState(420)
+
+  const tableScrollRef = useRef<HTMLDivElement | null>(null)
 
   const xlsxPath = folder ? folder + '/metadata.xlsx' : null
 
@@ -98,6 +105,7 @@ export default function ArchivePage() {
 
   useEffect(() => {
     clearSelection()
+    setTableScrollTop(0)
   }, [activeTab, clearSelection])
 
   // ── Breadcrumb ──────────────────────────────────────────────────────────────
@@ -273,12 +281,34 @@ export default function ArchivePage() {
 
     const visibleIndices = sheet.headers
       .map((h, i) => ({ h, i }))
-      .filter(({ h }) => h === '@type' || !h.startsWith('@'))
+      .filter(({ h }) => !h.startsWith('@') && h !== '@type')
       .map(({ i }) => i)
 
+    const visibleCount = Math.ceil(tableViewportHeight / VIRTUAL_ROW_HEIGHT_PX)
+    const windowStart = Math.max(
+      0,
+      Math.floor(tableScrollTop / VIRTUAL_ROW_HEIGHT_PX) - VIRTUAL_OVERSCAN_ROWS,
+    )
+    const windowEnd = Math.min(
+      visibleRows.length,
+      windowStart + visibleCount + VIRTUAL_OVERSCAN_ROWS * 2,
+    )
+    const windowedRows = visibleRows.slice(windowStart, windowEnd)
+    const topSpacerHeight = windowStart * VIRTUAL_ROW_HEIGHT_PX
+    const bottomSpacerHeight =
+      (visibleRows.length - windowEnd) * VIRTUAL_ROW_HEIGHT_PX
+    const columnCount = 2 + visibleIndices.length
+
     return (
-      <div className="table-scroll">
-        <table className="sheet-table">
+      <div
+        className="table-scroll virtualized-table-scroll"
+        ref={tableScrollRef}
+        onScroll={(event) => {
+          setTableScrollTop(event.currentTarget.scrollTop)
+          setTableViewportHeight(event.currentTarget.clientHeight)
+        }}
+      >
+        <table className="sheet-table virtualized-table">
           <thead>
             <tr>
               <th className="select-row-cell">
@@ -298,7 +328,13 @@ export default function ArchivePage() {
             </tr>
           </thead>
           <tbody>
-            {visibleRows.map(({ row, rowIndex }) => (
+            {topSpacerHeight > 0 && (
+              <tr className="virtual-spacer-row" aria-hidden="true">
+                <td colSpan={columnCount} style={{ height: topSpacerHeight }} />
+              </tr>
+            )}
+
+            {windowedRows.map(({ row, rowIndex }) => (
               <tr
                 key={rowIndex}
                 className={selectedRows.has(rowIndex) ? 'selected-row' : ''}
@@ -331,6 +367,12 @@ export default function ArchivePage() {
                 ))}
               </tr>
             ))}
+
+            {bottomSpacerHeight > 0 && (
+              <tr className="virtual-spacer-row" aria-hidden="true">
+                <td colSpan={columnCount} style={{ height: bottomSpacerHeight }} />
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

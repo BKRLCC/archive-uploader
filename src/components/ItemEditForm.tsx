@@ -1,9 +1,4 @@
-import React, {
-  forwardRef,
-  useImperativeHandle,
-  useMemo,
-  useState,
-} from 'react'
+import React, { forwardRef, useImperativeHandle, useMemo, useState } from 'react'
 import Select from 'react-select'
 import {
   getControlledVocabularyForField,
@@ -48,13 +43,6 @@ interface ItemEditFormProps {
   lockedFieldValues?: Record<string, string>
   onFeedback?: (message: string) => void
 }
-
-const TYPE_OPTIONS = [
-  { label: 'Resource', value: 'RepositoryObject', icon: '📜' },
-  { label: 'Person', value: 'Person', icon: '👤' },
-  { label: 'Language', value: 'Language', icon: '🗣️' },
-  { label: 'Defined term', value: 'DefinedTerm', icon: '🏷️' },
-]
 
 function normalizeFieldName(fieldName: string): string {
   return String(fieldName ?? '')
@@ -417,27 +405,7 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                   {currentValue || '—'}
                 </span>
               ) : isTypeField ? (
-                <select
-                  value={currentValue}
-                  onChange={(e) => {
-                    setFieldValue(fieldName, e.target.value)
-                  }}
-                  disabled={Object.prototype.hasOwnProperty.call(
-                    lockedFieldValues,
-                    fieldName,
-                  )}
-                >
-                  {!TYPE_OPTIONS.some(
-                    (option) => option.value === currentValue,
-                  ) && (
-                    <option value={currentValue}>{currentValue || '—'}</option>
-                  )}
-                  {TYPE_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.icon} {option.label}
-                    </option>
-                  ))}
-                </select>
+                <span className="edit-field-readonly">{currentValue || '—'}</span>
               ) : isDepictionField ? (
                 <>
                   <input
