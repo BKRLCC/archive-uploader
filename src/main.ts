@@ -36,7 +36,8 @@ const store = new Store()
 
 const isDev = !app.isPackaged
 
-const FFMPEG_BINARY_NAME = process.platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg'
+const FFMPEG_BINARY_NAME =
+  process.platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg'
 
 function resolveFfmpegPath(): string | null {
   const candidates: string[] = []
@@ -61,7 +62,12 @@ function resolveFfmpegPath(): string | null {
     )
   } else {
     candidates.push(
-      path.join(process.cwd(), 'node_modules', 'ffmpeg-static', FFMPEG_BINARY_NAME),
+      path.join(
+        process.cwd(),
+        'node_modules',
+        'ffmpeg-static',
+        FFMPEG_BINARY_NAME,
+      ),
     )
   }
 
@@ -82,7 +88,9 @@ const resolvedFfmpegPath = resolveFfmpegPath()
 if (resolvedFfmpegPath) {
   ffmpeg.setFfmpegPath(resolvedFfmpegPath)
 } else {
-  console.warn('ffmpeg binary was not found; video depiction generation will be unavailable.')
+  console.warn(
+    'ffmpeg binary was not found; video depiction generation will be unavailable.',
+  )
 }
 
 const VIDEO_PREVIEW_PROXY_EXTENSIONS = new Set(['mov', 'avi', 'mkv'])
@@ -635,7 +643,9 @@ ipcMain.handle(
   'generate-video-depiction',
   async (_event, archiveFolderPath: string, videoRelativePath: string) => {
     if (!resolvedFfmpegPath) {
-      throw new Error('Video depiction generation is unavailable (ffmpeg missing).')
+      throw new Error(
+        'Video depiction generation is unavailable (ffmpeg missing).',
+      )
     }
 
     const archiveFolderAbsolute = path.resolve(archiveFolderPath)
@@ -669,7 +679,10 @@ ipcMain.handle(
       throw new Error('Video path must point to a file.')
     }
 
-    const depictionsFolderAbsolute = path.join(archiveFolderAbsolute, 'depictions')
+    const depictionsFolderAbsolute = path.join(
+      archiveFolderAbsolute,
+      'depictions',
+    )
     await fs.promises.mkdir(depictionsFolderAbsolute, { recursive: true })
 
     const parsed = path.parse(normalizedRelativePath)
@@ -682,7 +695,10 @@ ipcMain.handle(
 
     let fileName = `${stem}-depiction.jpg`
     let outputRelativePath = path.posix.join('depictions', fileName)
-    let outputAbsolutePath = path.join(archiveFolderAbsolute, outputRelativePath)
+    let outputAbsolutePath = path.join(
+      archiveFolderAbsolute,
+      outputRelativePath,
+    )
 
     let counter = 1
     while (true) {
@@ -690,7 +706,10 @@ ipcMain.handle(
         await fs.promises.access(outputAbsolutePath)
         fileName = `${stem}-depiction-${counter}.jpg`
         outputRelativePath = path.posix.join('depictions', fileName)
-        outputAbsolutePath = path.join(archiveFolderAbsolute, outputRelativePath)
+        outputAbsolutePath = path.join(
+          archiveFolderAbsolute,
+          outputRelativePath,
+        )
         counter += 1
       } catch {
         break

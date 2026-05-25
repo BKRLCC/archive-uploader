@@ -74,7 +74,9 @@ const FilePreviewPopup: React.FC<FilePreviewPopupProps> = ({
         ) : previewKind === 'video' ? (
           <>
             {videoPreparing && (
-              <p className="file-preview-popup-status">Preparing video preview…</p>
+              <p className="file-preview-popup-status">
+                Preparing video preview…
+              </p>
             )}
             {videoError && (
               <p className="file-preview-popup-status">{videoError}</p>
