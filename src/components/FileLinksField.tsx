@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import Select from 'react-select'
+import Select, { components, type MultiValueGenericProps } from 'react-select'
 
 interface FileOption {
   value: string
@@ -32,6 +32,18 @@ function parseLinkedFilePaths(rawValue: string): string[] {
     unique.add(normalized)
   }
   return Array.from(unique)
+}
+
+function FilePathMultiValueLabel(props: MultiValueGenericProps<FileOption>) {
+  return (
+    <components.MultiValueLabel
+      {...props}
+      innerProps={{
+        ...props.innerProps,
+        title: props.data.value,
+      }}
+    />
+  )
 }
 
 export default function FileLinksField({
@@ -78,6 +90,11 @@ export default function FileLinksField({
         isMulti
         isSearchable={false}
         menuIsOpen={false}
+        components={{
+          DropdownIndicator: null,
+          IndicatorSeparator: null,
+          MultiValueLabel: FilePathMultiValueLabel,
+        }}
         options={linkedFileOptions}
         value={linkedFileOptions}
         onChange={(selected) => {
