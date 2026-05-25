@@ -44,9 +44,8 @@ export default function ArchiveView({ xlsxPath }: Props) {
   const [addingItem, setAddingItem] = useState<string | false>(false)
   const [bulkAddingItem, setBulkAddingItem] = useState<string | false>(false)
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set())
-  const [bulkEditingRows, setBulkEditingRows] = useState<BulkEditingRows | null>(
-    null,
-  )
+  const [bulkEditingRows, setBulkEditingRows] =
+    useState<BulkEditingRows | null>(null)
   const [editingRootDataset, setEditingRootDataset] = useState(false)
 
   const [populateFeedback, setPopulateFeedback] = useState('')
@@ -213,7 +212,10 @@ export default function ArchiveView({ xlsxPath }: Props) {
     rowIndices: number[],
   ): Promise<void> {
     const count = rowIndices.length
-    if (count === 0 || !window.confirm(`Delete ${count} selected row${count === 1 ? '' : 's'}?`)) {
+    if (
+      count === 0 ||
+      !window.confirm(`Delete ${count} selected row${count === 1 ? '' : 's'}?`)
+    ) {
       return
     }
 
@@ -276,9 +278,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
     const hasDepiction = depictionIndex !== -1
     const visibleRows = sheet.rows
       .map((row, rowIndex) => ({ row, rowIndex }))
-      .filter(({ row }) =>
-        row.some((cell) => String(cell ?? '').trim() !== ''),
-      )
+      .filter(({ row }) => row.some((cell) => String(cell ?? '').trim() !== ''))
     const visibleRowIndices = visibleRows.map(({ rowIndex }) => rowIndex)
     const visibleRowIndexSet = new Set(visibleRowIndices)
     const selectedVisibleRowIndices = Array.from(selectedRows)
@@ -321,7 +321,10 @@ export default function ArchiveView({ xlsxPath }: Props) {
           </thead>
           <tbody>
             {visibleRows.map(({ row, rowIndex }) => (
-              <tr key={rowIndex} className={selectedRows.has(rowIndex) ? 'selected-row' : ''}>
+              <tr
+                key={rowIndex}
+                className={selectedRows.has(rowIndex) ? 'selected-row' : ''}
+              >
                 <td className="select-row-cell">
                   <input
                     type="checkbox"
@@ -515,7 +518,8 @@ export default function ArchiveView({ xlsxPath }: Props) {
                 {sheet && typeof sheet !== 'string' && selectedCount > 0 && (
                   <div className="bulk-actions-bar">
                     <span>
-                      {selectedCount} row{selectedCount === 1 ? '' : 's'} selected
+                      {selectedCount} row{selectedCount === 1 ? '' : 's'}{' '}
+                      selected
                     </span>
                     <button
                       className="refresh-btn"
@@ -551,7 +555,9 @@ export default function ArchiveView({ xlsxPath }: Props) {
                     >
                       Clear selection
                     </button>
-                    <span className="populate-feedback">{bulkActionFeedback}</span>
+                    <span className="populate-feedback">
+                      {bulkActionFeedback}
+                    </span>
                   </div>
                 )}
                 {renderEditableTable(sheet, activeTab)}
@@ -612,7 +618,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
           })()}
       </Drawer>
 
-      {bulkEditingRows && (
+      {bulkEditingRows &&
         (() => {
           const bulkEditingSheet = sheets[bulkEditingRows.sheetName]
           if (!bulkEditingSheet || typeof bulkEditingSheet === 'string') {
@@ -620,26 +626,25 @@ export default function ArchiveView({ xlsxPath }: Props) {
           }
 
           return (
-        <BulkEditDrawer
-          open
-          headers={bulkEditingSheet.headers}
-          rows={bulkEditingRows.rows}
-          rowIndices={bulkEditingRows.rowIndices}
-          xlsxPath={xlsxPath}
-          sheetName={bulkEditingRows.sheetName}
-          onComplete={async () => {
-            const sheetName = bulkEditingRows.sheetName
-            clearSelection()
-            setBulkEditingRows(null)
-            await reloadSheet(sheetName)
-          }}
-          onClose={() => {
-            setBulkEditingRows(null)
-          }}
-        />
+            <BulkEditDrawer
+              open
+              headers={bulkEditingSheet.headers}
+              rows={bulkEditingRows.rows}
+              rowIndices={bulkEditingRows.rowIndices}
+              xlsxPath={xlsxPath}
+              sheetName={bulkEditingRows.sheetName}
+              onComplete={async () => {
+                const sheetName = bulkEditingRows.sheetName
+                clearSelection()
+                setBulkEditingRows(null)
+                await reloadSheet(sheetName)
+              }}
+              onClose={() => {
+                setBulkEditingRows(null)
+              }}
+            />
           )
-        })()
-      )}
+        })()}
 
       {bulkAddingItem &&
         (() => {

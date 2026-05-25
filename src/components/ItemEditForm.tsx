@@ -156,12 +156,15 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
     const getTagVocabularyForField = (fieldName: string) => {
       const key = getTagVocabularyKeyFromField(fieldName)
       if (!key) return null
-      return tagVocabularies.find((vocabulary) => vocabulary.key === key) ?? null
+      return (
+        tagVocabularies.find((vocabulary) => vocabulary.key === key) ?? null
+      )
     }
 
     const getHeaderIndex = (fieldName: string): number => {
       return headers.findIndex(
-        (header) => normalizeFieldName(header) === normalizeFieldName(fieldName),
+        (header) =>
+          normalizeFieldName(header) === normalizeFieldName(fieldName),
       )
     }
 
@@ -211,7 +214,9 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
       headers.some(
         (header) => normalizeFieldName(header) === 'isref_inlanguage',
       ) ||
-      headers.some((header) => normalizeFieldName(header) === 'isref_creator') ||
+      headers.some(
+        (header) => normalizeFieldName(header) === 'isref_creator',
+      ) ||
       headers.some(
         (header) => normalizeFieldName(header) === 'isref_contributor',
       )
@@ -255,7 +260,11 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
         }
 
         const source = getControlledVocabularyForField(field)
-        if (source !== 'People' && source !== 'Languages' && source !== 'Tags') {
+        if (
+          source !== 'People' &&
+          source !== 'Languages' &&
+          source !== 'Tags'
+        ) {
           continue
         }
         if (!selectedValue) continue
@@ -396,7 +405,9 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
             <label key={fieldName} className="edit-field">
               <span className="edit-field-key">{fieldName}</span>
               {isReadOnly ? (
-                <span className="edit-field-readonly">{currentValue || '—'}</span>
+                <span className="edit-field-readonly">
+                  {currentValue || '—'}
+                </span>
               ) : isTypeField ? (
                 <select
                   value={currentValue}
@@ -408,7 +419,9 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                     fieldName,
                   )}
                 >
-                  {!TYPE_OPTIONS.some((option) => option.value === currentValue) && (
+                  {!TYPE_OPTIONS.some(
+                    (option) => option.value === currentValue,
+                  ) && (
                     <option value={currentValue}>{currentValue || '—'}</option>
                   )}
                   {TYPE_OPTIONS.map((option) => (
@@ -502,8 +515,8 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                   />
                   {tagOptions.length === 0 && (
                     <span className="edit-field-readonly">
-                      Tag vocabulary is unavailable. Use the refresh action in the
-                      subheader.
+                      Tag vocabulary is unavailable. Use the refresh action in
+                      the subheader.
                     </span>
                   )}
                 </>
@@ -517,7 +530,9 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                     .filter(Boolean)
                     .map(
                       (id) =>
-                        languageOptions.find((option) => option.value === id) || {
+                        languageOptions.find(
+                          (option) => option.value === id,
+                        ) || {
                           value: id,
                           label: id,
                           searchText: id,

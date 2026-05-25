@@ -257,12 +257,7 @@ ipcMain.handle(
 
 ipcMain.handle(
   'delete-sheet-rows',
-  async (
-    _event,
-    xlsxPath: string,
-    sheetName: string,
-    rowIndices: number[],
-  ) => {
+  async (_event, xlsxPath: string, sheetName: string, rowIndices: number[]) => {
     const buf = await fs.promises.readFile(xlsxPath)
     const workbook = XLSX.read(buf)
     const actualName = workbook.SheetNames.find(
