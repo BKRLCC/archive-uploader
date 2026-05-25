@@ -85,6 +85,11 @@ contextBridge.exposeInMainWorld('api', {
     updates: Record<string, string>,
   ): Promise<import('./api').SheetData> =>
     ipcRenderer.invoke('update-root-dataset', xlsxPath, updates),
+  getDerivedFileRows: (
+    xlsxPath: string,
+    sheetName?: string,
+  ): Promise<import('./api').SheetData> =>
+    ipcRenderer.invoke('get-derived-file-rows', xlsxPath, sheetName),
   createPeopleFolder: (rootFolder: string): Promise<{ path: string }> =>
     ipcRenderer.invoke('create-people-folder', rootFolder),
   createLanguagesFolder: (rootFolder: string): Promise<{ path: string }> =>

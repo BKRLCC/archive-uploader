@@ -13,6 +13,7 @@ import { createHash } from 'node:crypto'
 import * as XLSX from 'xlsx'
 import started from 'electron-squirrel-startup'
 import { spreadsheets, type SpreadsheetType } from './types/types'
+import { deriveFileRowsFromItems } from './helpers/file-linkage'
 import {
   DEPICTION_IMAGE_EXTENSIONS,
   hasAllowedDepictionExtension,
@@ -496,6 +497,61 @@ ipcMain.handle(
     return {
       headers,
       rows: dataRows.map((r) => headers.map((_, i) => String(r[i] ?? ''))),
+    }
+  },
+)
+
+ipcMain.handle(
+  'get-derived-file-rows',
+  async (_event, xlsxPath: string, sheetName = 'Items') => {
+    const buf = await fs.promises.readFile(xlsxPath)
+    const workbook = XLSX.read(buf)
+    const actualName = workbook.SheetNames.find(
+      (name) => name.toLowerCase() === sheetName.toLowerCase(),
+    )
+    if (!actualName) {
+      throw new Error(`No ${sheetName} sheet found`)
+    }
+
+    const sheet = workbook.Sheets[actualName]
+    const rows: string[][] = XLSX.utils.sheet_to_json(sheet, {
+      header: 1,
+      defval: '',
+    })
+    if (rows.length === 0) {
+      return {
+        headers: ['@id', '@type', '.folder', '.filename', 'isRef_isPartOf'],
+        rows: [] as string[][],
+      }
+    }
+
+    const headers = (rows[0] ?? []).map((header) => String(header ?? ''))
+    const idIndex = headers.findIndex((header) => header === '@id')
+    const hasPartIndex = headers.findIndex((header) => header === 'isRef_hasPart')
+
+    if (idIndex < 0 || hasPartIndex < 0) {
+      return {
+        headers: ['@id', '@type', '.folder', '.filename', 'isRef_isPartOf'],
+        rows: [] as string[][],
+      }
+    }
+
+    const derivedRows = deriveFileRowsFromItems(
+      rows.slice(1).map((row) => ({
+        itemId: String(row[idIndex] ?? ''),
+        hasPart: String(row[hasPartIndex] ?? ''),
+      })),
+    )
+
+    return {
+      headers: ['@id', '@type', '.folder', '.filename', 'isRef_isPartOf'],
+      rows: derivedRows.map((row) => [
+        row['@id'],
+        row['@type'],
+        row['.folder'],
+        row['.filename'],
+        row.isRef_isPartOf,
+      ]),
     }
   },
 )

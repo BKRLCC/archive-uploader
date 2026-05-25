@@ -134,6 +134,7 @@ export default function BulkAddPopup({
           '@id': id,
           '@type': 'RepositoryObject',
           name: fileStem,
+          isRef_hasPart: relativePath,
         }
 
         if (isImagePreviewExtension(getFileExtension(relativePath))) {
@@ -192,7 +193,7 @@ export default function BulkAddPopup({
               initialValues={headers.map(() => '')}
               xlsxPath={xlsxPath}
               sheetName={sheetName}
-              hiddenFields={['@id', '@type', 'name', 'depiction']}
+              hiddenFields={['@id', '@type', 'name', 'depiction', 'isRef_hasPart']}
               lockedFieldValues={{ '@type': 'RepositoryObject' }}
               onFeedback={setFeedback}
             />

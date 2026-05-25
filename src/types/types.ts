@@ -71,6 +71,7 @@ export type RepositoryObject = BaseItem & {
   isRef_inLanguage?: string
   isRef_creator?: string
   isRef_contributor?: string
+  isRef_hasPart?: string
   /**
    * People referenced or depicted in this resource (schema:mentions)
    */
@@ -101,6 +102,7 @@ export type File = {
   '@type': 'File'
   '.folder': string // Relative path to the folder containing the file, e.g. "images"
   '.filename': string // Filename with extension, e.g. "photo.jpg"
+  isRef_isPartOf?: string
 }
 
 // Maps each ItemDataType string to its TypeScript type, used to constrain TypeColumns.
@@ -143,6 +145,7 @@ export const ENTITY_FIELD_REGISTRY: {
     'isRef_inLanguage',
     'isRef_creator',
     'isRef_contributor',
+    'isRef_hasPart',
     'isRef_mentions',
   ]),
   Language: defineEntityFields<BaseItem>()([
@@ -191,7 +194,13 @@ export const ENTITY_FIELD_REGISTRY: {
     '.longitude',
     'asWKT',
   ]),
-  File: defineEntityFields<File>()(['@id', '@type', '.folder', '.filename']),
+  File: defineEntityFields<File>()([
+    '@id',
+    '@type',
+    '.folder',
+    '.filename',
+    'isRef_isPartOf',
+  ]),
   DefinedTerm: defineEntityFields<Tag>()([
     '@id',
     '@type',
@@ -253,6 +262,7 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     'isRef_inLanguage',
     'isRef_creator',
     'isRef_contributor',
+    'isRef_hasPart',
     'isRef_mentions',
   ],
   Language: ['@id', '@type', 'name', 'description', 'depiction'],
@@ -270,7 +280,7 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
   ],
   Place: ['@id', '@type', 'name', 'description', 'depiction', 'isRef_geo'],
   Geometry: ['@id', '@type', '.latitude', '.longitude', 'asWKT'],
-  File: ['@id', '@type', '.folder', '.filename'],
+  File: ['@id', '@type', '.folder', '.filename', 'isRef_isPartOf'],
 }
 
 export type SpreadsheetTab = {

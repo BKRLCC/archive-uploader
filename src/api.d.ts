@@ -65,6 +65,7 @@ export interface Api {
     xlsxPath: string,
     updates: Record<string, string>,
   ) => Promise<SheetData>
+  getDerivedFileRows: (xlsxPath: string, sheetName?: string) => Promise<SheetData>
   createPeopleFolder: (rootFolder: string) => Promise<{ path: string }>
   createLanguagesFolder: (rootFolder: string) => Promise<{ path: string }>
   createPlacesFolder: (rootFolder: string) => Promise<{ path: string }>
