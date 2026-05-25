@@ -1,0 +1,36 @@
+.bulk-add-popup-content {
+  width: min(720px, 90vw);
+}
+
+.bulk-add-popup-content h3 {
+  margin-top: 0;
+  margin-bottom: 0.5em;
+}
+
+.bulk-add-popup-state {
+  color: #555;
+  margin: 0.75em 0;
+}
+
+.bulk-add-popup-summary {
+  margin: 0.5em 0;
+  font-size: 0.9em;
+  color: #555;
+}
+
+.bulk-add-popup-files {
+  margin: 0 0 1em;
+  padding-left: 1.1em;
+  max-height: 140px;
+  overflow-y: auto;
+  font-size: 0.85em;
+  color: #333;
+}
+
+.bulk-add-popup-subheader {
+  margin: 0.75em 0 0.4em;
+  font-size: 0.85em;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}

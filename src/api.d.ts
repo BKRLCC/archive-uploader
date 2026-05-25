@@ -21,6 +21,7 @@ export interface Api {
   getRootFolder: () => Promise<string | null>
   chooseRootFolder: () => Promise<string | null>
   pickDepictionFile: (archiveFolderPath: string) => Promise<string | null>
+  pickFiles: (archiveFolderPath: string) => Promise<string[] | null>
   validateDepictionPath: (
     archiveFolderPath: string,
     depictionPath: string,

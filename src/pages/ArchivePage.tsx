@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import type { SheetData } from "../api";
+import BulkAddPopup from "../components/BulkAddPopup";
 import EditDrawer from "../components/EditDrawer";
 import EditRootDatasetForm from "../components/EditRootDatasetForm";
 import Drawer from "../components/Drawer";
@@ -31,16 +32,19 @@ export default function ArchivePage() {
 
   const [editingRow, setEditingRow] = useState<EditingRow | null>(null);
   const [addingItem, setAddingItem] = useState<string | false>(false); // sheetName or false
+  const [bulkAddingItem, setBulkAddingItem] = useState<string | false>(false);
   const [editingRootDataset, setEditingRootDataset] = useState(false);
 
   const [populateFeedback, setPopulateFeedback] = useState("");
   const [populateBusy, setPopulateBusy] = useState(false);
+  const [bulkFeedback, setBulkFeedback] = useState("");
 
   const xlsxPath = folder ? folder + "/metadata.xlsx" : null;
 
   const closeDrawer = useCallback(() => {
     setEditingRow(null);
     setAddingItem(false);
+    setBulkAddingItem(false);
     setEditingRootDataset(false);
   }, []);
 
@@ -129,6 +133,18 @@ export default function ArchivePage() {
       return {
         ...prev,
         [sheetName]: { ...sheet, rows: [...sheet.rows, newRow] },
+      };
+    });
+  }
+
+  function handleAddRows(newRows: string[][], sheetName: string) {
+    if (newRows.length === 0) return;
+    setSheets((prev) => {
+      const sheet = prev[sheetName];
+      if (!sheet || typeof sheet === "string") return prev;
+      return {
+        ...prev,
+        [sheetName]: { ...sheet, rows: [...sheet.rows, ...newRows] },
       };
     });
   }
@@ -320,6 +336,20 @@ export default function ArchivePage() {
                         + Add item
                       </button>
                     )}
+                    {sheet && typeof sheet !== "string" && (
+                      <button
+                        className="refresh-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          closeDrawer();
+                          setBulkAddingItem(activeTab);
+                          setBulkFeedback("");
+                        }}
+                      >
+                        + Bulk add
+                      </button>
+                    )}
+                    <span className="populate-feedback">{bulkFeedback}</span>
                   </div>
                 </div>
                 {renderEditableTable(sheet, activeTab)}
@@ -377,6 +407,48 @@ export default function ArchivePage() {
             ) : null;
           })()}
       </Drawer>
+
+      {bulkAddingItem &&
+        (() => {
+          const sheet = sheets[bulkAddingItem];
+          if (!sheet || typeof sheet === "string") return null;
+
+          const idIndex = sheet.headers.findIndex((header) => header === "@id");
+          const existingIds = new Set(
+            idIndex >= 0
+              ? sheet.rows
+                  .map((row) => String(row[idIndex] ?? "").trim())
+                  .filter(Boolean)
+              : [],
+          );
+
+          return (
+            <BulkAddPopup
+              isOpen
+              xlsxPath={xlsxPath!}
+              sheetName={bulkAddingItem}
+              headers={sheet.headers}
+              existingIds={existingIds}
+              onComplete={(addedRows, skippedFiles) => {
+                handleAddRows(addedRows, bulkAddingItem);
+                const addedCount = addedRows.length;
+                const skippedCount = skippedFiles.length;
+                setBulkFeedback(
+                  `✓ Added ${addedCount} item${addedCount === 1 ? "" : "s"}${
+                    skippedCount > 0
+                      ? ` (${skippedCount} skipped because IDs already exist)`
+                      : ""
+                  }`,
+                );
+                void reloadSheet(bulkAddingItem);
+                setBulkAddingItem(false);
+              }}
+              onClose={() => {
+                setBulkAddingItem(false);
+              }}
+            />
+          );
+        })()}
     </div>
   );
 }

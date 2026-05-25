@@ -440,6 +440,31 @@ ipcMain.handle(
   },
 )
 
+ipcMain.handle('pick-files', async (event, archiveFolderPath: string) => {
+  const win = BrowserWindow.fromWebContents(event.sender)
+  win.focus()
+  const archiveFolderAbsolute = path.resolve(archiveFolderPath)
+  const { canceled, filePaths } = await dialog.showOpenDialog(win, {
+    properties: ['openFile', 'multiSelections'],
+    defaultPath: archiveFolderAbsolute,
+    title: 'Choose files to bulk add',
+  })
+  if (canceled || filePaths.length === 0) return null
+
+  const relativePaths = filePaths.map((filePath) => {
+    const selectedAbsolute = path.resolve(filePath)
+    if (!isPathWithin(archiveFolderAbsolute, selectedAbsolute)) {
+      throw new Error('All selected files must be inside the archive folder.')
+    }
+    return path
+      .relative(archiveFolderAbsolute, selectedAbsolute)
+      .split(path.sep)
+      .join('/')
+  })
+
+  return relativePaths
+})
+
 ipcMain.handle(
   'validate-depiction-path',
   async (_event, archiveFolderPath: string, depictionPath: string) => {
