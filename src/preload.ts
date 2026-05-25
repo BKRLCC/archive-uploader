@@ -12,6 +12,19 @@ contextBridge.exposeInMainWorld('api', {
     ipcRenderer.invoke('pick-depiction-file', archiveFolderPath),
   pickFiles: (archiveFolderPath: string): Promise<string[] | null> =>
     ipcRenderer.invoke('pick-files', archiveFolderPath),
+  generateVideoDepiction: (
+    archiveFolderPath: string,
+    videoRelativePath: string,
+  ): Promise<{ depictionPath: string }> =>
+    ipcRenderer.invoke(
+      'generate-video-depiction',
+      archiveFolderPath,
+      videoRelativePath,
+    ),
+  getVideoPreviewPath: (
+    filePath: string,
+  ): Promise<{ previewPath: string; isProxy: boolean }> =>
+    ipcRenderer.invoke('get-video-preview-path', filePath),
   validateDepictionPath: (
     archiveFolderPath: string,
     depictionPath: string,

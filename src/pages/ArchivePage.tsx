@@ -616,14 +616,19 @@ export default function ArchivePage() {
               sheetName={bulkAddingItem}
               headers={sheet.headers}
               existingIds={existingIds}
-              onComplete={(addedRows, skippedFiles) => {
+              onComplete={(addedRows, skippedFiles, depictionWarningFiles) => {
                 handleAddRows(addedRows, bulkAddingItem)
                 const addedCount = addedRows.length
                 const skippedCount = skippedFiles.length
+                const warningCount = depictionWarningFiles.length
                 setBulkFeedback(
                   `✓ Added ${addedCount} item${addedCount === 1 ? '' : 's'}${
                     skippedCount > 0
                       ? ` (${skippedCount} skipped because IDs already exist)`
+                      : ''
+                  }${
+                    warningCount > 0
+                      ? ` (${warningCount} video depiction${warningCount === 1 ? '' : 's'} failed)`
                       : ''
                   }`,
                 )

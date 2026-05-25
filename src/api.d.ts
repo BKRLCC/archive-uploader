@@ -22,6 +22,13 @@ export interface Api {
   chooseRootFolder: () => Promise<string | null>
   pickDepictionFile: (archiveFolderPath: string) => Promise<string | null>
   pickFiles: (archiveFolderPath: string) => Promise<string[] | null>
+  generateVideoDepiction: (
+    archiveFolderPath: string,
+    videoRelativePath: string,
+  ) => Promise<{ depictionPath: string }>
+  getVideoPreviewPath: (
+    filePath: string,
+  ) => Promise<{ previewPath: string; isProxy: boolean }>
   validateDepictionPath: (
     archiveFolderPath: string,
     depictionPath: string,

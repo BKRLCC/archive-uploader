@@ -9,6 +9,7 @@ import {
 } from 'electron'
 import path from 'node:path'
 import fs from 'node:fs'
+import { createHash } from 'node:crypto'
 import * as XLSX from 'xlsx'
 import started from 'electron-squirrel-startup'
 import { spreadsheets, type SpreadsheetType } from './types/types'
@@ -16,8 +17,14 @@ import {
   DEPICTION_IMAGE_EXTENSIONS,
   hasAllowedDepictionExtension,
 } from './config/depiction-config'
+import {
+  isVideoPreviewExtension,
+  PREVIEWABLE_VIDEO_EXTENSIONS,
+} from './config/previewable-file-types'
 import { updateElectronApp } from 'update-electron-app'
 import contextMenu from 'electron-context-menu'
+import ffmpeg from 'fluent-ffmpeg'
+import ffmpegPath from 'ffmpeg-static'
 
 // Must be called before app is ready
 protocol.registerSchemesAsPrivileged([
@@ -28,6 +35,61 @@ import Store from 'electron-store'
 const store = new Store()
 
 const isDev = !app.isPackaged
+
+const FFMPEG_BINARY_NAME = process.platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg'
+
+function resolveFfmpegPath(): string | null {
+  const candidates: string[] = []
+
+  if (process.env.FFMPEG_PATH) {
+    candidates.push(path.resolve(process.env.FFMPEG_PATH))
+  }
+
+  if (typeof ffmpegPath === 'string' && ffmpegPath.trim()) {
+    candidates.push(path.resolve(ffmpegPath))
+  }
+
+  if (app.isPackaged) {
+    candidates.push(
+      path.join(
+        process.resourcesPath,
+        'app.asar.unpacked',
+        'node_modules',
+        'ffmpeg-static',
+        FFMPEG_BINARY_NAME,
+      ),
+    )
+  } else {
+    candidates.push(
+      path.join(process.cwd(), 'node_modules', 'ffmpeg-static', FFMPEG_BINARY_NAME),
+    )
+  }
+
+  for (const candidate of candidates) {
+    try {
+      if (fs.existsSync(candidate)) {
+        return candidate
+      }
+    } catch {
+      // Ignore candidate path errors and continue to next fallback.
+    }
+  }
+
+  return null
+}
+
+const resolvedFfmpegPath = resolveFfmpegPath()
+if (resolvedFfmpegPath) {
+  ffmpeg.setFfmpegPath(resolvedFfmpegPath)
+} else {
+  console.warn('ffmpeg binary was not found; video depiction generation will be unavailable.')
+}
+
+const VIDEO_PREVIEW_PROXY_EXTENSIONS = new Set(['mov', 'avi', 'mkv'])
+
+function toCacheKey(filePath: string, mtimeMs: number): string {
+  return createHash('sha1').update(`${filePath}:${mtimeMs}`).digest('hex')
+}
 
 contextMenu({
   showInspectElement: isDev,
@@ -504,6 +566,152 @@ ipcMain.handle('pick-files', async (event, archiveFolderPath: string) => {
 
   return relativePaths
 })
+
+ipcMain.handle('get-video-preview-path', async (_event, filePath: string) => {
+  if (!resolvedFfmpegPath) {
+    return { previewPath: filePath, isProxy: false }
+  }
+
+  const absolutePath = path.resolve(String(filePath ?? '').trim())
+  if (!absolutePath) {
+    throw new Error('Video path is required.')
+  }
+
+  let videoStat: fs.Stats
+  try {
+    videoStat = await fs.promises.stat(absolutePath)
+  } catch {
+    throw new Error('Video file was not found.')
+  }
+
+  if (!videoStat.isFile()) {
+    throw new Error('Video path must point to a file.')
+  }
+
+  const extension = path.extname(absolutePath).slice(1).toLowerCase()
+  if (!isVideoPreviewExtension(extension)) {
+    return { previewPath: absolutePath, isProxy: false }
+  }
+
+  if (!VIDEO_PREVIEW_PROXY_EXTENSIONS.has(extension)) {
+    return { previewPath: absolutePath, isProxy: false }
+  }
+
+  const cacheDir = path.join(app.getPath('userData'), 'video-preview-cache')
+  await fs.promises.mkdir(cacheDir, { recursive: true })
+
+  const cacheKey = toCacheKey(absolutePath, videoStat.mtimeMs)
+  const outputPath = path.join(cacheDir, `${cacheKey}.mp4`)
+
+  try {
+    const cachedStat = await fs.promises.stat(outputPath)
+    if (cachedStat.isFile()) {
+      return { previewPath: outputPath, isProxy: true }
+    }
+  } catch {
+    // Cache miss; continue to generate.
+  }
+
+  await new Promise<void>((resolve, reject) => {
+    ffmpeg(absolutePath)
+      .outputOptions([
+        '-movflags +faststart',
+        '-pix_fmt yuv420p',
+        '-c:v libx264',
+        '-preset veryfast',
+        '-crf 28',
+        '-an',
+      ])
+      .output(outputPath)
+      .on('end', () => resolve())
+      .on('error', (error) => reject(error))
+      .run()
+  })
+
+  return { previewPath: outputPath, isProxy: true }
+})
+
+ipcMain.handle(
+  'generate-video-depiction',
+  async (_event, archiveFolderPath: string, videoRelativePath: string) => {
+    if (!resolvedFfmpegPath) {
+      throw new Error('Video depiction generation is unavailable (ffmpeg missing).')
+    }
+
+    const archiveFolderAbsolute = path.resolve(archiveFolderPath)
+    const normalizedRelativePath = String(videoRelativePath ?? '').trim()
+    if (!normalizedRelativePath) {
+      throw new Error('Video path is required.')
+    }
+
+    const videoAbsolutePath = path.resolve(
+      archiveFolderAbsolute,
+      normalizedRelativePath,
+    )
+    if (!isPathWithin(archiveFolderAbsolute, videoAbsolutePath)) {
+      throw new Error('Video file must be inside the archive folder.')
+    }
+
+    const extension = path.extname(videoAbsolutePath).slice(1).toLowerCase()
+    if (!isVideoPreviewExtension(extension)) {
+      throw new Error(
+        `Unsupported video extension. Supported: ${Array.from(PREVIEWABLE_VIDEO_EXTENSIONS).join(', ')}`,
+      )
+    }
+
+    let videoStat: fs.Stats
+    try {
+      videoStat = await fs.promises.stat(videoAbsolutePath)
+    } catch {
+      throw new Error('Video file was not found.')
+    }
+    if (!videoStat.isFile()) {
+      throw new Error('Video path must point to a file.')
+    }
+
+    const depictionsFolderAbsolute = path.join(archiveFolderAbsolute, 'depictions')
+    await fs.promises.mkdir(depictionsFolderAbsolute, { recursive: true })
+
+    const parsed = path.parse(normalizedRelativePath)
+    const stem =
+      parsed.name
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '') || 'video'
+
+    let fileName = `${stem}-depiction.jpg`
+    let outputRelativePath = path.posix.join('depictions', fileName)
+    let outputAbsolutePath = path.join(archiveFolderAbsolute, outputRelativePath)
+
+    let counter = 1
+    while (true) {
+      try {
+        await fs.promises.access(outputAbsolutePath)
+        fileName = `${stem}-depiction-${counter}.jpg`
+        outputRelativePath = path.posix.join('depictions', fileName)
+        outputAbsolutePath = path.join(archiveFolderAbsolute, outputRelativePath)
+        counter += 1
+      } catch {
+        break
+      }
+    }
+
+    await new Promise<void>((resolve, reject) => {
+      ffmpeg(videoAbsolutePath)
+        .seekInput(1)
+        .outputOptions(['-frames:v 1', '-q:v 2'])
+        .output(outputAbsolutePath)
+        .on('end', () => resolve())
+        .on('error', (error) => reject(error))
+        .run()
+    })
+
+    return {
+      depictionPath: outputRelativePath.replace(/\\/g, '/'),
+    }
+  },
+)
 
 ipcMain.handle(
   'validate-depiction-path',

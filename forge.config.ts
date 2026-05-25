@@ -10,7 +10,9 @@ import { PublisherGithub } from "@electron-forge/publisher-github";
 
 const config: ForgeConfig = {
   packagerConfig: {
-    asar: true,
+    asar: {
+      unpack: "**/node_modules/ffmpeg-static/**",
+    },
     icon: "src/icons/logo",
     ...(process.env.APPLE_ID
       ? {

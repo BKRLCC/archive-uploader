@@ -12,6 +12,7 @@ import {
   isPreviewableExtension,
   PREVIEWABLE_AUDIO_EXTENSIONS,
   PREVIEWABLE_IMAGE_EXTENSIONS,
+  PREVIEWABLE_VIDEO_EXTENSIONS,
   type PreviewKind,
 } from '../config/previewable-file-types'
 import {
@@ -29,8 +30,6 @@ const EMOJI = {
   doc: UiIcons.doc,
 }
 
-const VIDEO_EXTS = new Set(['mp4', 'mov', 'avi', 'mkv', 'webm'])
-
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 function emojiFor(entry: DirEntry, isArchiveEditable: boolean) {
@@ -42,7 +41,7 @@ function emojiFor(entry: DirEntry, isArchiveEditable: boolean) {
   if (isArchiveEditable) return '⭐'
   if (PREVIEWABLE_IMAGE_EXTENSIONS.has(entry.ext)) return EMOJI.image
   if (PREVIEWABLE_AUDIO_EXTENSIONS.has(entry.ext)) return EMOJI.audio
-  if (VIDEO_EXTS.has(entry.ext)) return EMOJI.video
+  if (PREVIEWABLE_VIDEO_EXTENSIONS.has(entry.ext)) return EMOJI.video
   return EMOJI.doc
 }
 

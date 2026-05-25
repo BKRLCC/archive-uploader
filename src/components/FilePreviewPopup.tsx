@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import type { PreviewKind } from '../config/previewable-file-types'
 import PopupOverlay from './PopupOverlay'
 import './FilePreviewPopup.css'
@@ -18,7 +18,38 @@ const FilePreviewPopup: React.FC<FilePreviewPopupProps> = ({
   fileName,
   previewKind,
 }) => {
-  const mediaUrl = `localfile://${filePath}`
+  const [resolvedVideoPath, setResolvedVideoPath] = useState(filePath)
+  const [videoPreparing, setVideoPreparing] = useState(false)
+  const [videoError, setVideoError] = useState('')
+
+  useEffect(() => {
+    setResolvedVideoPath(filePath)
+    setVideoPreparing(false)
+    setVideoError('')
+
+    if (!isOpen || previewKind !== 'video') return
+
+    setVideoPreparing(true)
+    void window.api
+      .getVideoPreviewPath(filePath)
+      .then((result) => {
+        if (!result?.previewPath) return
+        setResolvedVideoPath(result.previewPath)
+      })
+      .catch((err: unknown) => {
+        setVideoError(
+          `Preview transcoding failed: ${(err as Error).message}. Trying original file.`,
+        )
+      })
+      .finally(() => {
+        setVideoPreparing(false)
+      })
+  }, [filePath, isOpen, previewKind])
+
+  const mediaUrl = useMemo(() => {
+    const targetPath = previewKind === 'video' ? resolvedVideoPath : filePath
+    return `localfile://${targetPath}`
+  }, [filePath, previewKind, resolvedVideoPath])
 
   return (
     <PopupOverlay isOpen={isOpen} onClose={onClose}>
@@ -40,6 +71,28 @@ const FilePreviewPopup: React.FC<FilePreviewPopupProps> = ({
           >
             Your browser does not support audio playback.
           </audio>
+        ) : previewKind === 'video' ? (
+          <>
+            {videoPreparing && (
+              <p className="file-preview-popup-status">Preparing video preview…</p>
+            )}
+            {videoError && (
+              <p className="file-preview-popup-status">{videoError}</p>
+            )}
+            <video
+              className="file-preview-popup-video"
+              controls
+              autoPlay
+              src={mediaUrl}
+              onError={() => {
+                setVideoError(
+                  'Video codec is not supported for in-app playback. Open externally if needed.',
+                )
+              }}
+            >
+              Your browser does not support video playback.
+            </video>
+          </>
         ) : (
           <p className="file-preview-popup-fallback">Preview is unavailable.</p>
         )}

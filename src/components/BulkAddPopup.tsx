@@ -1,5 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { isImagePreviewExtension } from '../config/previewable-file-types'
+import {
+  isImagePreviewExtension,
+  isVideoPreviewExtension,
+} from '../config/previewable-file-types'
 import { toCamelCase } from '../helpers/string-formatters'
 import ItemEditForm, { type ItemEditFormHandle } from './ItemEditForm'
 import PopupOverlay from './PopupOverlay'
@@ -11,7 +14,11 @@ interface BulkAddPopupProps {
   sheetName: string
   headers: string[]
   existingIds: Set<string>
-  onComplete: (addedRows: string[][], skippedFiles: string[]) => void
+  onComplete: (
+    addedRows: string[][],
+    skippedFiles: string[],
+    depictionWarningFiles: string[],
+  ) => void
   onClose: () => void
 }
 
@@ -105,6 +112,7 @@ export default function BulkAddPopup({
 
     const seenIds = new Set(existingIds)
     const skippedFiles: string[] = []
+    const depictionWarningFiles: string[] = []
     const addedRows: string[][] = []
 
     try {
@@ -130,6 +138,16 @@ export default function BulkAddPopup({
 
         if (isImagePreviewExtension(getFileExtension(relativePath))) {
           rowValues.depiction = relativePath
+        } else if (isVideoPreviewExtension(getFileExtension(relativePath))) {
+          try {
+            const generated = await window.api.generateVideoDepiction(
+              archiveFolderPath,
+              relativePath,
+            )
+            rowValues.depiction = generated.depictionPath
+          } catch {
+            depictionWarningFiles.push(relativePath)
+          }
         }
 
         const addedRow = await window.api.addSheetRow(
@@ -141,7 +159,7 @@ export default function BulkAddPopup({
         seenIds.add(id)
       }
 
-      onComplete(addedRows, skippedFiles)
+      onComplete(addedRows, skippedFiles, depictionWarningFiles)
       onClose()
     } catch (err) {
       setFeedback(`✗ ${(err as Error).message}`)
