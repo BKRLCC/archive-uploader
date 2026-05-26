@@ -18,6 +18,8 @@ const HEADER_LAYOUTS: Record<string, TableColumnLayout> = {
     widthClassName: 'col-width-description',
     wrapMode: 'clamp-2',
   },
+  datecreated: { widthClassName: 'col-width-date', wrapMode: 'nowrap' },
+  dateadded: { widthClassName: 'col-width-date', wrapMode: 'nowrap' },
   depiction: { widthClassName: 'col-width-depiction', wrapMode: 'clamp-2' },
   isref_haspart: { widthClassName: 'col-width-files', wrapMode: 'clamp-2' },
   isref_creator: {

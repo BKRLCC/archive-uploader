@@ -328,7 +328,7 @@ export default function ArchivePage() {
               {visibleIndices.map((i) => {
                 const headerName = sheet.headers[i] ?? ''
                 const layout = getTableColumnLayout(headerName)
-                const className = layout.widthClassName ?? undefined
+                const className = layout.widthClassName ?? 'col-width-default'
                 return (
                   <th key={i} className={className}>
                     {getFieldDisplayLabel(headerName)}
@@ -386,7 +386,7 @@ export default function ArchivePage() {
                   const headerName = sheet.headers[i] ?? ''
                   const layout = getTableColumnLayout(headerName)
                   const className = [
-                    layout.widthClassName,
+                    layout.widthClassName ?? 'col-width-default',
                     layout.wrapMode === 'clamp-2'
                       ? 'col-wrap-clamp-2'
                       : 'col-wrap-nowrap',

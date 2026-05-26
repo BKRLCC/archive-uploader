@@ -497,6 +497,14 @@ textarea {
   width: 60px;
 }
 
+.sheet-table .col-width-date {
+  width: 9rem;
+}
+
+.sheet-table .col-width-default {
+  width: 8rem;
+}
+
 .sheet-table .col-width-people {
   width: 11rem;
 }

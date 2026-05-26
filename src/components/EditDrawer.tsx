@@ -10,6 +10,10 @@ function generateId(type: string, name: string): string {
   return `#${type}_${toCamelCase(name)}_${rand}`
 }
 
+function getTodayIsoDate(): string {
+  return new Date().toISOString().slice(0, 10)
+}
+
 interface Props {
   headers: string[]
   row: string[]
@@ -67,6 +71,9 @@ export default function EditDrawer({
       headers.forEach((header, index) => {
         updatedValues[header] = values[index] ?? ''
       })
+      if (!String(updatedValues.dateAdded ?? '').trim()) {
+        updatedValues.dateAdded = getTodayIsoDate()
+      }
       Object.entries(virtualValues).forEach(([field, value]) => {
         const trimmed = String(value ?? '').trim()
         if (trimmed) updatedValues[field] = trimmed

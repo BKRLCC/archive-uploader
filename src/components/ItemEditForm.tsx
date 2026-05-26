@@ -60,6 +60,13 @@ function normalizeFieldSet(fields: string[]): Set<string> {
   return new Set(fields.map((field) => normalizeFieldName(field)))
 }
 
+function isIsoDateString(value: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
+  const parsed = new Date(`${value}T00:00:00Z`)
+  if (Number.isNaN(parsed.getTime())) return false
+  return parsed.toISOString().slice(0, 10) === value
+}
+
 const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
   function ItemEditForm(
     {
@@ -255,6 +262,14 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
           continue
         }
 
+        if (field === 'dateCreated' || field === 'dateAdded') {
+          if (!selectedValue) continue
+          if (!isIsoDateString(selectedValue)) {
+            return `✗ ${field} must be a full date in YYYY-MM-DD format`
+          }
+          continue
+        }
+
         const source = getControlledVocabularyForField(field)
         if (
           source !== 'People' &&
@@ -365,6 +380,8 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
         {renderedFields.map((fieldName) => {
           const isReadOnly = fieldName === '@id'
           const isTypeField = fieldName === '@type'
+          const isDateCreatedField = fieldName === 'dateCreated'
+          const isDateAddedField = fieldName === 'dateAdded'
           const isDescriptionField = fieldName === 'description'
           const isDepictionField = fieldName === DEPICTION_FIELD_NAME
           const isFileLinksField =
@@ -416,6 +433,18 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                 <span className="edit-field-readonly">
                   {currentValue || '—'}
                 </span>
+              ) : isDateAddedField ? (
+                <span className="edit-field-readonly">
+                  {currentValue || '—'}
+                </span>
+              ) : isDateCreatedField ? (
+                <input
+                  type="date"
+                  value={currentValue}
+                  onChange={(e) => {
+                    setFieldValue(fieldName, e.target.value)
+                  }}
+                />
               ) : isDepictionField ? (
                 <>
                   <input

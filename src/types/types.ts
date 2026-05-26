@@ -20,6 +20,7 @@ export type BaseItem = {
   '@type': ItemDataType
   name: string
   description?: string
+  dateAdded?: string
   // Relative path to an identifying image under the archive folder (future LD mapping: foaf:depiction).
   depiction?: string
 }
@@ -34,27 +35,10 @@ export type Tag = {
   depiction?: string
 }
 
-type MissingKeys<T extends object, A extends readonly string[]> = Exclude<
-  keyof T,
-  A[number]
->
-
-type ExtraKeys<T extends object, A extends readonly string[]> = Exclude<
-  A[number],
-  keyof T
->
-
-type ExactFieldArray<T extends object, A extends readonly string[]> =
-  MissingKeys<T, A> extends never
-    ? ExtraKeys<T, A> extends never
-      ? A
-      : never
-    : never
-
 const defineEntityFields =
   <T extends object>() =>
-  <A extends readonly string[]>(fields: ExactFieldArray<T, A>) =>
-    fields as readonly (keyof T)[]
+  <K extends keyof T>(fields: readonly K[]) =>
+    fields
 
 // People
 // https://www.ldaca.edu.au/resources/user-guides/crate-o/convert-spreadsheet/#people
@@ -68,6 +52,7 @@ export type Language = BaseItem & {}
 
 // https://www.ldaca.edu.au/resources/user-guides/crate-o/convert-spreadsheet/#objects
 export type RepositoryObject = BaseItem & {
+  dateCreated?: string
   isRef_inLanguage?: string
   isRef_creator?: string
   isRef_contributor?: string
@@ -132,6 +117,7 @@ export const ENTITY_FIELD_REGISTRY: {
     '@type',
     'name',
     'description',
+    'dateAdded',
     'depiction',
     'gender',
     'birthDate',
@@ -141,6 +127,8 @@ export const ENTITY_FIELD_REGISTRY: {
     '@type',
     'name',
     'description',
+    'dateCreated',
+    'dateAdded',
     'depiction',
     'isRef_inLanguage',
     'isRef_creator',
@@ -153,6 +141,7 @@ export const ENTITY_FIELD_REGISTRY: {
     '@type',
     'name',
     'description',
+    'dateAdded',
     'depiction',
   ]),
   Dataset: defineEntityFields<BaseItem>()([
@@ -160,6 +149,7 @@ export const ENTITY_FIELD_REGISTRY: {
     '@type',
     'name',
     'description',
+    'dateAdded',
     'depiction',
   ]),
   RepositoryCollection: defineEntityFields<BaseItem>()([
@@ -167,6 +157,7 @@ export const ENTITY_FIELD_REGISTRY: {
     '@type',
     'name',
     'description',
+    'dateAdded',
     'depiction',
   ]),
   'ldac:DataReuseLicense': defineEntityFields<License>()([
@@ -174,6 +165,7 @@ export const ENTITY_FIELD_REGISTRY: {
     '@type',
     'name',
     'description',
+    'dateAdded',
     'depiction',
     'ldac:allowTextIndex',
     'isRef_sameAs',
@@ -184,6 +176,7 @@ export const ENTITY_FIELD_REGISTRY: {
     '@type',
     'name',
     'description',
+    'dateAdded',
     'depiction',
     'isRef_geo',
   ]),
@@ -249,6 +242,7 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     '@type',
     'name',
     'description',
+    'dateAdded',
     'depiction',
     'gender',
     'birthDate',
@@ -258,6 +252,8 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     '@type',
     'name',
     'description',
+    'dateCreated',
+    'dateAdded',
     'depiction',
     'isRef_inLanguage',
     'isRef_creator',
@@ -265,20 +261,36 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     'isRef_hasPart',
     'isRef_mentions',
   ],
-  Language: ['@id', '@type', 'name', 'description', 'depiction'],
-  Dataset: ['@id', '@type', 'name', 'description', 'depiction'],
-  RepositoryCollection: ['@id', '@type', 'name', 'description', 'depiction'],
+  Language: ['@id', '@type', 'name', 'description', 'dateAdded', 'depiction'],
+  Dataset: ['@id', '@type', 'name', 'description', 'dateAdded', 'depiction'],
+  RepositoryCollection: [
+    '@id',
+    '@type',
+    'name',
+    'description',
+    'dateAdded',
+    'depiction',
+  ],
   'ldac:DataReuseLicense': [
     '@id',
     '@type',
     'name',
     'description',
+    'dateAdded',
     'depiction',
     'ldac:allowTextIndex',
     'isRef_sameAs',
     'isRef_isPartOf',
   ],
-  Place: ['@id', '@type', 'name', 'description', 'depiction', 'isRef_geo'],
+  Place: [
+    '@id',
+    '@type',
+    'name',
+    'description',
+    'dateAdded',
+    'depiction',
+    'isRef_geo',
+  ],
   Geometry: ['@id', '@type', '.latitude', '.longitude', 'asWKT'],
   File: ['@id', '@type', '.folder', '.filename', 'isRef_isPartOf'],
 }
