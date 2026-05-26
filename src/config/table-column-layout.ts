@@ -20,6 +20,7 @@ const HEADER_LAYOUTS: Record<string, TableColumnLayout> = {
   },
   datecreated: { widthClassName: 'col-width-date', wrapMode: 'nowrap' },
   dateadded: { widthClassName: 'col-width-date', wrapMode: 'nowrap' },
+  ispublishable: { widthClassName: 'col-width-xs', wrapMode: 'nowrap' },
   depiction: { widthClassName: 'col-width-depiction', wrapMode: 'clamp-2' },
   isref_haspart: { widthClassName: 'col-width-files', wrapMode: 'clamp-2' },
   isref_creator: {

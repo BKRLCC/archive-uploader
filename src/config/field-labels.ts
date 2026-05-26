@@ -7,6 +7,7 @@ const FIELD_LABELS: Record<string, string> = {
   description: '📄 Description',
   dateCreated: '📅 Date Created',
   dateAdded: '🗓️ Date Added',
+  isPublishable: '🌐 Publish',
   depiction: '🖼️ Img',
   isRef_creator: '👤 Creators',
   isRef_contributor: '👥 Contributors',

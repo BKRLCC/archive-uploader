@@ -74,6 +74,9 @@ export default function EditDrawer({
       if (!String(updatedValues.dateAdded ?? '').trim()) {
         updatedValues.dateAdded = getTodayIsoDate()
       }
+      if (!String(updatedValues.isPublishable ?? '').trim()) {
+        updatedValues.isPublishable = 'FALSE'
+      }
       Object.entries(virtualValues).forEach(([field, value]) => {
         const trimmed = String(value ?? '').trim()
         if (trimmed) updatedValues[field] = trimmed

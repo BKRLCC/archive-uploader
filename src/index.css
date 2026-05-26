@@ -511,6 +511,10 @@ textarea {
   width: 9rem;
 }
 
+.sheet-table .col-width-xs {
+  width: 5rem;
+}
+
 .sheet-table .col-width-default {
   width: 8rem;
 }

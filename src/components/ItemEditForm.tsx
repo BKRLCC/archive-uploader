@@ -382,6 +382,7 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
           const isTypeField = fieldName === '@type'
           const isDateCreatedField = fieldName === 'dateCreated'
           const isDateAddedField = fieldName === 'dateAdded'
+          const isBooleanField = fieldName === 'isPublishable'
           const isDescriptionField = fieldName === 'description'
           const isDepictionField = fieldName === DEPICTION_FIELD_NAME
           const isFileLinksField =
@@ -436,8 +437,14 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
               ) : isDateAddedField ? (
                 <span className="edit-field-readonly">
                   {currentValue || '—'}
-                </span>
-              ) : isDateCreatedField ? (
+                </span>              ) : isBooleanField ? (
+                <input
+                  type="checkbox"
+                  checked={currentValue === 'TRUE'}
+                  onChange={(e) => {
+                    setFieldValue(fieldName, e.target.checked ? 'TRUE' : 'FALSE')
+                  }}
+                />              ) : isDateCreatedField ? (
                 <input
                   type="date"
                   value={currentValue}

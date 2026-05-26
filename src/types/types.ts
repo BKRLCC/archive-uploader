@@ -53,6 +53,7 @@ export type Language = BaseItem & {}
 // https://www.ldaca.edu.au/resources/user-guides/crate-o/convert-spreadsheet/#objects
 export type RepositoryObject = BaseItem & {
   dateCreated?: string
+  isPublishable?: boolean
   isRef_inLanguage?: string
   isRef_creator?: string
   isRef_contributor?: string
@@ -129,6 +130,7 @@ export const ENTITY_FIELD_REGISTRY: {
     'description',
     'dateCreated',
     'dateAdded',
+    'isPublishable',
     'depiction',
     'isRef_inLanguage',
     'isRef_creator',
@@ -254,6 +256,7 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     'description',
     'dateCreated',
     'dateAdded',
+    'isPublishable',
     'depiction',
     'isRef_inLanguage',
     'isRef_creator',

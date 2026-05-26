@@ -144,6 +144,9 @@ export default function BulkAddPopup({
         if (!String(rowValues.dateAdded ?? '').trim()) {
           rowValues.dateAdded = getTodayIsoDate()
         }
+        if (!String(rowValues.isPublishable ?? '').trim()) {
+          rowValues.isPublishable = 'FALSE'
+        }
 
         if (isImagePreviewExtension(getFileExtension(relativePath))) {
           rowValues.depiction = relativePath
