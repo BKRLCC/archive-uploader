@@ -16,7 +16,11 @@ import { spreadsheets, type SpreadsheetType } from './types/types'
 import { deriveFileRowsFromItems } from './helpers/file-linkage'
 import {
   DEPICTION_IMAGE_EXTENSIONS,
+  DEPICTION_FIELD_NAME,
+  getDepictionThumbnailRelativePath,
   hasAllowedDepictionExtension,
+  normalizeDepictionRelativePath,
+  THUMBNAIL_SIZE_PX,
 } from './config/depiction-config'
 import {
   isVideoPreviewExtension,
@@ -26,6 +30,7 @@ import { updateElectronApp } from 'update-electron-app'
 import contextMenu from 'electron-context-menu'
 import ffmpeg from 'fluent-ffmpeg'
 import ffmpegPath from 'ffmpeg-static'
+import sharp from 'sharp'
 
 // Must be called before app is ready
 protocol.registerSchemesAsPrivileged([
@@ -107,6 +112,74 @@ contextMenu({
 function isPathWithin(parentPath: string, targetPath: string): boolean {
   const rel = path.relative(parentPath, targetPath)
   return rel !== '' && !rel.startsWith('..') && !path.isAbsolute(rel)
+}
+
+async function writeDepictionThumbnail(
+  archiveFolderAbsolute: string,
+  depictionPath: string,
+): Promise<string | null> {
+  const normalizedDepictionPath = normalizeDepictionRelativePath(depictionPath)
+  if (!normalizedDepictionPath) return null
+
+  const sourceAbsolute = path.resolve(
+    archiveFolderAbsolute,
+    normalizedDepictionPath,
+  )
+  if (!isPathWithin(archiveFolderAbsolute, sourceAbsolute)) {
+    return null
+  }
+  if (!hasAllowedDepictionExtension(sourceAbsolute)) {
+    return null
+  }
+
+  let sourceStat: fs.Stats
+  try {
+    sourceStat = await fs.promises.stat(sourceAbsolute)
+  } catch {
+    return null
+  }
+  if (!sourceStat.isFile()) {
+    return null
+  }
+
+  const thumbnailRelativePath = getDepictionThumbnailRelativePath(
+    normalizedDepictionPath,
+  )
+  if (!thumbnailRelativePath) {
+    return null
+  }
+
+  const thumbnailAbsolute = path.resolve(
+    archiveFolderAbsolute,
+    thumbnailRelativePath,
+  )
+  if (!isPathWithin(archiveFolderAbsolute, thumbnailAbsolute)) {
+    return null
+  }
+
+  try {
+    const existingThumbStat = await fs.promises.stat(thumbnailAbsolute)
+    if (
+      existingThumbStat.isFile() &&
+      existingThumbStat.mtimeMs >= sourceStat.mtimeMs
+    ) {
+      return thumbnailRelativePath
+    }
+  } catch {
+    // Thumbnail does not exist or is unreadable; regenerate.
+  }
+
+  await fs.promises.mkdir(path.dirname(thumbnailAbsolute), { recursive: true })
+  await sharp(sourceAbsolute)
+    .rotate()
+    .resize(THUMBNAIL_SIZE_PX, THUMBNAIL_SIZE_PX, {
+      fit: 'cover',
+      position: 'attention',
+    })
+    .jpeg({ quality: 72, mozjpeg: true })
+    .toFile(thumbnailAbsolute)
+
+  return thumbnailRelativePath
 }
 
 // Auto-update from GitHub Releases (only in production)
@@ -316,6 +389,16 @@ ipcMain.handle(
       const col = headers.indexOf(key)
       if (col !== -1) rows[dataRowIndex][col] = value
     }
+
+    const depictionColumn = headers.indexOf(DEPICTION_FIELD_NAME)
+    if (depictionColumn >= 0) {
+      const archiveFolderAbsolute = path.resolve(path.dirname(xlsxPath))
+      await writeDepictionThumbnail(
+        archiveFolderAbsolute,
+        String(rows[dataRowIndex][depictionColumn] ?? ''),
+      )
+    }
+
     const newSheet = XLSX.utils.aoa_to_sheet(rows)
     workbook.Sheets[actualName] = newSheet
     await fs.promises.writeFile(
@@ -453,6 +536,16 @@ ipcMain.handle(
       }
     }
     const newRow = headers.map((h) => values[h] ?? '')
+
+    const depictionColumn = headers.indexOf(DEPICTION_FIELD_NAME)
+    if (depictionColumn >= 0) {
+      const archiveFolderAbsolute = path.resolve(path.dirname(xlsxPath))
+      await writeDepictionThumbnail(
+        archiveFolderAbsolute,
+        String(newRow[depictionColumn] ?? ''),
+      )
+    }
+
     rows.push(newRow)
     workbook.Sheets[actualName] = XLSX.utils.aoa_to_sheet(rows)
     await fs.promises.writeFile(
@@ -811,6 +904,8 @@ ipcMain.handle(
         .on('error', (error) => reject(error))
         .run()
     })
+
+      await writeDepictionThumbnail(archiveFolderAbsolute, outputRelativePath)
 
     return {
       depictionPath: outputRelativePath.replace(/\\/g, '/'),

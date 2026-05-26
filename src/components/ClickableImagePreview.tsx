@@ -1,12 +1,20 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import ImagePreviewPopup from './ImagePreviewPopup'
 import './ClickableImagePreview.css'
 
 const ClickableImagePreview: React.FC<{
   imageUrl: string
+  popupImageUrl?: string
   altText?: string
-}> = ({ imageUrl, altText }) => {
+}> = ({ imageUrl, popupImageUrl, altText }) => {
   const [isPopupOpen, setPopupOpen] = useState(false)
+  const [hasError, setHasError] = useState(false)
+
+  useEffect(() => {
+    setHasError(false)
+  }, [imageUrl])
+
+  if (hasError) return null
 
   return (
     <>
@@ -16,12 +24,13 @@ const ClickableImagePreview: React.FC<{
         className="clickable-thumbnail"
         loading="lazy"
         decoding="async"
+        onError={() => setHasError(true)}
         onClick={() => setPopupOpen(true)}
       />
       <ImagePreviewPopup
         isOpen={isPopupOpen}
         onClose={() => setPopupOpen(false)}
-        imageUrl={imageUrl}
+        imageUrl={popupImageUrl ?? imageUrl}
         altText={altText}
       />
     </>

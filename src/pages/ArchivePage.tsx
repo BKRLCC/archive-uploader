@@ -22,7 +22,7 @@ interface BulkEditingRows {
   sheetName: string
 }
 
-const VIRTUAL_ROW_HEIGHT_PX = 52
+const VIRTUAL_ROW_HEIGHT_PX = 72
 const VIRTUAL_OVERSCAN_ROWS = 10
 
 function sheetStateFromData(data: SheetData | null): SheetState {
@@ -337,7 +337,10 @@ export default function ArchivePage() {
             {windowedRows.map(({ row, rowIndex }) => (
               <tr
                 key={rowIndex}
-                className={selectedRows.has(rowIndex) ? 'selected-row' : ''}
+                className={[
+                  selectedRows.has(rowIndex) ? 'selected-row' : '',
+                  rowIndex % 2 === 0 ? 'row-even' : 'row-odd',
+                ].filter(Boolean).join(' ')}
               >
                 <td className="select-row-cell">
                   <input

@@ -8,6 +8,7 @@ import {
 import {
   DEPICTION_FIELD_NAME,
   DEPICTION_FOLDER_HINT,
+  getDepictionThumbnailRelativePath,
   hasAllowedDepictionExtension,
 } from '../config/depiction-config'
 import { useAppSelector } from '../ducks/hooks'
@@ -389,10 +390,12 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
 
           const previewPath =
             isDepictionField && currentValue.trim()
-              ? `${archiveFolderPath.replace(/\\/g, '/')}/${currentValue
-                  .trim()
-                  .replace(/^[/\\]+/, '')
-                  .replace(/\\/g, '/')}`
+              ? (() => {
+                  const thumbnailRelativePath =
+                    getDepictionThumbnailRelativePath(currentValue)
+                  if (!thumbnailRelativePath) return ''
+                  return `${archiveFolderPath.replace(/\\/g, '/')}/${thumbnailRelativePath}`
+                })()
               : ''
 
           return (

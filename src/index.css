@@ -398,12 +398,12 @@ textarea {
   font-weight: 600;
 }
 
-.sheet-table tbody tr:nth-child(even) {
+.sheet-table tbody tr.row-even {
   background: rgba(0, 0, 0, 0.02);
 }
 
 .sheet-table.virtualized-table tbody tr {
-  height: 52px;
+  height: 72px;
 }
 
 .virtual-spacer-row td {
@@ -432,18 +432,18 @@ textarea {
 }
 
 .depiction-thumb-header {
-  width: 52px;
+  width: 72px;
 }
 
 .depiction-thumb-cell {
-  width: 52px;
-  min-width: 52px;
+  width: 72px;
+  min-width: 72px;
   padding: 0.25em !important;
 }
 
 .depiction-thumb {
-  width: 40px;
-  height: 40px;
+  width: 60px;
+  height: 60px;
   object-fit: cover;
   display: block;
   border-radius: 4px;
@@ -451,9 +451,10 @@ textarea {
 }
 
 .depiction-thumb-cell .clickable-thumbnail {
-  width: 40px;
-  height: 40px;
+  width: 60px;
+  height: 60px;
   object-fit: cover;
+  cursor: zoom-in;
 }
 
 .edit-field .clickable-thumbnail {

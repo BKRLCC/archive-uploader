@@ -6,6 +6,7 @@ import EditDrawer from './EditDrawer'
 import EditRootDatasetForm from './EditRootDatasetForm'
 import Drawer from './Drawer'
 import ClickableImagePreview from './ClickableImagePreview'
+import { getDepictionThumbnailRelativePath } from '../config/depiction-config'
 import { useAppDispatch } from '../ducks/hooks'
 import { loadTagVocabulariesFromFolder } from '../ducks/tags-loader'
 import { setTagVocabularies, setTagsError, setTagsLoading } from '../ducks/tags'
@@ -35,7 +36,7 @@ interface Props {
   xlsxPath: string
 }
 
-const VIRTUAL_ROW_HEIGHT_PX = 52
+const VIRTUAL_ROW_HEIGHT_PX = 72
 const VIRTUAL_OVERSCAN_ROWS = 10
 
 export default function ArchiveView({ xlsxPath }: Props) {
@@ -363,7 +364,10 @@ export default function ArchiveView({ xlsxPath }: Props) {
             {windowedRows.map(({ row, rowIndex }) => (
               <tr
                 key={rowIndex}
-                className={selectedRows.has(rowIndex) ? 'selected-row' : ''}
+                className={[
+                  selectedRows.has(rowIndex) ? 'selected-row' : '',
+                  rowIndex % 2 === 0 ? 'row-even' : 'row-odd',
+                ].filter(Boolean).join(' ')}
               >
                 <td className="select-row-cell">
                   <input
@@ -390,17 +394,24 @@ export default function ArchiveView({ xlsxPath }: Props) {
                 </td>
                 {hasDepiction && (
                   <td className="depiction-thumb-cell">
-                    {String(row[depictionIndex] ?? '').trim() ? (
+                    {(() => {
+                      const depictionPath = String(
+                        row[depictionIndex] ?? '',
+                      ).trim()
+                      const thumbnailPath =
+                        getDepictionThumbnailRelativePath(depictionPath)
+                      if (!thumbnailPath) return null
+
+                      const folderUrl = folder.replace(/\\/g, '/')
+                      const canonicalUrl = `localfile://${folderUrl}/${depictionPath.replace(/^[/\\]+/, '').replace(/\\/g, '/')}`
+                      return (
                       <ClickableImagePreview
-                        imageUrl={`localfile://${`${folder.replace(/\\/g, '/')}/${String(
-                          row[depictionIndex] ?? '',
-                        )
-                          .trim()
-                          .replace(/^[/\\]+/, '')
-                          .replace(/\\/g, '/')}`}`}
+                        imageUrl={`localfile://${folderUrl}/${thumbnailPath}`}
+                        popupImageUrl={canonicalUrl}
                         altText="Depiction Thumbnail"
                       />
-                    ) : null}
+                      )
+                    })()}
                   </td>
                 )}
                 {visibleIndices.map((i) => (
