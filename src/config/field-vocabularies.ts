@@ -30,6 +30,7 @@ export const FIELD_VOCABULARIES: Record<string, ControlledVocabularySource> = {
   isRef_inLanguage: 'Languages',
   isRef_creator: 'People',
   isRef_contributor: 'People',
+  isRef_enteredBy: 'People',
   isRef_mentions: 'People', // People referenced or depicted (schema:mentions)
   isRef_geo: 'Places',
   isRef_sameAs: 'Licenses',

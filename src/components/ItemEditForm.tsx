@@ -437,14 +437,19 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
               ) : isDateAddedField ? (
                 <span className="edit-field-readonly">
                   {currentValue || '—'}
-                </span>              ) : isBooleanField ? (
+                </span>
+              ) : isBooleanField ? (
                 <input
                   type="checkbox"
                   checked={currentValue === 'TRUE'}
                   onChange={(e) => {
-                    setFieldValue(fieldName, e.target.checked ? 'TRUE' : 'FALSE')
+                    setFieldValue(
+                      fieldName,
+                      e.target.checked ? 'TRUE' : 'FALSE',
+                    )
                   }}
-                />              ) : isDateCreatedField ? (
+                />
+              ) : isDateCreatedField ? (
                 <input
                   type="date"
                   value={currentValue}
@@ -658,32 +663,45 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                 />
               ) : isPeopleControlled ? (
                 <>
-                  <input
-                    type="text"
-                    placeholder="Search people by name"
-                    value={peopleSearch}
-                    onChange={(e) => {
+                  <Select
+                    isClearable
+                    isDisabled={peopleOptions.length === 0}
+                    options={renderedPeopleOptions}
+                    value={
+                      renderedPeopleOptions.find(
+                        (option) => option.value === currentValue,
+                      ) ||
+                      (currentValue
+                        ? {
+                            value: currentValue,
+                            label: currentValue,
+                            searchText: currentValue,
+                          }
+                        : null)
+                    }
+                    onInputChange={(inputValue) => {
                       setVocabSearch((prev) => ({
                         ...prev,
-                        [fieldName]: e.target.value,
+                        [fieldName]: inputValue,
                       }))
                     }}
-                    disabled={peopleOptions.length === 0}
-                  />
-                  <select
-                    value={currentValue}
-                    onChange={(e) => {
-                      setFieldValue(fieldName, e.target.value)
+                    onChange={(selected) => {
+                      const option = selected as VocabOption | null
+                      setFieldValue(fieldName, option?.value ?? '')
                     }}
-                    disabled={peopleOptions.length === 0}
-                  >
-                    <option value="">Select person…</option>
-                    {renderedPeopleOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
+                    placeholder={
+                      peopleOptions.length === 0
+                        ? 'People vocabulary unavailable'
+                        : 'Select person…'
+                    }
+                    styles={{
+                      control: (base) => ({
+                        ...base,
+                        borderColor: '#a62b2b',
+                        minHeight: 34,
+                      }),
+                    }}
+                  />
                   {peopleOptions.length === 0 && (
                     <span className="edit-field-readonly">
                       People vocabulary is unavailable.

@@ -27,6 +27,10 @@ const HEADER_LAYOUTS: Record<string, TableColumnLayout> = {
     widthClassName: 'col-width-people',
     wrapMode: 'clamp-2',
   },
+  isref_enteredby: {
+    widthClassName: 'col-width-people',
+    wrapMode: 'clamp-2',
+  },
   isref_contributor: {
     widthClassName: 'col-width-people',
     wrapMode: 'clamp-2',
