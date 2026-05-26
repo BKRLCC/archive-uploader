@@ -5,7 +5,7 @@ const FIELD_LABELS: Record<string, string> = {
   '@type': '🧩 Type',
   name: '📝 Name',
   description: '📄 Description',
-  depiction: '🖼️ Image',
+  depiction: '🖼️ Img',
   isRef_creator: '👤 Creators',
   isRef_contributor: '👥 Contributors',
   isRef_mentions: '🧑‍🧑‍🧒‍🧒 Depicted',

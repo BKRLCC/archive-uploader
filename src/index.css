@@ -413,17 +413,42 @@ textarea {
 }
 
 .edit-btn-cell {
-  width: 2em;
+  width: 1.8em;
+  min-width: 1.8em;
   text-align: center;
+  cursor: default;
+  padding-left: 0.3em !important;
+  padding-right: 0.3em !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+
+.edit-btn-header {
+  padding-top: 0.4em !important;
+  padding-bottom: 0.4em !important;
+}
+
+.row-edit-btn {
+  border: 0;
+  background: transparent;
   cursor: pointer;
+  font-size: 0.95em;
+  line-height: 1;
+  padding: 0;
+  color: #4a4a4a;
+}
+
+.row-edit-btn:hover {
+  color: #a62b2b;
 }
 
 .select-row-cell {
-  width: 2.25em;
-  min-width: 2.25em;
+  width: 2em;
+  min-width: 2em;
   text-align: center;
-  padding-left: 0.4em;
-  padding-right: 0.4em;
+  padding-left: 0.3em;
+  padding-right: 0.3em;
 }
 
 .select-row-cell input {
@@ -432,11 +457,10 @@ textarea {
 }
 
 .depiction-thumb-header {
-  width: 72px;
+  min-width: 72px;
 }
 
 .depiction-thumb-cell {
-  width: 72px;
   min-width: 72px;
   padding: 0.25em !important;
 }
@@ -455,6 +479,59 @@ textarea {
   height: 60px;
   object-fit: cover;
   cursor: zoom-in;
+}
+
+.sheet-table .col-width-name {
+  width: 12rem;
+}
+
+.sheet-table .col-width-description {
+  width: 16rem;
+}
+
+.sheet-table .col-width-files {
+  width: 18rem;
+}
+
+.sheet-table .col-width-depiction {
+  width: 60px;
+}
+
+.sheet-table .col-width-people {
+  width: 11rem;
+}
+
+.sheet-table .col-width-language {
+  width: 10rem;
+}
+
+.sheet-table .col-width-tag {
+  width: 10rem;
+}
+
+.sheet-table .col-width-medium {
+  width: 10rem;
+}
+
+.sheet-table .table-cell-text {
+  display: block;
+}
+
+.sheet-table td.col-wrap-nowrap .table-cell-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sheet-table td.col-wrap-clamp-2 .table-cell-text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.25;
+  max-height: 3.75em;
 }
 
 .edit-field .clickable-thumbnail {
@@ -613,6 +690,38 @@ textarea {
   font-size: 0.9em;
 }
 
+.collection-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.collection-header-text h1 {
+  margin: 0 0 0.25rem;
+}
+
+.collection-description {
+  margin: 0.25rem 0;
+  color: #444;
+  font-size: 0.95em;
+}
+
+.collection-meta-ids {
+  margin: 0.25rem 0 0;
+  color: #888;
+  font-size: 0.8em;
+  font-family: monospace;
+}
+
+.collection-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  padding-top: 0.25rem;
+}
 .archive-page {
   flex: 1;
   min-height: 0;

@@ -1,5 +1,6 @@
 export const DEPICTION_FIELD_NAME = 'depiction'
 export const THUMBNAILS_FOLDER_NAME = '.thumbs'
+export const GENERATED_DEPICTIONS_FOLDER_NAME = '.depictions'
 export const THUMBNAIL_SIZE_PX = 150
 
 export const DEPICTION_IMAGE_EXTENSIONS = [

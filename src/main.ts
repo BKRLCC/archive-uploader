@@ -17,6 +17,7 @@ import { deriveFileRowsFromItems } from './helpers/file-linkage'
 import {
   DEPICTION_IMAGE_EXTENSIONS,
   DEPICTION_FIELD_NAME,
+  GENERATED_DEPICTIONS_FOLDER_NAME,
   getDepictionThumbnailRelativePath,
   hasAllowedDepictionExtension,
   normalizeDepictionRelativePath,
@@ -860,7 +861,7 @@ ipcMain.handle(
 
     const depictionsFolderAbsolute = path.join(
       archiveFolderAbsolute,
-      'depictions',
+      GENERATED_DEPICTIONS_FOLDER_NAME,
     )
     await fs.promises.mkdir(depictionsFolderAbsolute, { recursive: true })
 
@@ -873,7 +874,10 @@ ipcMain.handle(
         .replace(/^-+|-+$/g, '') || 'video'
 
     let fileName = `${stem}-depiction.jpg`
-    let outputRelativePath = path.posix.join('depictions', fileName)
+    let outputRelativePath = path.posix.join(
+      GENERATED_DEPICTIONS_FOLDER_NAME,
+      fileName,
+    )
     let outputAbsolutePath = path.join(
       archiveFolderAbsolute,
       outputRelativePath,
@@ -884,7 +888,10 @@ ipcMain.handle(
       try {
         await fs.promises.access(outputAbsolutePath)
         fileName = `${stem}-depiction-${counter}.jpg`
-        outputRelativePath = path.posix.join('depictions', fileName)
+        outputRelativePath = path.posix.join(
+          GENERATED_DEPICTIONS_FOLDER_NAME,
+          fileName,
+        )
         outputAbsolutePath = path.join(
           archiveFolderAbsolute,
           outputRelativePath,
@@ -905,7 +912,7 @@ ipcMain.handle(
         .run()
     })
 
-      await writeDepictionThumbnail(archiveFolderAbsolute, outputRelativePath)
+    await writeDepictionThumbnail(archiveFolderAbsolute, outputRelativePath)
 
     return {
       depictionPath: outputRelativePath.replace(/\\/g, '/'),

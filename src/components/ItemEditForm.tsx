@@ -1,4 +1,9 @@
-import React, { forwardRef, useImperativeHandle, useMemo, useState } from 'react'
+import React, {
+  forwardRef,
+  useImperativeHandle,
+  useMemo,
+  useState,
+} from 'react'
 import Select from 'react-select'
 import {
   getControlledVocabularyForField,
@@ -408,7 +413,9 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                   {currentValue || '—'}
                 </span>
               ) : isTypeField ? (
-                <span className="edit-field-readonly">{currentValue || '—'}</span>
+                <span className="edit-field-readonly">
+                  {currentValue || '—'}
+                </span>
               ) : isDepictionField ? (
                 <>
                   <input

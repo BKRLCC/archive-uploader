@@ -11,6 +11,7 @@ import { useAppDispatch } from '../ducks/hooks'
 import { loadTagVocabulariesFromFolder } from '../ducks/tags-loader'
 import { setTagVocabularies, setTagsError, setTagsLoading } from '../ducks/tags'
 import { getFieldDisplayLabel } from '../config/field-labels'
+import { getTableColumnLayout } from '../config/table-column-layout'
 
 type SheetState = SheetData | null | 'empty' | 'missing'
 
@@ -92,7 +93,8 @@ export default function ArchiveView({ xlsxPath }: Props) {
   const loadAll = useCallback(async () => {
     const names = await window.api.getSheetNames(xlsxPath)
     setSheetNames(names)
-    if (names.length > 0) setActiveTab(names[0])
+    const firstVisible = names.find((n) => n !== 'RootDataset')
+    if (firstVisible) setActiveTab(firstVisible)
     const results = await Promise.all(
       names.map(async (name) => {
         const data = await window.api.readSheet(xlsxPath, name)
@@ -302,11 +304,15 @@ export default function ArchiveView({ xlsxPath }: Props) {
       .map((h, i) => ({ h, i }))
       .filter(({ h }) => !h.startsWith('@') && h !== 'depiction')
       .map(({ i }) => i)
+    const depictionLayout = hasDepiction
+      ? getTableColumnLayout('depiction')
+      : null
 
     const visibleCount = Math.ceil(tableViewportHeight / VIRTUAL_ROW_HEIGHT_PX)
     const windowStart = Math.max(
       0,
-      Math.floor(tableScrollTop / VIRTUAL_ROW_HEIGHT_PX) - VIRTUAL_OVERSCAN_ROWS,
+      Math.floor(tableScrollTop / VIRTUAL_ROW_HEIGHT_PX) -
+        VIRTUAL_OVERSCAN_ROWS,
     )
     const windowEnd = Math.min(
       visibleRows.length,
@@ -316,10 +322,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
     const topSpacerHeight = windowStart * VIRTUAL_ROW_HEIGHT_PX
     const bottomSpacerHeight =
       (visibleRows.length - windowEnd) * VIRTUAL_ROW_HEIGHT_PX
-    const columnCount =
-      2 +
-      (hasDepiction ? 1 : 0) +
-      visibleIndices.length
+    const columnCount = 2 + (hasDepiction ? 1 : 0) + visibleIndices.length
 
     return (
       <div
@@ -333,6 +336,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
         <table className="sheet-table virtualized-table">
           <thead>
             <tr>
+              <th className="edit-btn-cell edit-btn-header"></th>
               <th className="select-row-cell">
                 <input
                   type="checkbox"
@@ -343,15 +347,28 @@ export default function ArchiveView({ xlsxPath }: Props) {
                   aria-label="Select all rows"
                 />
               </th>
-              <th></th>
               {hasDepiction && (
-                <th className="depiction-thumb-header">
+                <th
+                  className={[
+                    'depiction-thumb-header',
+                    depictionLayout?.widthClassName,
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                >
                   {getFieldDisplayLabel('depiction')}
                 </th>
               )}
-              {visibleIndices.map((i) => (
-                <th key={i}>{getFieldDisplayLabel(sheet.headers[i])}</th>
-              ))}
+              {visibleIndices.map((i) => {
+                const headerName = sheet.headers[i] ?? ''
+                const layout = getTableColumnLayout(headerName)
+                const className = layout.widthClassName ?? undefined
+                return (
+                  <th key={i} className={className}>
+                    {getFieldDisplayLabel(headerName)}
+                  </th>
+                )
+              })}
             </tr>
           </thead>
           <tbody>
@@ -367,8 +384,26 @@ export default function ArchiveView({ xlsxPath }: Props) {
                 className={[
                   selectedRows.has(rowIndex) ? 'selected-row' : '',
                   rowIndex % 2 === 0 ? 'row-even' : 'row-odd',
-                ].filter(Boolean).join(' ')}
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
               >
+                <td className="edit-btn-cell">
+                  <button
+                    type="button"
+                    className="row-edit-btn"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setEditingRootDataset(false)
+                      setAddingItem(false)
+                      setEditingRow({ rowIndex, row, sheetName })
+                    }}
+                    aria-label={`Edit row ${rowIndex + 1}`}
+                    title="Edit row"
+                  >
+                    ✏️
+                  </button>
+                </td>
                 <td className="select-row-cell">
                   <input
                     type="checkbox"
@@ -381,19 +416,15 @@ export default function ArchiveView({ xlsxPath }: Props) {
                     aria-label={`Select row ${rowIndex + 1}`}
                   />
                 </td>
-                <td
-                  className="edit-btn-cell"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setEditingRootDataset(false)
-                    setAddingItem(false)
-                    setEditingRow({ rowIndex, row, sheetName })
-                  }}
-                >
-                  ✏️
-                </td>
                 {hasDepiction && (
-                  <td className="depiction-thumb-cell">
+                  <td
+                    className={[
+                      'depiction-thumb-cell',
+                      depictionLayout?.widthClassName,
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
+                  >
                     {(() => {
                       const depictionPath = String(
                         row[depictionIndex] ?? '',
@@ -405,24 +436,41 @@ export default function ArchiveView({ xlsxPath }: Props) {
                       const folderUrl = folder.replace(/\\/g, '/')
                       const canonicalUrl = `localfile://${folderUrl}/${depictionPath.replace(/^[/\\]+/, '').replace(/\\/g, '/')}`
                       return (
-                      <ClickableImagePreview
-                        imageUrl={`localfile://${folderUrl}/${thumbnailPath}`}
-                        popupImageUrl={canonicalUrl}
-                        altText="Depiction Thumbnail"
-                      />
+                        <ClickableImagePreview
+                          imageUrl={`localfile://${folderUrl}/${thumbnailPath}`}
+                          popupImageUrl={canonicalUrl}
+                          altText="Depiction Thumbnail"
+                        />
                       )
                     })()}
                   </td>
                 )}
-                {visibleIndices.map((i) => (
-                  <td key={i}>{row[i] ?? ''}</td>
-                ))}
+                {visibleIndices.map((i) => {
+                  const headerName = sheet.headers[i] ?? ''
+                  const layout = getTableColumnLayout(headerName)
+                  const className = [
+                    layout.widthClassName,
+                    layout.wrapMode === 'clamp-2'
+                      ? 'col-wrap-clamp-2'
+                      : 'col-wrap-nowrap',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')
+                  return (
+                    <td key={i} className={className}>
+                      <span className="table-cell-text">{row[i] ?? ''}</span>
+                    </td>
+                  )
+                })}
               </tr>
             ))}
 
             {bottomSpacerHeight > 0 && (
               <tr className="virtual-spacer-row" aria-hidden="true">
-                <td colSpan={columnCount} style={{ height: bottomSpacerHeight }} />
+                <td
+                  colSpan={columnCount}
+                  style={{ height: bottomSpacerHeight }}
+                />
               </tr>
             )}
           </tbody>
@@ -432,15 +480,43 @@ export default function ArchiveView({ xlsxPath }: Props) {
   }
 
   const rootDatasetSheet = sheets['RootDataset'] ?? null
+  const rdValues = Object.fromEntries(
+    (rootDatasetSheet && typeof rootDatasetSheet !== 'string'
+      ? rootDatasetSheet.rows
+      : []
+    ).map((r) => [r[0] ?? '', r[1] ?? '']),
+  )
   const drawerOpen =
     editingRootDataset || editingRow !== null || addingItem !== false
 
   return (
     <div className="archive-page" onClick={closeDrawer}>
       <div className="archive-main">
-        <div className="section-toolbar">
-          <h1>⭐ Metadata</h1>
-          <div>
+        <div className="collection-header">
+          <div className="collection-header-text">
+            <h1>{rdValues['name'] || 'Untitled collection'}</h1>
+            {rdValues['description'] && (
+              <p className="collection-description">
+                {rdValues['description']}
+              </p>
+            )}
+            <p className="collection-meta-ids">
+              <span>{rdValues['@id'] || ''}</span>
+              {rdValues['@id'] && rdValues['@type'] ? ' · ' : ''}
+              <span>{rdValues['@type'] || ''}</span>
+            </p>
+          </div>
+          <div className="collection-header-actions">
+            <button
+              className="refresh-btn"
+              onClick={(e) => {
+                e.stopPropagation()
+                closeDrawer()
+                setEditingRootDataset(true)
+              }}
+            >
+              ✏️ Edit
+            </button>
             <button
               className="refresh-btn"
               onClick={(e) => {
@@ -456,39 +532,22 @@ export default function ArchiveView({ xlsxPath }: Props) {
         </div>
 
         <div className="tab-bar">
-          {sheetNames.map((tab) => (
-            <button
-              key={tab}
-              className={`tab${activeTab === tab ? ' active' : ''}`}
-              onClick={(e) => {
-                e.stopPropagation()
-                setActiveTab(tab)
-                closeDrawer()
-              }}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-
-        {activeTab === 'RootDataset' && (
-          <section>
-            <div className="section-toolbar">
-              <h2>Root Dataset</h2>
+          {sheetNames
+            .filter((tab) => tab !== 'RootDataset')
+            .map((tab) => (
               <button
-                className="refresh-btn"
+                key={tab}
+                className={`tab${activeTab === tab ? ' active' : ''}`}
                 onClick={(e) => {
                   e.stopPropagation()
+                  setActiveTab(tab)
                   closeDrawer()
-                  setEditingRootDataset(true)
                 }}
               >
-                ✏️ Edit
+                {tab}
               </button>
-            </div>
-            {renderGenericTable(rootDatasetSheet, 'RootDataset tab is empty.')}
-          </section>
-        )}
+            ))}
+        </div>
 
         {activeTab === 'Files' && (
           <section>
@@ -512,8 +571,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
           </section>
         )}
 
-        {activeTab !== 'RootDataset' &&
-          activeTab !== 'Files' &&
+        {activeTab !== 'Files' &&
           (() => {
             const sheet = sheets[activeTab] ?? null
             const visibleRowIndices =
