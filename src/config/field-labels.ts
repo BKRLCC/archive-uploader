@@ -13,6 +13,7 @@ const FIELD_LABELS: Record<string, string> = {
   isRef_creator: '👤 Creators',
   isRef_contributor: '👥 Contributors',
   isRef_mentions: '🧑‍🧑‍🧒‍🧒 Depicted',
+  isRef_contentLocation: '📍 Content Location',
   isRef_inLanguage: '🗣️ Languages',
   isRef_hasPart: '📎 Files',
   isRef_geo: '📍 Place',

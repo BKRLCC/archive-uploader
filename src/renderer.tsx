@@ -14,11 +14,14 @@ import { loadLanguagesFromSpreadsheet } from './ducks/languages-loader'
 import { setLanguages, setLanguagesLoading } from './ducks/languages'
 import { setLoading, setPeople } from './ducks/people'
 import { loadPeopleFromSpreadsheet } from './ducks/people-loader'
+import { setPlaces, setPlacesLoading } from './ducks/places'
+import { loadPlacesFromSpreadsheet } from './ducks/places-loader'
 import { setTagVocabularies, setTagsError, setTagsLoading } from './ducks/tags'
 import { loadTagVocabulariesFromFolder } from './ducks/tags-loader'
 
 let hasBootstrappedLanguages = false
 let hasBootstrappedPeople = false
+let hasBootstrappedPlaces = false
 let hasBootstrappedTags = false
 
 function LanguagesBootstrap() {
@@ -58,6 +61,29 @@ function PeopleBootstrap() {
         dispatch(setPeople(people))
       } finally {
         dispatch(setLoading(false))
+      }
+    }
+
+    void run()
+  }, [dispatch])
+
+  return null
+}
+
+function PlacesBootstrap() {
+  const dispatch = useAppDispatch()
+
+  React.useEffect(() => {
+    if (hasBootstrappedPlaces) return
+    hasBootstrappedPlaces = true
+
+    const run = async () => {
+      dispatch(setPlacesLoading(true))
+      try {
+        const places = await loadPlacesFromSpreadsheet()
+        dispatch(setPlaces(places))
+      } finally {
+        dispatch(setPlacesLoading(false))
       }
     }
 
@@ -117,6 +143,7 @@ root.render(
     <Provider store={store}>
       <LanguagesBootstrap />
       <PeopleBootstrap />
+      <PlacesBootstrap />
       <TagsBootstrap />
       <HashRouter>
         <Routes>

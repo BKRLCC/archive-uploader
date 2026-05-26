@@ -55,6 +55,7 @@ export type Language = BaseItem & {}
 export type RepositoryObject = BaseItem & {
   dateCreated?: string
   isPublishable?: boolean
+  isRef_contentLocation?: string
   isRef_inLanguage?: string
   isRef_creator?: string
   isRef_contributor?: string
@@ -135,6 +136,7 @@ export const ENTITY_FIELD_REGISTRY: {
     'isRef_enteredBy',
     'isPublishable',
     'depiction',
+    'isRef_contentLocation',
     'isRef_inLanguage',
     'isRef_creator',
     'isRef_contributor',
@@ -268,6 +270,7 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     'isRef_enteredBy',
     'isPublishable',
     'depiction',
+    'isRef_contentLocation',
     'isRef_inLanguage',
     'isRef_creator',
     'isRef_contributor',

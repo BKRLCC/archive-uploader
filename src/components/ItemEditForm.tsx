@@ -19,6 +19,7 @@ import {
 import { useAppSelector } from '../ducks/hooks'
 import { selectLanguages } from '../ducks/languages'
 import { selectPeople } from '../ducks/people'
+import { selectPlaces } from '../ducks/places'
 import { selectTagVocabularies } from '../ducks/tags'
 import { getEntityFieldModel, resolveEditableEntityType } from '../types/types'
 import { getFieldDisplayLabel } from '../config/field-labels'
@@ -117,6 +118,7 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
     )
 
     const people = useAppSelector(selectPeople)
+    const places = useAppSelector(selectPlaces)
     const languages = useAppSelector(selectLanguages)
     const tagVocabularies = useAppSelector(selectTagVocabularies)
 
@@ -145,6 +147,18 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
       }
     })
     const peopleOptionIds = new Set(peopleOptions.map((option) => option.value))
+
+    const placesOptions: VocabOption[] = places.map((place) => {
+      const id = place['@id']
+      const name = place.name
+      const label = `${name} (${id})`
+      return {
+        value: id,
+        label,
+        searchText: `${name} ${id}`.toLowerCase(),
+      }
+    })
+    const placesOptionIds = new Set(placesOptions.map((option) => option.value))
 
     const isHiddenField = (fieldName: string): boolean => {
       if (hiddenFieldSet.has(normalizeFieldName(fieldName))) {
@@ -271,10 +285,15 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
         }
 
         const source = getControlledVocabularyForField(field)
+        const isContentLocationField =
+          normalizeFieldName(field) === 'isref_contentlocation'
+        const isPlacesValidatedField =
+          source === 'Places' && isContentLocationField
         if (
           source !== 'People' &&
           source !== 'Languages' &&
-          source !== 'Tags'
+          source !== 'Tags' &&
+          !isPlacesValidatedField
         ) {
           continue
         }
@@ -307,6 +326,19 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
           for (const id of ids) {
             if (!languageOptionIds.has(id)) {
               return `✗ ${field} must be selected from Languages`
+            }
+          }
+          continue
+        }
+
+        if (isPlacesValidatedField) {
+          const ids = isMultiSelectField(field)
+            ? selectedValue.split(/,\s*/).filter(Boolean)
+            : [selectedValue]
+
+          for (const id of ids) {
+            if (!placesOptionIds.has(id)) {
+              return `✗ ${field} must be selected from Places`
             }
           }
           continue
@@ -390,6 +422,10 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
             normalizeFieldName(FILE_LINKS_FIELD_NAME)
           const vocabularySource = getControlledVocabularyForField(fieldName)
           const isPeopleControlled = vocabularySource === 'People'
+          const isContentLocationField =
+            normalizeFieldName(fieldName) === 'isref_contentlocation'
+          const isPlacesControlled =
+            vocabularySource === 'Places' && isContentLocationField
           const isLanguagesControlled = vocabularySource === 'Languages'
           const isTagsControlled = vocabularySource === 'Tags'
           const tagVocabulary = getTagVocabularyForField(fieldName)
@@ -621,6 +657,87 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                     </option>
                   ))}
                 </select>
+              ) : isPlacesControlled && isMultiSelectField(fieldName) ? (
+                <Select
+                  isMulti
+                  isDisabled={placesOptions.length === 0}
+                  options={placesOptions}
+                  value={currentValue
+                    .split(/,\s*/)
+                    .filter(Boolean)
+                    .map(
+                      (id) =>
+                        placesOptions.find((option) => option.value === id) || {
+                          value: id,
+                          label: id,
+                          searchText: id,
+                        },
+                    )}
+                  onChange={(selected) => {
+                    const ids = (selected as VocabOption[]).map(
+                      (option) => option.value,
+                    )
+                    setFieldValue(fieldName, ids.join(', '))
+                  }}
+                  placeholder={
+                    placesOptions.length === 0
+                      ? 'Places vocabulary unavailable'
+                      : 'Select places…'
+                  }
+                  styles={{
+                    multiValue: (base) => ({
+                      ...base,
+                      background: 'rgba(166,43,43,0.15)',
+                    }),
+                    multiValueLabel: (base) => ({ ...base, color: '#a62b2b' }),
+                    control: (base) => ({
+                      ...base,
+                      borderColor: '#a62b2b',
+                      minHeight: 34,
+                    }),
+                  }}
+                />
+              ) : isPlacesControlled ? (
+                <>
+                  <Select
+                    isClearable
+                    isDisabled={placesOptions.length === 0}
+                    options={placesOptions}
+                    value={
+                      placesOptions.find(
+                        (option) => option.value === currentValue,
+                      ) ||
+                      (currentValue
+                        ? {
+                            value: currentValue,
+                            label: currentValue,
+                            searchText: currentValue,
+                          }
+                        : null)
+                    }
+                    onChange={(selected) => {
+                      const option = selected as VocabOption | null
+                      setFieldValue(fieldName, option?.value ?? '')
+                    }}
+                    placeholder={
+                      placesOptions.length === 0
+                        ? 'Places vocabulary unavailable'
+                        : 'Select place…'
+                    }
+                    styles={{
+                      control: (base) => ({
+                        ...base,
+                        borderColor: '#a62b2b',
+                        minHeight: 34,
+                      }),
+                    }}
+                  />
+                  {placesOptions.length === 0 && (
+                    <span className="edit-field-readonly">
+                      Places vocabulary is unavailable.
+                    </span>
+                  )}
+                </>
               ) : isPeopleControlled && isMultiSelectField(fieldName) ? (
                 <Select
                   isMulti
