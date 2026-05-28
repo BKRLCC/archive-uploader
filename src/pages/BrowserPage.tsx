@@ -19,6 +19,7 @@ import {
   getArchiveWorkbookLabel,
   isArchiveEditableWorkbookPath,
 } from '../helpers/archive-workbooks'
+import { dataTypeLabels, labelToDataTypeMap } from '../config/datatype-labels'
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -33,10 +34,12 @@ const EMOJI = {
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 function emojiFor(entry: DirEntry, isArchiveEditable: boolean) {
-  if (entry.name === 'People' && entry.isDirectory) return '👥'
-  if (entry.name === 'Languages' && entry.isDirectory) return '🗣️'
-  if (entry.name === 'Places' && entry.isDirectory) return '📍'
-  if (entry.name === 'Licenses' && entry.isDirectory) return '📜'
+  // If it's a recognised type folder, show a specific emoji for that
+  const labelDataType = labelToDataTypeMap[entry.name]
+  if (labelDataType) {
+    return dataTypeLabels[labelDataType].icon
+  }
+
   if (entry.isDirectory) return EMOJI.folder
   if (isArchiveEditable) return '⭐'
   if (PREVIEWABLE_IMAGE_EXTENSIONS.has(entry.ext)) return EMOJI.image

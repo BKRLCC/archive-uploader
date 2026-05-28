@@ -1,7 +1,7 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { DataTypeLabels } from "../config/datatype-labels";
-import { UiIcons } from "../config/icons";
+import React from 'react'
+import { Link } from 'react-router-dom'
+import { dataTypeLabels } from '../config/datatype-labels'
+import { UiIcons } from '../config/icons'
 
 export default function HomePage() {
   return (
@@ -18,10 +18,10 @@ export default function HomePage() {
       </ul>
       <h2>How it works</h2>
       <p>
-        All your metadata is kept in Excel files called{" "}
+        All your metadata is kept in Excel files called{' '}
         <code>metadata.xlsx</code>. In the Archivist app, you will see these
-        files called "<code>⭐ Metadata</code>". You can make an{" "}
-        <code>⭐ Metadata</code> file in any folder by clicking the{" "}
+        files called "<code>⭐ Metadata</code>". You can make an{' '}
+        <code>⭐ Metadata</code> file in any folder by clicking the{' '}
         <span className="pretend-button">🌟 Create metadata file</span> button.
         When it comes to upload time, the app will read and combine all of these
         archive files.
@@ -32,15 +32,14 @@ export default function HomePage() {
       </p>
       <ul>
         <li>
-          {DataTypeLabels.People.icon}{" "}
-          {DataTypeLabels.People.label}
+          {dataTypeLabels.People.icon} {dataTypeLabels.People.label}
         </li>
         <li>
-          {DataTypeLabels.Places.icon} {DataTypeLabels.Places.label}
+          {dataTypeLabels.Places.icon} {dataTypeLabels.Places.label}
         </li>
         <li>
-          {DataTypeLabels["ldac:DataReuseLicense"].icon}{" "}
-          {DataTypeLabels["ldac:DataReuseLicense"].label}
+          {dataTypeLabels['ldac:DataReuseLicense'].icon}{' '}
+          {dataTypeLabels['ldac:DataReuseLicense'].label}
         </li>
       </ul>
       <h2>Get started: </h2>
@@ -55,5 +54,5 @@ export default function HomePage() {
         </Link>
       </p>
     </div>
-  );
+  )
 }

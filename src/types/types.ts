@@ -1,11 +1,13 @@
-import { DataTypeLabels } from '../config/datatype-labels'
+import { dataTypeLabels } from '../config/datatype-labels'
 
 export type ItemDataType =
   | 'Person'
+  | 'Organization'
   | 'RepositoryObject'
   | 'Language'
   | 'Dataset'
   | 'RepositoryCollection'
+  | 'Tag'
   | 'ldac:DataReuseLicense'
   | 'Place'
   | 'Geometry'
@@ -96,9 +98,11 @@ export type File = {
 // Maps each ItemDataType string to its TypeScript type, used to constrain TypeColumns.
 type ItemTypeMap = {
   Person: Person
+  Organization: BaseItem
   RepositoryObject: RepositoryObject
   Language: Language
   Dataset: BaseItem
+  Tag: BaseItem
   RepositoryCollection: BaseItem
   'ldac:DataReuseLicense': License
   Place: Place
@@ -143,6 +147,15 @@ export const ENTITY_FIELD_REGISTRY: {
     'isRef_hasPart',
     'isRef_mentions',
   ]),
+  Organization: defineEntityFields<BaseItem>()([
+    '@id',
+    '@type',
+    'name',
+    'description',
+    'dateAdded',
+    'isRef_enteredBy',
+    'depiction',
+  ]),
   Language: defineEntityFields<BaseItem>()([
     '@id',
     '@type',
@@ -153,6 +166,15 @@ export const ENTITY_FIELD_REGISTRY: {
     'depiction',
   ]),
   Dataset: defineEntityFields<BaseItem>()([
+    '@id',
+    '@type',
+    'name',
+    'description',
+    'dateAdded',
+    'isRef_enteredBy',
+    'depiction',
+  ]),
+  Tag: defineEntityFields<BaseItem>()([
     '@id',
     '@type',
     'name',
@@ -260,6 +282,15 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     'gender',
     'birthDate',
   ],
+  Organization: [
+    '@id',
+    '@type',
+    'name',
+    'description',
+    'dateAdded',
+    'isRef_enteredBy',
+    'depiction',
+  ],
   RepositoryObject: [
     '@id',
     '@type',
@@ -278,6 +309,15 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     'isRef_mentions',
   ],
   Language: [
+    '@id',
+    '@type',
+    'name',
+    'description',
+    'dateAdded',
+    'isRef_enteredBy',
+    'depiction',
+  ],
+  Tag: [
     '@id',
     '@type',
     'name',
@@ -360,12 +400,12 @@ export const spreadsheets: Record<SpreadsheetType, SpreadsheetSchema> = {
     folderName: '',
     tabs: [
       {
-        name: DataTypeLabels.RepositoryObject.label,
+        name: dataTypeLabels.RepositoryObject.label,
         type: 'RepositoryObject',
         headers: TypeColumns.RepositoryObject,
       },
       {
-        name: DataTypeLabels.File.label,
+        name: dataTypeLabels.File.label,
         type: 'File',
         headers: TypeColumns.File,
       },
@@ -375,7 +415,7 @@ export const spreadsheets: Record<SpreadsheetType, SpreadsheetSchema> = {
     folderName: 'People',
     tabs: [
       {
-        name: DataTypeLabels.Person.label,
+        name: dataTypeLabels.Person.label,
         type: 'Person',
         headers: TypeColumns.Person,
       },
@@ -385,7 +425,7 @@ export const spreadsheets: Record<SpreadsheetType, SpreadsheetSchema> = {
     folderName: 'Languages',
     tabs: [
       {
-        name: DataTypeLabels.Language.label,
+        name: dataTypeLabels.Language.label,
         type: 'Language',
         headers: TypeColumns.Language,
       },
@@ -395,12 +435,12 @@ export const spreadsheets: Record<SpreadsheetType, SpreadsheetSchema> = {
     folderName: 'Places',
     tabs: [
       {
-        name: DataTypeLabels.Place.label,
+        name: dataTypeLabels.Place.label,
         type: 'Place',
         headers: TypeColumns.Place,
       },
       {
-        name: DataTypeLabels.Geometry.label,
+        name: dataTypeLabels.Geometry.label,
         type: 'Geometry',
         headers: TypeColumns.Geometry,
       },
@@ -410,7 +450,7 @@ export const spreadsheets: Record<SpreadsheetType, SpreadsheetSchema> = {
     folderName: 'Licenses',
     tabs: [
       {
-        name: DataTypeLabels['ldac:DataReuseLicense'].label,
+        name: dataTypeLabels['ldac:DataReuseLicense'].label,
         type: 'ldac:DataReuseLicense',
         headers: TypeColumns['ldac:DataReuseLicense'],
         seedRows: [
