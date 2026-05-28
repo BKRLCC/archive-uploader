@@ -76,6 +76,8 @@ const mapRowsToLocalities = (sheet: SheetData): Geometry[] => {
     localities.push({
       '@id': id,
       '@type': 'Geometry',
+      name: getCell(row, indexMap, 'name'),
+      description: getCell(row, indexMap, 'description'),
       '.latitude': getCell(row, indexMap, '.latitude'),
       '.longitude': getCell(row, indexMap, '.longitude'),
       asWKT: getCell(row, indexMap, 'asWKT'),

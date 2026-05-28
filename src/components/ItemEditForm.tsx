@@ -170,16 +170,17 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
 
     const localitiesOptions: VocabOption[] = localities.map((locality) => {
       const id = locality['@id']
+      const name = String(locality.name ?? '').trim()
       const latitude = locality['.latitude']
       const longitude = locality['.longitude']
       const coordinateLabel =
         latitude && longitude ? ` (${latitude}, ${longitude})` : ''
-      const label = `${id}${coordinateLabel}`
+      const label = name ? `${name} (${id})` : `${id}${coordinateLabel}`
       return {
         value: id,
         label,
         searchText:
-          `${id} ${latitude} ${longitude} ${locality.asWKT}`.toLowerCase(),
+          `${name} ${id} ${latitude} ${longitude} ${locality.asWKT}`.toLowerCase(),
       }
     })
     const localitiesOptionIds = new Set(

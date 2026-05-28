@@ -10,6 +10,8 @@ const FIELD_LABELS: Record<string, string> = {
   isRef_enteredBy: '✍️ Entered By',
   isPublishable: '🌐 Publish',
   depiction: '🖼️ Img',
+  '.latitude': '📐 Latitude',
+  '.longitude': '📐 Longitude',
   isRef_creator: '👤 Creators',
   isRef_contributor: '👥 Contributors',
   isRef_mentions: '🧑‍🧑‍🧒‍🧒 Depicted',

@@ -81,6 +81,8 @@ export type Place = BaseItem & {
 export type Geometry = {
   '@id': string
   '@type': 'Geometry'
+  name?: string // Optional operator-friendly name for this locality geometry
+  description?: string
   '.latitude': string // Latitude in decimal degrees (WGS84)
   '.longitude': string // Longitude in decimal degrees (WGS84)
   asWKT: string // Geometry in WKT format
@@ -217,6 +219,8 @@ export const ENTITY_FIELD_REGISTRY: {
   Geometry: defineEntityFields<Geometry>()([
     '@id',
     '@type',
+    'name',
+    'description',
     '.latitude',
     '.longitude',
     'asWKT',
@@ -366,7 +370,15 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     'depiction',
     'isRef_geo',
   ],
-  Geometry: ['@id', '@type', '.latitude', '.longitude', 'asWKT'],
+  Geometry: [
+    '@id',
+    '@type',
+    'name',
+    'description',
+    '.latitude',
+    '.longitude',
+    'asWKT',
+  ],
   File: ['@id', '@type', '.folder', '.filename', 'isRef_isPartOf'],
 }
 
