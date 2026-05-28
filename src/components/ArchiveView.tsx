@@ -39,7 +39,9 @@ function sheetStateFromData(data: SheetData | null): SheetState {
 }
 
 function normalizeSheetName(name: string): string {
-  return String(name ?? '').trim().toLowerCase()
+  return String(name ?? '')
+    .trim()
+    .toLowerCase()
 }
 
 function isPeopleSheetName(name: string): boolean {
@@ -47,9 +49,14 @@ function isPeopleSheetName(name: string): boolean {
 }
 
 function getHeaderIndex(headers: string[], key: string): number {
-  const normalizedKey = String(key ?? '').trim().toLowerCase()
+  const normalizedKey = String(key ?? '')
+    .trim()
+    .toLowerCase()
   return headers.findIndex(
-    (header) => String(header ?? '').trim().toLowerCase() === normalizedKey,
+    (header) =>
+      String(header ?? '')
+        .trim()
+        .toLowerCase() === normalizedKey,
   )
 }
 
@@ -162,7 +169,9 @@ export default function ArchiveView({ xlsxPath }: Props) {
     const names = await window.api.getSheetNames(xlsxPath)
     if (requestId !== loadRequestRef.current) return
     setSheetNames(names)
-    const firstVisible = names.find((n) => n !== 'RootDataset' && n.toLowerCase() !== '@context')
+    const firstVisible = names.find(
+      (n) => n !== 'RootDataset' && n.toLowerCase() !== '@context',
+    )
     if (firstVisible) setActiveTab(firstVisible)
     const results = await Promise.all(
       names.map(async (name) => {
@@ -594,7 +603,10 @@ export default function ArchiveView({ xlsxPath }: Props) {
 
         <div className="tab-bar">
           {sheetNames
-            .filter((tab) => tab !== 'RootDataset' && tab.toLowerCase() !== '@context')
+            .filter(
+              (tab) =>
+                tab !== 'RootDataset' && tab.toLowerCase() !== '@context',
+            )
             .map((tab) => (
               <button
                 key={tab}
@@ -767,7 +779,10 @@ export default function ArchiveView({ xlsxPath }: Props) {
                 sheetName={editingRow.sheetName}
                 onSave={(_rowIndex: number, updated: string[]) => {
                   if (isPeopleSheetName(editingRow.sheetName)) {
-                    const previousPerson = mapRowToPerson(sheet.headers, editingRow.row)
+                    const previousPerson = mapRowToPerson(
+                      sheet.headers,
+                      editingRow.row,
+                    )
                     const nextPerson = mapRowToPerson(sheet.headers, updated)
 
                     if (

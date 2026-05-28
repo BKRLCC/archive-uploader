@@ -27,9 +27,9 @@ Local development (recommended):
 
 1. Create a `.env.local` file in the project root.
 2. Add one of these variables:
-	- `MAPBOX_ACCESS_TOKEN=...`
-	- `VITE_MAPBOX_ACCESS_TOKEN=...`
-	- `MAPBOX_TOKEN=...`
+   - `MAPBOX_ACCESS_TOKEN=...`
+   - `VITE_MAPBOX_ACCESS_TOKEN=...`
+   - `MAPBOX_TOKEN=...`
 3. Restart the Electron dev process.
 
 If no token is configured, the map picker shows a warning and manual latitude/longitude entry still works.

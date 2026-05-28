@@ -188,7 +188,10 @@ export default function MapPickerModal({
       return
     }
 
-    onConfirm(formatCoordinate(parsed.latitude), formatCoordinate(parsed.longitude))
+    onConfirm(
+      formatCoordinate(parsed.latitude),
+      formatCoordinate(parsed.longitude),
+    )
   }
 
   return (

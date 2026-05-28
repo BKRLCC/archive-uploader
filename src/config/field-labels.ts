@@ -16,7 +16,7 @@ const FIELD_LABELS: Record<string, string> = {
   isRef_contributor: '👥 Contributors',
   isRef_mentions: '🧑‍🧑‍🧒‍🧒 Depicted',
   isRef_contentLocation: '📍 Content Location',
-  isRef_inLanguage: '🗣️ Languages',
+  isRef_inLanguage: '🗣️ In Languages',
   isRef_hasPart: '📎 Files',
   isRef_geo: '🧭 Localities',
   isRef_sameAs: '🔗 License Link',
