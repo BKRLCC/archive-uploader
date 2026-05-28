@@ -393,6 +393,7 @@ export type SpreadsheetType =
   | 'People'
   | 'Language'
   | 'Places'
+  | 'Localities'
   | 'ldac:DataReuseLicense'
 
 export const spreadsheets: Record<SpreadsheetType, SpreadsheetSchema> = {
@@ -439,6 +440,11 @@ export const spreadsheets: Record<SpreadsheetType, SpreadsheetSchema> = {
         type: 'Place',
         headers: TypeColumns.Place,
       },
+    ],
+  },
+  Localities: {
+    folderName: 'Localities',
+    tabs: [
       {
         name: dataTypeLabels.Geometry.label,
         type: 'Geometry',

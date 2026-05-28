@@ -3,6 +3,7 @@
     "metadata.xlsx",
     "people.xlsx",
     "places.xlsx",
+    "localities.xlsx",
     "licenses.xlsx",
     "languages.xlsx"
   ],
@@ -10,6 +11,7 @@
     "metadata.xlsx": "Metadata",
     "people.xlsx": "People",
     "places.xlsx": "Places",
+    "localities.xlsx": "Localities",
     "licenses.xlsx": "Licenses",
     "languages.xlsx": "Languages"
   }

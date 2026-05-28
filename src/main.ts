@@ -980,6 +980,25 @@ ipcMain.handle('create-places-folder', async (_event, rootFolder: string) => {
   return { path: folderPath }
 })
 
+ipcMain.handle(
+  'create-localities-folder',
+  async (_event, rootFolder: string) => {
+    const schema = spreadsheets.Localities
+    const folderPath = path.join(rootFolder, schema.folderName)
+    await fs.promises.mkdir(folderPath, { recursive: true })
+    const xlsxPath = path.join(folderPath, 'localities.xlsx')
+    const workbook = buildWorkbook('Localities', {
+      name: schema.folderName,
+      description: '',
+    })
+    await fs.promises.writeFile(
+      xlsxPath,
+      XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' }),
+    )
+    return { path: folderPath }
+  },
+)
+
 ipcMain.handle('create-people-folder', async (_event, rootFolder: string) => {
   const schema = spreadsheets.People
   const folderPath = path.join(rootFolder, schema.folderName)

@@ -47,6 +47,10 @@ const HEADER_LAYOUTS: Record<string, TableColumnLayout> = {
     widthClassName: 'col-width-medium',
     wrapMode: 'clamp-2',
   },
+  isref_geo: {
+    widthClassName: 'col-width-medium',
+    wrapMode: 'clamp-2',
+  },
 }
 
 function normalizeHeaderName(headerName: string): string {

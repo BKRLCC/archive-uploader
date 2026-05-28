@@ -98,6 +98,8 @@ contextBridge.exposeInMainWorld('api', {
     ipcRenderer.invoke('create-languages-folder', rootFolder),
   createPlacesFolder: (rootFolder: string): Promise<{ path: string }> =>
     ipcRenderer.invoke('create-places-folder', rootFolder),
+  createLocalitiesFolder: (rootFolder: string): Promise<{ path: string }> =>
+    ipcRenderer.invoke('create-localities-folder', rootFolder),
   createLicensesFolder: (rootFolder: string): Promise<{ path: string }> =>
     ipcRenderer.invoke('create-licenses-folder', rootFolder),
   openFile: (filePath: string): Promise<string> =>

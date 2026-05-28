@@ -3,8 +3,9 @@ import type { ItemDataType } from '../types/types'
 const SHEET_TYPE_MAP: Record<string, ItemDataType> = {
   People: 'Person',
   Languages: 'Language',
-  Tags: 'DefinedTerm',
+  Tags: 'Tag',
   Places: 'Place',
+  Localities: 'Geometry',
   Licenses: 'ldac:DataReuseLicense',
 }
 

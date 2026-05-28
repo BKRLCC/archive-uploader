@@ -5,6 +5,7 @@ import Breadcrumb from './Breadcrumb'
 import { useAppDispatch } from '../ducks/hooks'
 import { loadTagVocabulariesFromFolder } from '../ducks/tags-loader'
 import { setTagVocabularies, setTagsError, setTagsLoading } from '../ducks/tags'
+import { isArchiveWorkbookName } from '../helpers/archive-workbooks'
 
 export default function AppSubHeader() {
   const location = useLocation()
@@ -80,7 +81,9 @@ export default function AppSubHeader() {
             🏷️ Refresh tags vocab
           </button>
           {currentPath !== rootFolder &&
-            !entries.some((e) => e.name === 'metadata.xlsx') && (
+            !entries.some(
+              (e) => !e.isDirectory && isArchiveWorkbookName(e.name),
+            ) && (
               <button
                 className="create-archive-btn"
                 onClick={(e) => {
@@ -139,6 +142,22 @@ export default function AppSubHeader() {
                 }}
               >
                 📍 Create Places folder
+              </button>
+            )}
+          {currentPath === rootFolder &&
+            !entries.some((e) => e.name === 'Localities' && e.isDirectory) && (
+              <button
+                className="create-archive-btn"
+                onClick={async (e) => {
+                  e.stopPropagation()
+                  await window.api.createLocalitiesFolder(rootFolder)
+                  navigate(
+                    `/browser?path=${encodeURIComponent(currentPath)}&r=${Date.now()}`,
+                    { replace: true },
+                  )
+                }}
+              >
+                🧭 Create Localities folder
               </button>
             )}
           {currentPath === rootFolder &&

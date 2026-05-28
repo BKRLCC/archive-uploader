@@ -73,6 +73,7 @@ export interface Api {
   createPeopleFolder: (rootFolder: string) => Promise<{ path: string }>
   createLanguagesFolder: (rootFolder: string) => Promise<{ path: string }>
   createPlacesFolder: (rootFolder: string) => Promise<{ path: string }>
+  createLocalitiesFolder: (rootFolder: string) => Promise<{ path: string }>
   createLicensesFolder: (rootFolder: string) => Promise<{ path: string }>
   openFile: (filePath: string) => Promise<string>
   showInFinder: (filePath: string) => Promise<void>
