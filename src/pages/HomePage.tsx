@@ -32,10 +32,10 @@ export default function HomePage() {
       </p>
       <ul>
         <li>
-          {dataTypeLabels.People.icon} {dataTypeLabels.People.label}
+          {dataTypeLabels.Person.icon} {dataTypeLabels.Person.label}
         </li>
         <li>
-          {dataTypeLabels.Places.icon} {dataTypeLabels.Places.label}
+          {dataTypeLabels.Place.icon} {dataTypeLabels.Place.label}
         </li>
         <li>
           {dataTypeLabels['ldac:DataReuseLicense'].icon}{' '}

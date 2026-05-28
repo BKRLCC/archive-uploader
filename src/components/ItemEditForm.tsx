@@ -26,6 +26,7 @@ import { getEntityFieldModel, resolveEditableEntityType } from '../types/types'
 import { getFieldDisplayLabel } from '../config/field-labels'
 import ClickableImagePreview from './ClickableImagePreview'
 import FileLinksField, { FILE_LINKS_FIELD_NAME } from './FileLinksField'
+import MapPickerModal from './MapPickerModal'
 
 interface VocabOption {
   value: string
@@ -117,6 +118,7 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
     const [depictionPickingField, setDepictionPickingField] = useState<
       string | null
     >(null)
+    const [isMapPickerOpen, setIsMapPickerOpen] = useState(false)
 
     const archiveFolderPath = xlsxPath.replace(/[/\\][^/\\]+$/, '')
     const hiddenFieldSet = useMemo(
@@ -480,6 +482,8 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
           const isBooleanField = fieldName === 'isPublishable'
           const isDescriptionField = fieldName === 'description'
           const isDepictionField = fieldName === DEPICTION_FIELD_NAME
+          const isLatitudeField = fieldName === '.latitude'
+          const isLongitudeField = fieldName === '.longitude'
           const isFileLinksField =
             normalizeFieldName(fieldName) ===
             normalizeFieldName(FILE_LINKS_FIELD_NAME)
@@ -596,6 +600,47 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
               ) : isDescriptionField ? (
                 <textarea
                   rows={5}
+                  value={currentValue}
+                  onChange={(e) => {
+                    setFieldValue(fieldName, e.target.value)
+                  }}
+                />
+              ) : isLatitudeField ? (
+                <>
+                  <input
+                    type="text"
+                    value={currentValue}
+                    onChange={(e) => {
+                      setFieldValue(fieldName, e.target.value)
+                    }}
+                  />
+                  <div className="coordinate-actions">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsMapPickerOpen(true)
+                      }}
+                    >
+                      Pick on map...
+                    </button>
+                  </div>
+                  <MapPickerModal
+                    isOpen={isMapPickerOpen}
+                    initialLatitude={getFieldValue('.latitude')}
+                    initialLongitude={getFieldValue('.longitude')}
+                    onClose={() => {
+                      setIsMapPickerOpen(false)
+                    }}
+                    onConfirm={(latitude, longitude) => {
+                      setFieldValue('.latitude', latitude)
+                      setFieldValue('.longitude', longitude)
+                      setIsMapPickerOpen(false)
+                    }}
+                  />
+                </>
+              ) : isLongitudeField ? (
+                <input
+                  type="text"
                   value={currentValue}
                   onChange={(e) => {
                     setFieldValue(fieldName, e.target.value)

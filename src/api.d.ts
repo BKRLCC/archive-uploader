@@ -18,6 +18,7 @@ export interface SheetData {
 }
 
 export interface Api {
+  getMapboxToken: () => Promise<string | null>
   getRootFolder: () => Promise<string | null>
   chooseRootFolder: () => Promise<string | null>
   pickDepictionFile: (archiveFolderPath: string) => Promise<string | null>

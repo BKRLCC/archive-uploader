@@ -18,3 +18,18 @@ There are a few special types of data. Each of these has its own folder in the r
 - 👥 People
 - 🗺️ Places
 - 📜 Licenses
+
+## Map picker setup
+
+The Geometry editor supports picking coordinates on a map. To enable it, set a Mapbox public token before launching the app.
+
+Local development (recommended):
+
+1. Create a `.env.local` file in the project root.
+2. Add one of these variables:
+	- `MAPBOX_ACCESS_TOKEN=...`
+	- `VITE_MAPBOX_ACCESS_TOKEN=...`
+	- `MAPBOX_TOKEN=...`
+3. Restart the Electron dev process.
+
+If no token is configured, the map picker shows a warning and manual latitude/longitude entry still works.

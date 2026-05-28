@@ -1,9 +1,9 @@
 import { dataTypeLabels } from '../config/datatype-labels'
 
 export type ItemDataType =
+  | 'RepositoryObject'
   | 'Person'
   | 'Organization'
-  | 'RepositoryObject'
   | 'Language'
   | 'Dataset'
   | 'RepositoryCollection'

@@ -33,6 +33,7 @@ import contextMenu from 'electron-context-menu'
 import ffmpeg from 'fluent-ffmpeg'
 import ffmpegPath from 'ffmpeg-static'
 import sharp from 'sharp'
+import dotenv from 'dotenv'
 
 // Must be called before app is ready
 protocol.registerSchemesAsPrivileged([
@@ -42,7 +43,27 @@ import Store from 'electron-store'
 
 const store = new Store()
 
+// Load local env files in development so runtime-only keys (e.g. MAPBOX_ACCESS_TOKEN)
+// are available to the Electron main process.
+dotenv.config({ path: path.join(process.cwd(), '.env') })
+dotenv.config({ path: path.join(process.cwd(), '.env.local') })
+
 const isDev = !app.isPackaged
+
+function resolveMapboxToken(): string | null {
+  const candidates = [
+    process.env.MAPBOX_ACCESS_TOKEN,
+    process.env.VITE_MAPBOX_ACCESS_TOKEN,
+    process.env.MAPBOX_TOKEN,
+  ]
+
+  for (const candidate of candidates) {
+    const token = String(candidate ?? '').trim()
+    if (token) return token
+  }
+
+  return null
+}
 
 const FFMPEG_BINARY_NAME =
   process.platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg'
@@ -310,6 +331,10 @@ ipcMain.handle('get-file-info', async (_event, filePath: string) => {
     mtime: stat.mtime.toISOString(),
     isDirectory: stat.isDirectory(),
   }
+})
+
+ipcMain.handle('get-mapbox-token', async () => {
+  return resolveMapboxToken()
 })
 
 ipcMain.handle(

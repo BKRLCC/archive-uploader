@@ -658,6 +658,18 @@ textarea {
   background: rgba(0, 0, 0, 0.04);
 }
 
+.coordinate-actions {
+  margin-top: 0.4em;
+  display: flex;
+  gap: 0.4em;
+}
+
+.coordinate-actions button {
+  font-size: 0.75em;
+  border-radius: 6px;
+  padding: 0.3em 0.7em;
+}
+
 .edit-actions {
   margin-top: 1em;
   display: flex;

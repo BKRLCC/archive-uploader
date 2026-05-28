@@ -4,6 +4,8 @@
 import { contextBridge, ipcRenderer } from 'electron'
 
 contextBridge.exposeInMainWorld('api', {
+  getMapboxToken: (): Promise<string | null> =>
+    ipcRenderer.invoke('get-mapbox-token'),
   getRootFolder: (): Promise<string | null> =>
     ipcRenderer.invoke('get-root-folder'),
   chooseRootFolder: (): Promise<string | null> =>
