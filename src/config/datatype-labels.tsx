@@ -1,8 +1,8 @@
-import { LabelDataType } from '../types/types'
+import { ItemDataType } from '../types/types'
 
 // Icon mapping for different object types
 // e.g. Person: "👤"
-export const TypeIcons: Record<LabelDataType, string> = {
+export const TypeIcons: Record<ItemDataType, string> = {
   Person: '👤',
   Organization: '🏠',
   RepositoryObject: '🗃️',
@@ -11,10 +11,8 @@ export const TypeIcons: Record<LabelDataType, string> = {
   Tag: '🏷️',
   RepositoryCollection: '📚',
   File: '📎',
-  People: '👥',
   Place: '🗺️',
-  Geometry: '📐',
-  Places: '🗺️',
+  Geometry: '📍',
   'ldac:DataReuseLicense': '📜',
 }
 
@@ -24,7 +22,7 @@ type LabelConfig = {
   labelSingular: string
 }
 
-export const dataTypeLabels: Record<LabelDataType, LabelConfig> = {
+export const dataTypeLabels: Record<ItemDataType, LabelConfig> = {
   Person: {
     icon: TypeIcons.Person,
     label: 'People',
@@ -62,23 +60,13 @@ export const dataTypeLabels: Record<LabelDataType, LabelConfig> = {
   },
   Geometry: {
     icon: TypeIcons.Geometry,
-    label: 'Geometries',
-    labelSingular: 'Geometry',
-  },
-  People: {
-    icon: TypeIcons.Person,
-    label: 'People',
-    labelSingular: 'Person',
+    label: 'Localities',
+    labelSingular: 'Locality',
   },
   Organization: {
     icon: TypeIcons.Organization,
     label: 'Organisations',
     labelSingular: 'Organisation',
-  },
-  Places: {
-    icon: TypeIcons.Places,
-    label: 'Places',
-    labelSingular: 'Place',
   },
   File: {
     icon: TypeIcons.File,
@@ -93,13 +81,13 @@ export const dataTypeLabels: Record<LabelDataType, LabelConfig> = {
 }
 
 // Reverse lookup to get the data type from a label
-export const labelToDataTypeMap: Record<string, LabelDataType> = Object.entries(
+export const labelToDataTypeMap: Record<string, ItemDataType> = Object.entries(
   dataTypeLabels,
 ).reduce(
   (acc, [key, value]) => {
-    acc[value.label] = key as LabelDataType
-    acc[value.labelSingular] = key as LabelDataType
+    acc[value.label] = key as ItemDataType
+    acc[value.labelSingular] = key as ItemDataType
     return acc
   },
-  {} as Record<string, LabelDataType>,
+  {} as Record<string, ItemDataType>,
 )
