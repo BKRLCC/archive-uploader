@@ -4,6 +4,7 @@ import { MakerZIP } from '@electron-forge/maker-zip'
 import { MakerDeb } from '@electron-forge/maker-deb'
 import { MakerRpm } from '@electron-forge/maker-rpm'
 import { VitePlugin } from '@electron-forge/plugin-vite'
+import { AutoUnpackNativesPlugin } from '@electron-forge/plugin-auto-unpack-natives'
 import { FusesPlugin } from '@electron-forge/plugin-fuses'
 import { FuseV1Options, FuseVersion } from '@electron/fuses'
 import { PublisherGithub } from '@electron-forge/publisher-github'
@@ -11,7 +12,10 @@ import { PublisherGithub } from '@electron-forge/publisher-github'
 const config: ForgeConfig = {
   packagerConfig: {
     asar: {
-      unpack: '**/node_modules/ffmpeg-static/**|**/node_modules/sharp/**',
+      // Use brace expansion — the | separator is regex syntax, not a valid glob separator.
+      // fluent-ffmpeg is pure JS but unpacking it sidesteps any asar-internal require issues.
+      unpack:
+        '{**/node_modules/ffmpeg-static/**,**/node_modules/sharp/**,**/node_modules/fluent-ffmpeg/**}',
     },
     icon: 'src/icons/logo',
     ...(process.env.APPLE_ID
@@ -43,6 +47,8 @@ const config: ForgeConfig = {
     new MakerDeb({}),
   ],
   plugins: [
+    // Auto-detects and unpacks native .node modules so they work outside the asar.
+    new AutoUnpackNativesPlugin({}),
     new VitePlugin({
       // `build` can specify multiple entry builds, which can be Main process, Preload scripts, Worker process, etc.
       // If you are familiar with Vite configuration, it will look really familiar.
