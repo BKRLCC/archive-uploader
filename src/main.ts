@@ -14,6 +14,7 @@ import * as XLSX from 'xlsx'
 import started from 'electron-squirrel-startup'
 import { spreadsheets, type SpreadsheetType } from './types/types'
 import { deriveFileRowsFromItems } from './helpers/file-linkage'
+import { deriveWKTFromRawCoordinates } from './helpers/geometry-utils'
 import {
   DEPICTION_IMAGE_EXTENSIONS,
   DEPICTION_FIELD_NAME,
@@ -391,6 +392,28 @@ ipcMain.handle(
       if (col !== -1) rows[dataRowIndex][col] = value
     }
 
+    const typeColumn = headers.indexOf('@type')
+    const latitudeColumn = headers.indexOf('.latitude')
+    const longitudeColumn = headers.indexOf('.longitude')
+    const wktColumn = headers.indexOf('asWKT')
+    const rowType =
+      typeColumn >= 0 ? String(rows[dataRowIndex][typeColumn] ?? '').trim() : ''
+    const isGeometryRow = rowType === 'Geometry' || actualName === 'Localities'
+
+    if (
+      isGeometryRow &&
+      latitudeColumn >= 0 &&
+      longitudeColumn >= 0 &&
+      wktColumn >= 0
+    ) {
+      const latitudeRaw = String(rows[dataRowIndex][latitudeColumn] ?? '')
+      const longitudeRaw = String(rows[dataRowIndex][longitudeColumn] ?? '')
+      rows[dataRowIndex][wktColumn] = deriveWKTFromRawCoordinates(
+        latitudeRaw,
+        longitudeRaw,
+      )
+    }
+
     const depictionColumn = headers.indexOf(DEPICTION_FIELD_NAME)
     if (depictionColumn >= 0) {
       const archiveFolderAbsolute = path.resolve(path.dirname(xlsxPath))
@@ -537,6 +560,25 @@ ipcMain.handle(
       }
     }
     const newRow = headers.map((h) => values[h] ?? '')
+
+    const typeColumn = headers.indexOf('@type')
+    const latitudeColumn = headers.indexOf('.latitude')
+    const longitudeColumn = headers.indexOf('.longitude')
+    const wktColumn = headers.indexOf('asWKT')
+    const rowType =
+      typeColumn >= 0 ? String(newRow[typeColumn] ?? '').trim() : ''
+    const isGeometryRow = rowType === 'Geometry' || actualName === 'Localities'
+
+    if (
+      isGeometryRow &&
+      latitudeColumn >= 0 &&
+      longitudeColumn >= 0 &&
+      wktColumn >= 0
+    ) {
+      const latitudeRaw = String(newRow[latitudeColumn] ?? '')
+      const longitudeRaw = String(newRow[longitudeColumn] ?? '')
+      newRow[wktColumn] = deriveWKTFromRawCoordinates(latitudeRaw, longitudeRaw)
+    }
 
     const depictionColumn = headers.indexOf(DEPICTION_FIELD_NAME)
     if (depictionColumn >= 0) {

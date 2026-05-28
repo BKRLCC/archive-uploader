@@ -69,6 +69,12 @@ function isIsoDateString(value: string): boolean {
   return parsed.toISOString().slice(0, 10) === value
 }
 
+function isNumericCoordinate(value: string): boolean {
+  if (!String(value ?? '').trim()) return false
+  const parsed = Number(value)
+  return Number.isFinite(parsed)
+}
+
 const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
   function ItemEditForm(
     {
@@ -274,7 +280,9 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
       ...headers.filter((header) => String(header ?? '').trim() !== ''),
       ...missingModelFieldNames,
       ...missingTagFieldNames,
-    ].filter((fieldName) => !isHiddenField(fieldName))
+    ]
+      .filter((fieldName) => normalizeFieldName(fieldName) !== 'aswkt')
+      .filter((fieldName) => !isHiddenField(fieldName))
 
     const validateFields = async (): Promise<string | null> => {
       for (const field of renderedFields) {
@@ -300,6 +308,30 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
           if (!selectedValue) continue
           if (!isIsoDateString(selectedValue)) {
             return `✗ ${field} must be a full date in YYYY-MM-DD format`
+          }
+          continue
+        }
+
+        if (field === '.latitude') {
+          if (!selectedValue) continue
+          if (!isNumericCoordinate(selectedValue)) {
+            return '✗ .latitude must be a valid decimal number'
+          }
+          const latitude = Number(selectedValue)
+          if (latitude < -90 || latitude > 90) {
+            return '✗ .latitude must be between -90 and 90'
+          }
+          continue
+        }
+
+        if (field === '.longitude') {
+          if (!selectedValue) continue
+          if (!isNumericCoordinate(selectedValue)) {
+            return '✗ .longitude must be a valid decimal number'
+          }
+          const longitude = Number(selectedValue)
+          if (longitude < -180 || longitude > 180) {
+            return '✗ .longitude must be between -180 and 180'
           }
           continue
         }

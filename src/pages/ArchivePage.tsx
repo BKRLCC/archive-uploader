@@ -283,7 +283,10 @@ export default function ArchivePage() {
 
     const visibleIndices = sheet.headers
       .map((h, i) => ({ h, i }))
-      .filter(({ h }) => !h.startsWith('@') && h !== '@type')
+      .filter(
+        ({ h }) =>
+          !h.startsWith('@') && h !== '@type' && h.toLowerCase() !== 'aswkt',
+      )
       .map(({ i }) => i)
 
     const visibleCount = Math.ceil(tableViewportHeight / VIRTUAL_ROW_HEIGHT_PX)

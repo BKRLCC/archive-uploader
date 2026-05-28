@@ -302,7 +302,12 @@ export default function ArchiveView({ xlsxPath }: Props) {
 
     const visibleIndices = sheet.headers
       .map((h, i) => ({ h, i }))
-      .filter(({ h }) => !h.startsWith('@') && h !== 'depiction')
+      .filter(
+        ({ h }) =>
+          !h.startsWith('@') &&
+          h !== 'depiction' &&
+          h.toLowerCase() !== 'aswkt',
+      )
       .map(({ i }) => i)
     const depictionLayout = hasDepiction
       ? getTableColumnLayout('depiction')
