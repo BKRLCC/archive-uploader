@@ -1,7 +1,10 @@
 import type { SheetData } from '../api'
 import type { Person } from '../types/types'
 
-const PEOPLE_WORKBOOK_RELATIVE_PATH = 'People/people.xlsx'
+const PEOPLE_WORKBOOK_RELATIVE_PATHS = [
+  'People/people.xlsx',
+  'People/metadata.xlsx',
+] as const
 const PEOPLE_TAB_NAME = 'People'
 
 const REQUIRED_COLUMNS = ['@id', '@type', 'name'] as const
@@ -94,20 +97,21 @@ export const loadPeopleFromSpreadsheet = async (): Promise<Person[]> => {
   }
 
   const trimmedRoot = rootFolder.replace(/[\\/]+$/, '')
-  const workbookPath = `${trimmedRoot}/${PEOPLE_WORKBOOK_RELATIVE_PATH}`
-
-  try {
-    const sheet = await window.api.readSheet(workbookPath, PEOPLE_TAB_NAME)
-    if (!sheet) {
+  for (const relativePath of PEOPLE_WORKBOOK_RELATIVE_PATHS) {
+    const workbookPath = `${trimmedRoot}/${relativePath}`
+    try {
+      const sheet = await window.api.readSheet(workbookPath, PEOPLE_TAB_NAME)
+      if (sheet) return mapRowsToPeople(sheet)
+    } catch (error) {
       console.warn(
-        `[people-loader] Could not find workbook/tab at ${workbookPath} (${PEOPLE_TAB_NAME})`,
+        `[people-loader] Failed to load workbook at ${relativePath}`,
+        error,
       )
-      return []
     }
-
-    return mapRowsToPeople(sheet)
-  } catch (error) {
-    console.warn('[people-loader] Failed to load People spreadsheet', error)
-    return []
   }
+
+  console.warn(
+    `[people-loader] Could not find workbook/tab for ${PEOPLE_TAB_NAME} in: ${PEOPLE_WORKBOOK_RELATIVE_PATHS.join(', ')}`,
+  )
+  return []
 }

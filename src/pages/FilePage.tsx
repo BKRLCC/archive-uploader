@@ -37,7 +37,7 @@ export default function FilePage() {
   }
 
   if (isArchiveEditable) {
-    return <ArchiveView xlsxPath={filePath} />
+    return <ArchiveView key={filePath} xlsxPath={filePath} />
   }
 
   const name = filePath.split(/[/\\]/).pop() ?? filePath

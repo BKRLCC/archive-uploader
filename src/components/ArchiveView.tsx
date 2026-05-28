@@ -8,9 +8,11 @@ import Drawer from './Drawer'
 import ClickableImagePreview from './ClickableImagePreview'
 import { getDepictionThumbnailRelativePath } from '../config/depiction-config'
 import { useAppDispatch } from '../ducks/hooks'
+import { removePeopleByIds, upsertPerson } from '../ducks/people'
 import { loadTagVocabulariesFromFolder } from '../ducks/tags-loader'
 import { setTagVocabularies, setTagsError, setTagsLoading } from '../ducks/tags'
 import { getFieldDisplayLabel } from '../config/field-labels'
+import type { Person } from '../types/types'
 import {
   getTableColumnLayout,
   isHiddenTableColumn,
@@ -34,6 +36,65 @@ function sheetStateFromData(data: SheetData | null): SheetState {
   if (data === null) return 'missing'
   if (data.headers.length === 0) return 'empty'
   return data
+}
+
+function normalizeSheetName(name: string): string {
+  return String(name ?? '').trim().toLowerCase()
+}
+
+function isPeopleSheetName(name: string): boolean {
+  return normalizeSheetName(name) === 'people'
+}
+
+function getHeaderIndex(headers: string[], key: string): number {
+  const normalizedKey = String(key ?? '').trim().toLowerCase()
+  return headers.findIndex(
+    (header) => String(header ?? '').trim().toLowerCase() === normalizedKey,
+  )
+}
+
+function mapRowToPerson(headers: string[], row: string[]): Person | null {
+  const idIndex = getHeaderIndex(headers, '@id')
+  const typeIndex = getHeaderIndex(headers, '@type')
+  const nameIndex = getHeaderIndex(headers, 'name')
+  if (idIndex < 0 || typeIndex < 0 || nameIndex < 0) return null
+
+  const id = String(row[idIndex] ?? '').trim()
+  const rawType = String(row[typeIndex] ?? '').trim()
+  const name = String(row[nameIndex] ?? '').trim()
+  if (!id || !name) return null
+  if (!rawType || (rawType !== 'Person' && !rawType.includes('Person'))) {
+    return null
+  }
+
+  const person: Person = {
+    '@id': id,
+    '@type': 'Person',
+    name,
+  }
+
+  const descriptionIndex = getHeaderIndex(headers, 'description')
+  const genderIndex = getHeaderIndex(headers, 'gender')
+  const birthDateIndex = getHeaderIndex(headers, 'birthDate')
+
+  const description =
+    descriptionIndex >= 0 ? String(row[descriptionIndex] ?? '').trim() : ''
+  const gender = genderIndex >= 0 ? String(row[genderIndex] ?? '').trim() : ''
+  const birthDate =
+    birthDateIndex >= 0 ? String(row[birthDateIndex] ?? '').trim() : ''
+
+  if (description) person.description = description
+  if (gender) person.gender = gender
+  if (birthDate) person.birthDate = birthDate
+
+  return person
+}
+
+function getRowPersonId(headers: string[], row: string[]): string | null {
+  const idIndex = getHeaderIndex(headers, '@id')
+  if (idIndex < 0) return null
+  const id = String(row[idIndex] ?? '').trim()
+  return id || null
 }
 
 interface Props {
@@ -67,6 +128,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
   const [tableViewportHeight, setTableViewportHeight] = useState(420)
 
   const tableScrollRef = useRef<HTMLDivElement | null>(null)
+  const loadRequestRef = useRef(0)
 
   const folder = xlsxPath.replace(/[/\\][^/\\]+$/, '')
 
@@ -86,7 +148,9 @@ export default function ArchiveView({ xlsxPath }: Props) {
 
   const reloadSheet = useCallback(
     async (name: string) => {
+      const requestId = ++loadRequestRef.current
       const data = await window.api.readSheet(xlsxPath, name)
+      if (requestId !== loadRequestRef.current) return
       setSheets((prev) => ({ ...prev, [name]: sheetStateFromData(data) }))
       clearSelection()
     },
@@ -94,7 +158,9 @@ export default function ArchiveView({ xlsxPath }: Props) {
   )
 
   const loadAll = useCallback(async () => {
+    const requestId = ++loadRequestRef.current
     const names = await window.api.getSheetNames(xlsxPath)
+    if (requestId !== loadRequestRef.current) return
     setSheetNames(names)
     const firstVisible = names.find((n) => n !== 'RootDataset')
     if (firstVisible) setActiveTab(firstVisible)
@@ -104,12 +170,23 @@ export default function ArchiveView({ xlsxPath }: Props) {
         return [name, sheetStateFromData(data)] as const
       }),
     )
+    if (requestId !== loadRequestRef.current) return
     setSheets(Object.fromEntries(results))
   }, [xlsxPath])
 
   useEffect(() => {
+    loadRequestRef.current += 1
+    setSheetNames([])
+    setSheets({})
+    setActiveTab('RootDataset')
+    closeDrawer()
+    setPopulateFeedback('')
+    setTagsFeedback('')
+    setBulkFeedback('')
+    setBulkActionFeedback('')
+    setTableScrollTop(0)
     loadAll()
-  }, [loadAll])
+  }, [closeDrawer, loadAll])
 
   useEffect(() => {
     clearSelection()
@@ -158,51 +235,6 @@ export default function ArchiveView({ xlsxPath }: Props) {
 
   // ── Row handlers ────────────────────────────────────────────────────────────
 
-  function handleSaveRow(
-    rowIndex: number,
-    updated: string[],
-    sheetName: string,
-  ) {
-    setSheets((prev) => {
-      const sheet = prev[sheetName]
-      if (!sheet || typeof sheet === 'string') return prev
-      return {
-        ...prev,
-        [sheetName]: {
-          ...sheet,
-          rows: sheet.rows.map((r, i) => (i === rowIndex ? updated : r)),
-        },
-      }
-    })
-  }
-
-  function handleAddRow(
-    _rowIndex: number,
-    newRow: string[],
-    sheetName: string,
-  ) {
-    setSheets((prev) => {
-      const sheet = prev[sheetName]
-      if (!sheet || typeof sheet === 'string') return prev
-      return {
-        ...prev,
-        [sheetName]: { ...sheet, rows: [...sheet.rows, newRow] },
-      }
-    })
-  }
-
-  function handleAddRows(newRows: string[][], sheetName: string) {
-    if (newRows.length === 0) return
-    setSheets((prev) => {
-      const sheet = prev[sheetName]
-      if (!sheet || typeof sheet === 'string') return prev
-      return {
-        ...prev,
-        [sheetName]: { ...sheet, rows: [...sheet.rows, ...newRows] },
-      }
-    })
-  }
-
   function toggleRowSelection(rowIndex: number, checked: boolean) {
     setSelectedRows((prev) => {
       const next = new Set(prev)
@@ -235,12 +267,26 @@ export default function ArchiveView({ xlsxPath }: Props) {
     }
 
     setBulkActionFeedback('Deleting…')
+
+    const idsToRemove = (() => {
+      if (!isPeopleSheetName(sheetName)) return [] as string[]
+      const sheet = sheets[sheetName]
+      if (!sheet || typeof sheet === 'string') return [] as string[]
+      return rowIndices
+        .map((rowIndex) => sheet.rows[rowIndex] ?? [])
+        .map((row) => getRowPersonId(sheet.headers, row))
+        .filter((id): id is string => Boolean(id))
+    })()
+
     try {
       const result = await window.api.deleteSheetRows(
         xlsxPath,
         sheetName,
         rowIndices,
       )
+      if (idsToRemove.length > 0) {
+        dispatch(removePeopleByIds(Array.from(new Set(idsToRemove))))
+      }
       setBulkActionFeedback(
         `✓ Deleted ${result.deletedCount} row${result.deletedCount === 1 ? '' : 's'}`,
       )
@@ -291,9 +337,21 @@ export default function ArchiveView({ xlsxPath }: Props) {
 
     const depictionIndex = sheet.headers.indexOf('depiction')
     const hasDepiction = depictionIndex !== -1
+    const idIndex = sheet.headers.findIndex((header) => header === '@id')
     const visibleRows = sheet.rows
       .map((row, rowIndex) => ({ row, rowIndex }))
-      .filter(({ row }) => row.some((cell) => String(cell ?? '').trim() !== ''))
+      .filter(({ row }) => {
+        const hasAnyValue = row.some((cell) => String(cell ?? '').trim() !== '')
+        if (!hasAnyValue) return false
+
+        // For entity-style sheets, @id is required. Hide partial rows that have
+        // no identifier so stale/invalid rows from prior bugs do not appear.
+        if (idIndex >= 0) {
+          return String(row[idIndex] ?? '').trim() !== ''
+        }
+
+        return true
+      })
     const visibleRowIndices = visibleRows.map(({ rowIndex }) => rowIndex)
     const visibleRowIndexSet = new Set(visibleRowIndices)
     const selectedVisibleRowIndices = Array.from(selectedRows)
@@ -707,8 +765,23 @@ export default function ArchiveView({ xlsxPath }: Props) {
                 rowIndex={editingRow.rowIndex}
                 xlsxPath={xlsxPath}
                 sheetName={editingRow.sheetName}
-                onSave={(rowIndex: number, updated: string[]) => {
-                  handleSaveRow(rowIndex, updated, editingRow.sheetName)
+                onSave={(_rowIndex: number, updated: string[]) => {
+                  if (isPeopleSheetName(editingRow.sheetName)) {
+                    const previousPerson = mapRowToPerson(sheet.headers, editingRow.row)
+                    const nextPerson = mapRowToPerson(sheet.headers, updated)
+
+                    if (
+                      previousPerson &&
+                      (!nextPerson ||
+                        nextPerson['@id'] !== previousPerson['@id'])
+                    ) {
+                      dispatch(removePeopleByIds([previousPerson['@id']]))
+                    }
+
+                    if (nextPerson) {
+                      dispatch(upsertPerson(nextPerson))
+                    }
+                  }
                   void reloadSheet(editingRow.sheetName)
                 }}
                 onClose={closeDrawer}
@@ -725,8 +798,11 @@ export default function ArchiveView({ xlsxPath }: Props) {
                 rowIndex={-1}
                 xlsxPath={xlsxPath}
                 sheetName={addingItem}
-                onSave={(rowIndex: number, newRow: string[]) => {
-                  handleAddRow(rowIndex, newRow, addingItem)
+                onSave={(_rowIndex: number, newRow: string[]) => {
+                  if (isPeopleSheetName(addingItem)) {
+                    const person = mapRowToPerson(sheet.headers, newRow)
+                    if (person) dispatch(upsertPerson(person))
+                  }
                   void reloadSheet(addingItem)
                 }}
                 onClose={closeDrawer}
@@ -751,8 +827,40 @@ export default function ArchiveView({ xlsxPath }: Props) {
               rowIndices={bulkEditingRows.rowIndices}
               xlsxPath={xlsxPath}
               sheetName={bulkEditingRows.sheetName}
-              onComplete={async () => {
+              onComplete={async (updatedRows) => {
                 const sheetName = bulkEditingRows.sheetName
+
+                if (isPeopleSheetName(sheetName)) {
+                  const idsToRemove = new Set<string>()
+
+                  bulkEditingRows.rows.forEach((oldRow, index) => {
+                    const previousPerson = mapRowToPerson(
+                      bulkEditingSheet.headers,
+                      oldRow,
+                    )
+                    const nextPerson = mapRowToPerson(
+                      bulkEditingSheet.headers,
+                      updatedRows[index] ?? [],
+                    )
+
+                    if (
+                      previousPerson &&
+                      (!nextPerson ||
+                        nextPerson['@id'] !== previousPerson['@id'])
+                    ) {
+                      idsToRemove.add(previousPerson['@id'])
+                    }
+
+                    if (nextPerson) {
+                      dispatch(upsertPerson(nextPerson))
+                    }
+                  })
+
+                  if (idsToRemove.size > 0) {
+                    dispatch(removePeopleByIds(Array.from(idsToRemove)))
+                  }
+                }
+
                 clearSelection()
                 setBulkEditingRows(null)
                 await reloadSheet(sheetName)
@@ -786,7 +894,13 @@ export default function ArchiveView({ xlsxPath }: Props) {
               headers={sheet.headers}
               existingIds={existingIds}
               onComplete={(addedRows, skippedFiles, depictionWarningFiles) => {
-                handleAddRows(addedRows, bulkAddingItem)
+                if (isPeopleSheetName(bulkAddingItem)) {
+                  addedRows.forEach((row) => {
+                    const person = mapRowToPerson(sheet.headers, row)
+                    if (person) dispatch(upsertPerson(person))
+                  })
+                }
+
                 const addedCount = addedRows.length
                 const skippedCount = skippedFiles.length
                 const warningCount = depictionWarningFiles.length

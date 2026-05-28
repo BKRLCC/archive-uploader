@@ -26,13 +26,23 @@ const peopleSlice = createSlice({
       })
       state.people = peopleDict
     },
+    upsertPerson(state, action: PayloadAction<Person>) {
+      const person = action.payload
+      state.people[person['@id']] = person
+    },
+    removePeopleByIds(state, action: PayloadAction<string[]>) {
+      action.payload.forEach((id) => {
+        delete state.people[id]
+      })
+    },
     setLoading(state, action: PayloadAction<boolean>) {
       state.loading = action.payload
     },
   },
 })
 
-export const { setPeople, setLoading } = peopleSlice.actions
+export const { setPeople, upsertPerson, removePeopleByIds, setLoading } =
+  peopleSlice.actions
 
 // Selectors
 const selectPeopleDictionary = (state: RootState) => state.people.people

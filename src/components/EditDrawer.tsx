@@ -69,6 +69,7 @@ export default function EditDrawer({
 
       const updatedValues: Record<string, string> = { '@id': id }
       headers.forEach((header, index) => {
+        if (header === '@id') return
         updatedValues[header] = values[index] ?? ''
       })
       if (!String(updatedValues.dateAdded ?? '').trim()) {

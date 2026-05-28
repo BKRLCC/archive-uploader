@@ -303,6 +303,27 @@ function buildWorkbook(
   return workbook
 }
 
+function trimTrailingEmptyRows(rows: string[][]): string[][] {
+  if (rows.length === 0) return rows
+
+  let lastNonEmptyRowIndex = -1
+  for (let index = rows.length - 1; index >= 0; index -= 1) {
+    const hasValue = (rows[index] ?? []).some(
+      (cell) => String(cell ?? '').trim() !== '',
+    )
+    if (hasValue) {
+      lastNonEmptyRowIndex = index
+      break
+    }
+  }
+
+  if (lastNonEmptyRowIndex < 0) {
+    return []
+  }
+
+  return rows.slice(0, lastNonEmptyRowIndex + 1)
+}
+
 // ── IPC handlers ─────────────────────────────────────────────────────────────
 
 ipcMain.handle('list-folder', async (_event, folderPath: string) => {
@@ -360,7 +381,10 @@ ipcMain.handle(
       )
       return { headers, rows: data }
     } catch (err) {
-      console.error('read-sheet error:', err)
+      const maybeErr = err as NodeJS.ErrnoException
+      if (maybeErr?.code !== 'ENOENT') {
+        console.error('read-sheet error:', err)
+      }
       return null
     }
   },
@@ -448,7 +472,8 @@ ipcMain.handle(
       )
     }
 
-    const newSheet = XLSX.utils.aoa_to_sheet(rows)
+    const normalizedRows = trimTrailingEmptyRows(rows)
+    const newSheet = XLSX.utils.aoa_to_sheet(normalizedRows)
     workbook.Sheets[actualName] = newSheet
     await fs.promises.writeFile(
       xlsxPath,
@@ -489,7 +514,8 @@ ipcMain.handle(
       }
     }
 
-    workbook.Sheets[actualName] = XLSX.utils.aoa_to_sheet(rows)
+    const normalizedRows = trimTrailingEmptyRows(rows)
+    workbook.Sheets[actualName] = XLSX.utils.aoa_to_sheet(normalizedRows)
     await fs.promises.writeFile(
       xlsxPath,
       XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' }),
@@ -614,8 +640,12 @@ ipcMain.handle(
       )
     }
 
-    rows.push(newRow)
-    workbook.Sheets[actualName] = XLSX.utils.aoa_to_sheet(rows)
+    // Trim trailing empty rows BEFORE appending so the new row lands
+    // immediately after the last meaningful data row, not deep in an
+    // inflated sheet range left over from prior edits.
+    const compactedRows = trimTrailingEmptyRows(rows)
+    compactedRows.push(newRow)
+    workbook.Sheets[actualName] = XLSX.utils.aoa_to_sheet(compactedRows)
     await fs.promises.writeFile(
       xlsxPath,
       XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' }),

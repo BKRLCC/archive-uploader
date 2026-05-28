@@ -2,11 +2,11 @@ import { dataTypeLabels } from '../config/datatype-labels'
 
 export type ItemDataType =
   | 'RepositoryObject'
+  | 'Dataset'
+  | 'RepositoryCollection'
   | 'Person'
   | 'Organization'
   | 'Language'
-  | 'Dataset'
-  | 'RepositoryCollection'
   | 'Tag'
   | 'ldac:DataReuseLicense'
   | 'Place'
