@@ -162,7 +162,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
     const names = await window.api.getSheetNames(xlsxPath)
     if (requestId !== loadRequestRef.current) return
     setSheetNames(names)
-    const firstVisible = names.find((n) => n !== 'RootDataset')
+    const firstVisible = names.find((n) => n !== 'RootDataset' && n.toLowerCase() !== '@context')
     if (firstVisible) setActiveTab(firstVisible)
     const results = await Promise.all(
       names.map(async (name) => {
@@ -594,7 +594,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
 
         <div className="tab-bar">
           {sheetNames
-            .filter((tab) => tab !== 'RootDataset')
+            .filter((tab) => tab !== 'RootDataset' && tab.toLowerCase() !== '@context')
             .map((tab) => (
               <button
                 key={tab}
