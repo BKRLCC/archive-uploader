@@ -7,7 +7,10 @@ import EditDrawer from '../components/EditDrawer'
 import EditRootDatasetForm from '../components/EditRootDatasetForm'
 import Drawer from '../components/Drawer'
 import { getFieldDisplayLabel } from '../config/field-labels'
-import { getTableColumnLayout } from '../config/table-column-layout'
+import {
+  getTableColumnLayout,
+  isHiddenTableColumn,
+} from '../config/table-column-layout'
 
 type SheetState = SheetData | null | 'empty' | 'missing'
 
@@ -283,10 +286,7 @@ export default function ArchivePage() {
 
     const visibleIndices = sheet.headers
       .map((h, i) => ({ h, i }))
-      .filter(
-        ({ h }) =>
-          !h.startsWith('@') && h !== '@type' && h.toLowerCase() !== 'aswkt',
-      )
+      .filter(({ h }) => !isHiddenTableColumn(h))
       .map(({ i }) => i)
 
     const visibleCount = Math.ceil(tableViewportHeight / VIRTUAL_ROW_HEIGHT_PX)

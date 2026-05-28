@@ -7,6 +7,8 @@ export interface TableColumnLayout {
   wrapMode: WrapMode
 }
 
+export const HIDDEN_TABLE_COLUMNS = ['@id', '@type', 'asWKT'] as const
+
 const DEFAULT_LAYOUT: TableColumnLayout = {
   widthClassName: null,
   wrapMode: 'nowrap',
@@ -57,6 +59,14 @@ function normalizeHeaderName(headerName: string): string {
   return String(headerName ?? '')
     .trim()
     .toLowerCase()
+}
+
+const HIDDEN_TABLE_COLUMN_SET = new Set(
+  HIDDEN_TABLE_COLUMNS.map((headerName) => normalizeHeaderName(headerName)),
+)
+
+export function isHiddenTableColumn(headerName: string): boolean {
+  return HIDDEN_TABLE_COLUMN_SET.has(normalizeHeaderName(headerName))
 }
 
 export function getTableColumnLayout(headerName: string): TableColumnLayout {

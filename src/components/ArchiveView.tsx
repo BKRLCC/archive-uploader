@@ -11,7 +11,10 @@ import { useAppDispatch } from '../ducks/hooks'
 import { loadTagVocabulariesFromFolder } from '../ducks/tags-loader'
 import { setTagVocabularies, setTagsError, setTagsLoading } from '../ducks/tags'
 import { getFieldDisplayLabel } from '../config/field-labels'
-import { getTableColumnLayout } from '../config/table-column-layout'
+import {
+  getTableColumnLayout,
+  isHiddenTableColumn,
+} from '../config/table-column-layout'
 
 type SheetState = SheetData | null | 'empty' | 'missing'
 
@@ -302,12 +305,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
 
     const visibleIndices = sheet.headers
       .map((h, i) => ({ h, i }))
-      .filter(
-        ({ h }) =>
-          !h.startsWith('@') &&
-          h !== 'depiction' &&
-          h.toLowerCase() !== 'aswkt',
-      )
+      .filter(({ h }) => !isHiddenTableColumn(h) && h !== 'depiction')
       .map(({ i }) => i)
     const depictionLayout = hasDepiction
       ? getTableColumnLayout('depiction')
