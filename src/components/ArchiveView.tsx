@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import type { SheetData } from '../api'
 import BulkAddPopup from './BulkAddPopup'
+import BulkAddListPopup from './BulkAddListPopup'
 import BulkEditDrawer from './BulkEditDrawer'
 import EditDrawer from './EditDrawer'
 import EditRootDatasetForm from './EditRootDatasetForm'
@@ -120,6 +121,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
   const [editingRow, setEditingRow] = useState<EditingRow | null>(null)
   const [addingItem, setAddingItem] = useState<string | false>(false)
   const [bulkAddingItem, setBulkAddingItem] = useState<string | false>(false)
+  const [bulkAddingList, setBulkAddingList] = useState<string | false>(false)
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set())
   const [bulkEditingRows, setBulkEditingRows] =
     useState<BulkEditingRows | null>(null)
@@ -697,7 +699,20 @@ export default function ArchiveView({ xlsxPath }: Props) {
                           setBulkFeedback('')
                         }}
                       >
-                        + Bulk add
+                        + Bulk add files
+                      </button>
+                    )}
+                    {sheet && typeof sheet !== 'string' && (
+                      <button
+                        className="refresh-btn"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          closeDrawer()
+                          setBulkAddingList(activeTab)
+                          setBulkFeedback('')
+                        }}
+                      >
+                        + Bulk add list
                       </button>
                     )}
                     <span className="populate-feedback">{bulkFeedback}</span>
@@ -935,6 +950,31 @@ export default function ArchiveView({ xlsxPath }: Props) {
               }}
               onClose={() => {
                 setBulkAddingItem(false)
+              }}
+            />
+          )
+        })()}
+
+      {bulkAddingList &&
+        (() => {
+          const sheet = sheets[bulkAddingList]
+          if (!sheet || typeof sheet === 'string') return null
+          return (
+            <BulkAddListPopup
+              isOpen
+              xlsxPath={xlsxPath}
+              sheetName={bulkAddingList}
+              headers={sheet.headers}
+              onComplete={(addedRows) => {
+                const addedCount = addedRows.length
+                setBulkFeedback(
+                  `✓ Added ${addedCount} item${addedCount === 1 ? '' : 's'}`,
+                )
+                void reloadSheet(bulkAddingList)
+                setBulkAddingList(false)
+              }}
+              onClose={() => {
+                setBulkAddingList(false)
               }}
             />
           )
