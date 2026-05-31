@@ -1,4 +1,9 @@
 // Type declarations for window.api (exposed via preload contextBridge)
+export interface SavedFolder {
+  name: string
+  path: string
+}
+
 export interface DirEntry {
   name: string
   isDirectory: boolean
@@ -21,6 +26,11 @@ export interface Api {
   getMapboxToken: () => Promise<string | null>
   getRootFolder: () => Promise<string | null>
   chooseRootFolder: () => Promise<string | null>
+  setRootFolder: (path: string) => Promise<string>
+  getSavedFolders: () => Promise<SavedFolder[]>
+  saveFolder: (name: string, path: string) => Promise<SavedFolder[]>
+  removeSavedFolder: (path: string) => Promise<SavedFolder[]>
+  reloadApp: () => Promise<void>
   pickDepictionFile: (archiveFolderPath: string) => Promise<string | null>
   pickFiles: (archiveFolderPath: string) => Promise<string[] | null>
   pickLinkedFiles: (archiveFolderPath: string) => Promise<string[] | null>
