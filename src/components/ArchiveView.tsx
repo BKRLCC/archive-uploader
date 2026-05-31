@@ -11,7 +11,7 @@ import { getDepictionThumbnailRelativePath } from '../config/depiction-config'
 import { useAppDispatch } from '../ducks/hooks'
 import { removePeopleByIds, upsertPerson } from '../ducks/people'
 import { loadTagVocabulariesFromFolder } from '../ducks/tags-loader'
-import { setTagVocabularies, setTagsError, setTagsLoading } from '../ducks/tags'
+import { setTagVocabularies } from '../ducks/tags'
 import { getFieldDisplayLabel } from '../config/field-labels'
 import type { Person } from '../types/types'
 import {
@@ -129,8 +129,6 @@ export default function ArchiveView({ xlsxPath }: Props) {
 
   const [populateFeedback, setPopulateFeedback] = useState('')
   const [populateBusy, setPopulateBusy] = useState(false)
-  const [tagsBusy, setTagsBusy] = useState(false)
-  const [tagsFeedback, setTagsFeedback] = useState('')
   const [bulkFeedback, setBulkFeedback] = useState('')
   const [bulkActionFeedback, setBulkActionFeedback] = useState('')
   const [tableScrollTop, setTableScrollTop] = useState(0)
@@ -192,7 +190,6 @@ export default function ArchiveView({ xlsxPath }: Props) {
     setActiveTab('RootDataset')
     closeDrawer()
     setPopulateFeedback('')
-    setTagsFeedback('')
     setBulkFeedback('')
     setBulkActionFeedback('')
     setTableScrollTop(0)
@@ -222,27 +219,18 @@ export default function ArchiveView({ xlsxPath }: Props) {
     }
   }
 
-  async function handleRefreshTags() {
-    setTagsBusy(true)
-    setTagsFeedback('Refreshing…')
-    dispatch(setTagsLoading(true))
-    dispatch(setTagsError(null))
+  const isTagsVocabFile =
+    xlsxPath.includes('/Tags/') || xlsxPath.includes('\\Tags\\')
+
+  const reloadTagsIfVocabFile = useCallback(async () => {
+    if (!isTagsVocabFile) return
     try {
       const vocabularies = await loadTagVocabulariesFromFolder()
       dispatch(setTagVocabularies(vocabularies))
-      setTagsFeedback(
-        `✓ Loaded ${vocabularies.length} tag vocab${vocabularies.length === 1 ? '' : 's'}`,
-      )
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : 'Failed to refresh tags'
-      dispatch(setTagsError(message))
-      setTagsFeedback(`✗ ${message}`)
-    } finally {
-      dispatch(setTagsLoading(false))
-      setTagsBusy(false)
+    } catch {
+      // silent — vocab reload is best-effort
     }
-  }
+  }, [dispatch, isTagsVocabFile])
 
   // ── Row handlers ────────────────────────────────────────────────────────────
 
@@ -302,6 +290,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
         `✓ Deleted ${result.deletedCount} row${result.deletedCount === 1 ? '' : 's'}`,
       )
       await reloadSheet(sheetName)
+      void reloadTagsIfVocabFile()
     } catch (err) {
       setBulkActionFeedback(`✗ ${(err as Error).message}`)
     }
@@ -600,17 +589,6 @@ export default function ArchiveView({ xlsxPath }: Props) {
             >
               ↗️
             </button>
-            <button
-              className="refresh-btn"
-              onClick={(e) => {
-                e.stopPropagation()
-                void handleRefreshTags()
-              }}
-              disabled={tagsBusy}
-            >
-              🏷️ Refresh tags vocab
-            </button>{' '}
-            <span className="populate-feedback">{tagsFeedback}</span>
           </div>
         </div>
 
@@ -824,6 +802,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
                     }
                   }
                   void reloadSheet(editingRow.sheetName)
+                  void reloadTagsIfVocabFile()
                 }}
                 onClose={closeDrawer}
               />
@@ -832,24 +811,34 @@ export default function ArchiveView({ xlsxPath }: Props) {
         {addingItem &&
           (() => {
             const sheet = sheets[addingItem]
-            return sheet && typeof sheet !== 'string' ? (
+            if (!sheet || typeof sheet === 'string') return null
+            const typeIndex = sheet.headers.indexOf('@type')
+            const inferredType =
+              typeIndex >= 0
+                ? sheet.rows
+                    .map((r) => String(r[typeIndex] ?? '').trim())
+                    .find((v) => v !== '')
+                : undefined
+            return (
               <EditDrawer
                 headers={sheet.headers}
                 row={sheet.headers.map(() => '')}
                 rowIndex={-1}
                 xlsxPath={xlsxPath}
                 sheetName={addingItem}
+                defaultType={inferredType}
                 onSave={(_rowIndex: number, newRow: string[]) => {
                   if (isPeopleSheetName(addingItem)) {
                     const person = mapRowToPerson(sheet.headers, newRow)
                     if (person) dispatch(upsertPerson(person))
                   }
                   void reloadSheet(addingItem)
+                  void reloadTagsIfVocabFile()
                 }}
                 onClose={closeDrawer}
                 isNew
               />
-            ) : null
+            )
           })()}
       </Drawer>
 
@@ -905,6 +894,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
                 clearSelection()
                 setBulkEditingRows(null)
                 await reloadSheet(sheetName)
+                void reloadTagsIfVocabFile()
               }}
               onClose={() => {
                 setBulkEditingRows(null)
@@ -957,6 +947,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
                   }`,
                 )
                 void reloadSheet(bulkAddingItem)
+                void reloadTagsIfVocabFile()
                 setBulkAddingItem(false)
               }}
               onClose={() => {
@@ -970,18 +961,27 @@ export default function ArchiveView({ xlsxPath }: Props) {
         (() => {
           const sheet = sheets[bulkAddingList]
           if (!sheet || typeof sheet === 'string') return null
+          const typeIndex = sheet.headers.indexOf('@type')
+          const inferredType =
+            typeIndex >= 0
+              ? sheet.rows
+                  .map((r) => String(r[typeIndex] ?? '').trim())
+                  .find((v) => v !== '')
+              : undefined
           return (
             <BulkAddListPopup
               isOpen
               xlsxPath={xlsxPath}
               sheetName={bulkAddingList}
               headers={sheet.headers}
+              defaultType={inferredType}
               onComplete={(addedRows) => {
                 const addedCount = addedRows.length
                 setBulkFeedback(
                   `✓ Added ${addedCount} item${addedCount === 1 ? '' : 's'}`,
                 )
                 void reloadSheet(bulkAddingList)
+                void reloadTagsIfVocabFile()
                 setBulkAddingList(false)
               }}
               onClose={() => {

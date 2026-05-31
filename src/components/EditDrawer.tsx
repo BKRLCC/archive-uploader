@@ -23,6 +23,7 @@ interface Props {
   onSave: (rowIndex: number, updated: string[]) => void
   onClose: () => void
   isNew?: boolean
+  defaultType?: string
 }
 
 export default function EditDrawer({
@@ -34,6 +35,7 @@ export default function EditDrawer({
   onSave,
   onClose,
   isNew = false,
+  defaultType,
 }: Props) {
   const formRef = useRef<ItemEditFormHandle>(null)
   const [saving, setSaving] = useState(false)
@@ -133,7 +135,7 @@ export default function EditDrawer({
         sheetName={sheetName}
         hiddenFields={isNew ? ['@id'] : []}
         lockedFieldValues={{
-          '@type': getItemTypeForSheetName(sheetName),
+          '@type': defaultType ?? getItemTypeForSheetName(sheetName),
         }}
         onFeedback={setFeedback}
       />

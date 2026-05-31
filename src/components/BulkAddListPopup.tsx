@@ -9,6 +9,7 @@ interface Props {
   xlsxPath: string
   sheetName: string
   headers: string[]
+  defaultType?: string
   onComplete: (addedRows: string[][]) => void
   onClose: () => void
 }
@@ -67,6 +68,7 @@ export default function BulkAddListPopup({
   xlsxPath,
   sheetName,
   headers,
+  defaultType,
   onComplete,
   onClose,
 }: Props) {
@@ -84,7 +86,7 @@ export default function BulkAddListPopup({
     setBusy(true)
     setFeedback('Adding…')
 
-    const type = getItemTypeForSheetName(sheetName)
+    const type = defaultType ?? getItemTypeForSheetName(sheetName)
     const addedRows: string[][] = []
 
     try {
