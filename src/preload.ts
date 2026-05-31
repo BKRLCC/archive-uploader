@@ -10,6 +10,18 @@ contextBridge.exposeInMainWorld('api', {
     ipcRenderer.invoke('get-root-folder'),
   chooseRootFolder: (): Promise<string | null> =>
     ipcRenderer.invoke('choose-root-folder'),
+  setRootFolder: (path: string): Promise<string> =>
+    ipcRenderer.invoke('set-root-folder', path),
+  getSavedFolders: (): Promise<import('./api').SavedFolder[]> =>
+    ipcRenderer.invoke('get-saved-folders'),
+  saveFolder: (
+    name: string,
+    path: string,
+  ): Promise<import('./api').SavedFolder[]> =>
+    ipcRenderer.invoke('save-folder', name, path),
+  removeSavedFolder: (path: string): Promise<import('./api').SavedFolder[]> =>
+    ipcRenderer.invoke('remove-saved-folder', path),
+  reloadApp: (): Promise<void> => ipcRenderer.invoke('reload-app'),
   pickDepictionFile: (archiveFolderPath: string): Promise<string | null> =>
     ipcRenderer.invoke('pick-depiction-file', archiveFolderPath),
   pickFiles: (archiveFolderPath: string): Promise<string[] | null> =>

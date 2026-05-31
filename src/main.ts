@@ -765,6 +765,45 @@ ipcMain.handle('choose-root-folder', async (event) => {
   return filePaths[0]
 })
 
+ipcMain.handle('set-root-folder', (_, folderPath: string) => {
+  store.set('rootFolder', folderPath)
+  return folderPath
+})
+
+ipcMain.handle('get-saved-folders', () => {
+  return store.get('savedFolders', [])
+})
+
+ipcMain.handle('save-folder', (_, name: string, folderPath: string) => {
+  const saved = store.get('savedFolders', []) as Array<{
+    name: string
+    path: string
+  }>
+  const idx = saved.findIndex((f) => f.path === folderPath)
+  if (idx >= 0) {
+    saved[idx] = { name, path: folderPath }
+  } else {
+    saved.push({ name, path: folderPath })
+  }
+  store.set('savedFolders', saved)
+  return saved
+})
+
+ipcMain.handle('remove-saved-folder', (_, folderPath: string) => {
+  const saved = store.get('savedFolders', []) as Array<{
+    name: string
+    path: string
+  }>
+  const filtered = saved.filter((f) => f.path !== folderPath)
+  store.set('savedFolders', filtered)
+  return filtered
+})
+
+ipcMain.handle('reload-app', (event) => {
+  const win = BrowserWindow.fromWebContents(event.sender)
+  if (win) win.webContents.reload()
+})
+
 ipcMain.handle(
   'pick-depiction-file',
   async (event, archiveFolderPath: string) => {
