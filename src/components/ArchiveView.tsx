@@ -586,8 +586,19 @@ export default function ArchiveView({ xlsxPath }: Props) {
                 closeDrawer()
                 setEditingRootDataset(true)
               }}
+              title="Edit metadata"
             >
-              ✏️ Edit
+              ✏️
+            </button>
+            <button
+              className="refresh-btn"
+              onClick={(e) => {
+                e.stopPropagation()
+                void window.api.showInFinder(xlsxPath)
+              }}
+              title="Show in Finder"
+            >
+              ↗️
             </button>
             <button
               className="refresh-btn"
