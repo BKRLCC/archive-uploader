@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import type { SavedFolder } from '../api'
+import { version } from '../../package.json'
 
 export default function SettingsPage() {
   const [rootFolder, setRootFolder] = useState<string | null>(null)
@@ -137,6 +138,7 @@ export default function SettingsPage() {
           })}
         </tbody>
       </table>
+      <p className="settings-version">v{version}</p>
     </div>
   )
 }

@@ -924,6 +924,12 @@ textarea {
   white-space: nowrap;
 }
 
+.settings-version {
+  margin-top: 2em;
+  color: rgba(0, 0, 0, 0.3);
+  font-size: 0.8em;
+}
+
 .folder-active-mark {
   color: hsl(0, 59%, 38%);
   font-weight: 700;
