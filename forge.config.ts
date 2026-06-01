@@ -17,9 +17,13 @@ const config: ForgeConfig = {
         from: 'node_modules/ffmpeg-static',
         to: 'app.asar.unpacked/node_modules/ffmpeg-static',
       },
+      // sharp + all its runtime deps (native bindings, libvips, colour, detect-libc, semver).
+      // Using from:'node_modules' + filter preserves subdirectory names in the destination,
+      // and @img/** covers whichever platform-specific packages npm installed (arm64/x64/win32 etc).
       {
-        from: 'node_modules/sharp',
-        to: 'app.asar.unpacked/node_modules/sharp',
+        from: 'node_modules',
+        to: 'app.asar.unpacked/node_modules',
+        filter: ['sharp/**', '@img/**', 'detect-libc/**', 'semver/**'],
       },
     ],
     icon: 'src/icons/logo',
