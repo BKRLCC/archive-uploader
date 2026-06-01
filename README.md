@@ -1,7 +1,7 @@
 # Baladji
 
 👋 Hello!
-Baladji is your archive manager.
+Baladji is your archive manager!
 
 Here you can:
 
