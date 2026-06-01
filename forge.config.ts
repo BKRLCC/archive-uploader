@@ -1,3 +1,4 @@
+import path from 'path'
 import type { ForgeConfig } from '@electron-forge/shared-types'
 import { MakerSquirrel } from '@electron-forge/maker-squirrel'
 import { MakerZIP } from '@electron-forge/maker-zip'
@@ -11,19 +12,14 @@ import { PublisherGithub } from '@electron-forge/publisher-github'
 
 const config: ForgeConfig = {
   packagerConfig: {
-    asar: true,
+    // Unpack the entire @img scope so both the native .node addon and the
+    // libvips .dylib/.dll shared libraries land in app.asar.unpacked/.
+    // AutoUnpackNativesPlugin handles .node files; this pattern also covers .dylib/.dll.
+    asar: { unpack: '**/@img/**' },
     extraResources: [
       {
         from: 'node_modules/ffmpeg-static',
         to: 'app.asar.unpacked/node_modules/ffmpeg-static',
-      },
-      // sharp + all its runtime deps (native bindings, libvips, colour, detect-libc, semver).
-      // Using from:'node_modules' + filter preserves subdirectory names in the destination,
-      // and @img/** covers whichever platform-specific packages npm installed (arm64/x64/win32 etc).
-      {
-        from: 'node_modules',
-        to: 'app.asar.unpacked/node_modules',
-        filter: ['sharp/**', '@img/**', 'detect-libc/**', 'semver/**'],
       },
     ],
     icon: 'src/icons/logo',
@@ -41,6 +37,22 @@ const config: ForgeConfig = {
           },
         }
       : {}),
+  },
+  hooks: {
+    // sharp is a native module that Vite can't bundle. Inject it (and its JS deps)
+    // into the build directory so the asar packager includes them. The @img scope
+    // is covered by asar.unpack above, so native binaries land in app.asar.unpacked/.
+    packageAfterCopy: async (_config, buildPath) => {
+      const { cp } = await import('fs/promises')
+      const nmSrc = path.join(process.cwd(), 'node_modules')
+      const nmDest = path.join(buildPath, 'node_modules')
+      await Promise.all([
+        cp(path.join(nmSrc, 'sharp'), path.join(nmDest, 'sharp'), { recursive: true }),
+        cp(path.join(nmSrc, '@img'), path.join(nmDest, '@img'), { recursive: true }),
+        cp(path.join(nmSrc, 'detect-libc'), path.join(nmDest, 'detect-libc'), { recursive: true }),
+        cp(path.join(nmSrc, 'semver'), path.join(nmDest, 'semver'), { recursive: true }),
+      ])
+    },
   },
   rebuildConfig: {},
   publishers: [

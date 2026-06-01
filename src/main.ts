@@ -32,7 +32,7 @@ import { updateElectronApp } from 'update-electron-app'
 import contextMenu from 'electron-context-menu'
 import ffmpeg from 'fluent-ffmpeg'
 import ffmpegPath from 'ffmpeg-static'
-import type sharpType from 'sharp'
+import sharp from 'sharp'
 import dotenv from 'dotenv'
 
 // Must be called before app is ready
@@ -193,11 +193,7 @@ async function writeDepictionThumbnail(
   }
 
   await fs.promises.mkdir(path.dirname(thumbnailAbsolute), { recursive: true })
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const sharpFn = (app.isPackaged
-    ? require(path.join(process.resourcesPath, 'app.asar.unpacked', 'node_modules', 'sharp'))
-    : require('sharp')) as typeof sharpType
-  await sharpFn(sourceAbsolute)
+  await sharp(sourceAbsolute)
     .rotate()
     .resize(THUMBNAIL_SIZE_PX, THUMBNAIL_SIZE_PX, {
       fit: 'cover',
