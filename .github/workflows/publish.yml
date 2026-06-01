@@ -8,6 +8,8 @@ on:
 
 jobs:
   publish:
+    permissions:
+      contents: write
     strategy:
       matrix:
         os: [macos-latest, windows-latest]
@@ -24,7 +26,7 @@ jobs:
         run: npm ci
 
       - name: Import signing certificate (macOS only)
-        if: matrix.os == 'macos-latest'
+        if: matrix.os == 'macos-latest' && env.APPLE_CERTIFICATE != ''
         env:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
