@@ -11,12 +11,17 @@ import { PublisherGithub } from '@electron-forge/publisher-github'
 
 const config: ForgeConfig = {
   packagerConfig: {
-    asar: {
-      // Use brace expansion — the | separator is regex syntax, not a valid glob separator.
-      // fluent-ffmpeg is pure JS but unpacking it sidesteps any asar-internal require issues.
-      unpack:
-        '{**/node_modules/ffmpeg-static/**,**/node_modules/sharp/**,**/node_modules/fluent-ffmpeg/**}',
-    },
+    asar: true,
+    extraResources: [
+      {
+        from: 'node_modules/ffmpeg-static',
+        to: 'app.asar.unpacked/node_modules/ffmpeg-static',
+      },
+      {
+        from: 'node_modules/sharp',
+        to: 'app.asar.unpacked/node_modules/sharp',
+      },
+    ],
     icon: 'src/icons/logo',
     ...(process.env.APPLE_ID
       ? {
