@@ -10,13 +10,13 @@ export default function AppHeader() {
 
   return (
     <header className="app-header">
-      <div className="app-header-back">
-        {!isHome && (
+      {!isHome && (
+        <div className="app-header-back">
           <button className="back-btn" onClick={() => navigate(-1)}>
             ← Back
           </button>
-        )}
-      </div>
+        </div>
+      )}
       <span
         className="app-header-title"
         style={{ display: 'flex', alignItems: 'center', gap: 8 }}

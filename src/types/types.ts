@@ -417,11 +417,6 @@ export const spreadsheets: Record<SpreadsheetType, SpreadsheetSchema> = {
         type: 'RepositoryObject',
         headers: TypeColumns.RepositoryObject,
       },
-      {
-        name: dataTypeLabels.File.label,
-        type: 'File',
-        headers: TypeColumns.File,
-      },
     ],
   },
   People: {
