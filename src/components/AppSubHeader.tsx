@@ -113,22 +113,6 @@ export default function AppSubHeader() {
               </button>
             )}
           {currentPath === rootFolder &&
-            !entries.some((e) => e.name === 'Localities' && e.isDirectory) && (
-              <button
-                className="create-archive-btn"
-                onClick={async (e) => {
-                  e.stopPropagation()
-                  await window.api.createLocalitiesFolder(rootFolder)
-                  navigate(
-                    `/browser?path=${encodeURIComponent(currentPath)}&r=${Date.now()}`,
-                    { replace: true },
-                  )
-                }}
-              >
-                🧭 Create Localities folder
-              </button>
-            )}
-          {currentPath === rootFolder &&
             !entries.some((e) => e.name === 'Licenses' && e.isDirectory) && (
               <button
                 className="create-archive-btn"

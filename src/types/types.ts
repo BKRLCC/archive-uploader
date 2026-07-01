@@ -75,7 +75,8 @@ export type License = BaseItem & {
 }
 
 export type Place = BaseItem & {
-  isRef_geo?: string // The @id of the location to which this object relates from the Localities tab.
+  latitude?: string // Latitude in decimal degrees (WGS84)
+  longitude?: string // Longitude in decimal degrees (WGS84)
 }
 
 export type Geometry = {
@@ -214,7 +215,8 @@ export const ENTITY_FIELD_REGISTRY: {
     'dateAdded',
     'isRef_enteredBy',
     'depiction',
-    'isRef_geo',
+    'latitude',
+    'longitude',
   ]),
   Geometry: defineEntityFields<Geometry>()([
     '@id',
@@ -368,7 +370,8 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     'dateAdded',
     'isRef_enteredBy',
     'depiction',
-    'isRef_geo',
+    'latitude',
+    'longitude',
   ],
   Geometry: [
     '@id',
