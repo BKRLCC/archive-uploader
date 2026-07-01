@@ -1,7 +1,7 @@
 export function toCamelCase(str: string): string {
   return str
     .trim()
-    .split(/[\s_-]+/)
+    .split(/[^a-zA-Z0-9]+/)
     .filter(Boolean)
     .map((word, i) =>
       i === 0
