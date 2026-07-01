@@ -55,6 +55,11 @@
   font-size: 0.82rem;
   cursor: pointer;
   background: #fff;
+  color: #333;
+}
+
+.map-picker-actions button:hover {
+  background: #f2f2f2;
 }
 
 .map-picker-feedback {

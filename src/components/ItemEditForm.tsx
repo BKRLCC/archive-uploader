@@ -229,9 +229,11 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
       }
       const index = getHeaderIndex(fieldName)
       if (index >= 0) {
-        const next = [...values]
-        next[index] = nextValue
-        setValues(next)
+        setValues((prev) => {
+          const next = [...prev]
+          next[index] = nextValue
+          return next
+        })
         return
       }
       setVirtualValues((prev) => ({ ...prev, [fieldName]: nextValue }))
@@ -315,26 +317,26 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
           continue
         }
 
-        if (field === '.latitude') {
+        if (field === '.latitude' || field === 'latitude') {
           if (!selectedValue) continue
           if (!isNumericCoordinate(selectedValue)) {
-            return '✗ .latitude must be a valid decimal number'
+            return `✗ ${field} must be a valid decimal number`
           }
           const latitude = Number(selectedValue)
           if (latitude < -90 || latitude > 90) {
-            return '✗ .latitude must be between -90 and 90'
+            return `✗ ${field} must be between -90 and 90`
           }
           continue
         }
 
-        if (field === '.longitude') {
+        if (field === '.longitude' || field === 'longitude') {
           if (!selectedValue) continue
           if (!isNumericCoordinate(selectedValue)) {
-            return '✗ .longitude must be a valid decimal number'
+            return `✗ ${field} must be a valid decimal number`
           }
           const longitude = Number(selectedValue)
           if (longitude < -180 || longitude > 180) {
-            return '✗ .longitude must be between -180 and 180'
+            return `✗ ${field} must be between -180 and 180`
           }
           continue
         }
@@ -482,8 +484,10 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
           const isBooleanField = fieldName === 'isPublishable'
           const isDescriptionField = fieldName === 'description'
           const isDepictionField = fieldName === DEPICTION_FIELD_NAME
-          const isLatitudeField = fieldName === '.latitude'
-          const isLongitudeField = fieldName === '.longitude'
+          const isLatitudeField =
+            fieldName === '.latitude' || fieldName === 'latitude'
+          const isLongitudeField =
+            fieldName === '.longitude' || fieldName === 'longitude'
           const isFileLinksField =
             normalizeFieldName(fieldName) ===
             normalizeFieldName(FILE_LINKS_FIELD_NAME)
@@ -607,13 +611,9 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                 />
               ) : isLatitudeField ? (
                 <>
-                  <input
-                    type="text"
-                    value={currentValue}
-                    onChange={(e) => {
-                      setFieldValue(fieldName, e.target.value)
-                    }}
-                  />
+                  <span className="edit-field-readonly">
+                    {currentValue || '—'}
+                  </span>
                   <div className="coordinate-actions">
                     <button
                       type="button"
@@ -621,31 +621,44 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                         setIsMapPickerOpen(true)
                       }}
                     >
-                      Pick on map...
+                      Edit
                     </button>
                   </div>
                   <MapPickerModal
                     isOpen={isMapPickerOpen}
-                    initialLatitude={getFieldValue('.latitude')}
-                    initialLongitude={getFieldValue('.longitude')}
+                    initialLatitude={getFieldValue(fieldName)}
+                    initialLongitude={getFieldValue(
+                      fieldName === 'latitude' ? 'longitude' : '.longitude',
+                    )}
                     onClose={() => {
                       setIsMapPickerOpen(false)
                     }}
                     onConfirm={(latitude, longitude) => {
-                      setFieldValue('.latitude', latitude)
-                      setFieldValue('.longitude', longitude)
+                      setFieldValue(fieldName, latitude)
+                      setFieldValue(
+                        fieldName === 'latitude' ? 'longitude' : '.longitude',
+                        longitude,
+                      )
                       setIsMapPickerOpen(false)
                     }}
                   />
                 </>
               ) : isLongitudeField ? (
-                <input
-                  type="text"
-                  value={currentValue}
-                  onChange={(e) => {
-                    setFieldValue(fieldName, e.target.value)
-                  }}
-                />
+                <>
+                  <span className="edit-field-readonly">
+                    {currentValue || '—'}
+                  </span>
+                  <div className="coordinate-actions">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsMapPickerOpen(true)
+                      }}
+                    >
+                      Edit
+                    </button>
+                  </div>
+                </>
               ) : isFileLinksField ? (
                 <FileLinksField
                   value={currentValue}
