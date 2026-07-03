@@ -58,7 +58,7 @@ const config: ForgeConfig = {
   publishers: [
     new PublisherGithub({
       repository: { owner: 'BKRLCC', name: 'archive-uploader' },
-      prerelease: true,
+      prerelease: false,
     }),
   ],
   makers: [
