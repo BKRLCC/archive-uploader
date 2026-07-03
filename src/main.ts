@@ -50,11 +50,18 @@ dotenv.config({ path: path.join(process.cwd(), '.env.local') })
 
 const isDev = !app.isPackaged
 
+// Injected at build time by Vite (see vite.main.config.ts) so the token ships
+// with the packaged app, where no .env is available at runtime.
+declare const __MAPBOX_ACCESS_TOKEN__: string
+
 function resolveMapboxToken(): string | null {
   const candidates = [
     process.env.MAPBOX_ACCESS_TOKEN,
     process.env.VITE_MAPBOX_ACCESS_TOKEN,
     process.env.MAPBOX_TOKEN,
+    typeof __MAPBOX_ACCESS_TOKEN__ !== 'undefined'
+      ? __MAPBOX_ACCESS_TOKEN__
+      : '',
   ]
 
   for (const candidate of candidates) {
