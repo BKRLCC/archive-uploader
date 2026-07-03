@@ -6,13 +6,15 @@
    npm version patch
    ```
 
-2. Build and publish to GitHub Releases (runs locally, not via CI):
-
-   ```
-   export $(cat .env | xargs) && npm run publish
-   ```
-
-3. Push the version commit and tag to origin:
+2. Push the version commit and tag to origin:
    ```
    git push && git push --tags
    ```
+
+## For local build
+
+Build and publish to GitHub Releases (runs locally, not via CI):
+
+```
+export $(cat .env | xargs) && npm run publish
+```
