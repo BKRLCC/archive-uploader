@@ -22,6 +22,17 @@ export interface SheetData {
   rows: string[][]
 }
 
+export interface UpdateStatus {
+  state:
+    | 'checking'
+    | 'available'
+    | 'not-available'
+    | 'downloaded'
+    | 'error'
+    | 'unsupported'
+  message?: string
+}
+
 export interface Api {
   getMapboxToken: () => Promise<string | null>
   getRootFolder: () => Promise<string | null>
@@ -31,6 +42,9 @@ export interface Api {
   saveFolder: (name: string, path: string) => Promise<SavedFolder[]>
   removeSavedFolder: (path: string) => Promise<SavedFolder[]>
   reloadApp: () => Promise<void>
+  checkForUpdates: () => Promise<UpdateStatus>
+  quitAndInstallUpdate: () => Promise<void>
+  onUpdateStatus: (callback: (status: UpdateStatus) => void) => () => void
   pickDepictionFile: (archiveFolderPath: string) => Promise<string | null>
   pickFiles: (archiveFolderPath: string) => Promise<string[] | null>
   pickLinkedFiles: (archiveFolderPath: string) => Promise<string[] | null>

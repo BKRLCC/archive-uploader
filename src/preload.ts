@@ -22,6 +22,22 @@ contextBridge.exposeInMainWorld('api', {
   removeSavedFolder: (path: string): Promise<import('./api').SavedFolder[]> =>
     ipcRenderer.invoke('remove-saved-folder', path),
   reloadApp: (): Promise<void> => ipcRenderer.invoke('reload-app'),
+  checkForUpdates: (): Promise<import('./api').UpdateStatus> =>
+    ipcRenderer.invoke('check-for-updates'),
+  quitAndInstallUpdate: (): Promise<void> =>
+    ipcRenderer.invoke('quit-and-install-update'),
+  onUpdateStatus: (
+    callback: (status: import('./api').UpdateStatus) => void,
+  ): (() => void) => {
+    const listener = (
+      _event: unknown,
+      status: import('./api').UpdateStatus,
+    ) => callback(status)
+    ipcRenderer.on('update-status', listener)
+    return () => {
+      ipcRenderer.removeListener('update-status', listener)
+    }
+  },
   pickDepictionFile: (archiveFolderPath: string): Promise<string | null> =>
     ipcRenderer.invoke('pick-depiction-file', archiveFolderPath),
   pickFiles: (archiveFolderPath: string): Promise<string[] | null> =>

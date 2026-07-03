@@ -1,12 +1,56 @@
 import React, { useEffect, useState } from 'react'
-import type { SavedFolder } from '../api'
+import type { SavedFolder, UpdateStatus } from '../api'
 import { version } from '../../package.json'
+
+function getUpdateMessage(status: UpdateStatus): string {
+  switch (status.state) {
+    case 'checking':
+      return 'Checking for updates…'
+    case 'available':
+      return 'Update available — downloading…'
+    case 'not-available':
+      return "You're up to date."
+    case 'downloaded':
+      return 'Update ready to install.'
+    case 'error':
+      return status.message ?? 'Could not check for updates.'
+    case 'unsupported':
+      return status.message ?? 'Updates are only available in the installed app.'
+    default:
+      return ''
+  }
+}
 
 export default function SettingsPage() {
   const [rootFolder, setRootFolder] = useState<string | null>(null)
   const [savedFolders, setSavedFolders] = useState<SavedFolder[]>([])
   const [editingPath, setEditingPath] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
+  const [updateStatus, setUpdateStatus] = useState<UpdateStatus | null>(null)
+  const [isChecking, setIsChecking] = useState(false)
+
+  useEffect(() => {
+    const unsubscribe = window.api.onUpdateStatus((status) => {
+      setUpdateStatus(status)
+      if (status.state !== 'checking' && status.state !== 'available') {
+        setIsChecking(false)
+      }
+    })
+    return unsubscribe
+  }, [])
+
+  async function handleCheckForUpdates() {
+    setIsChecking(true)
+    const result = await window.api.checkForUpdates()
+    setUpdateStatus(result)
+    if (result.state !== 'checking' && result.state !== 'available') {
+      setIsChecking(false)
+    }
+  }
+
+  async function handleRestartToUpdate() {
+    await window.api.quitAndInstallUpdate()
+  }
 
   useEffect(() => {
     Promise.all([
@@ -138,6 +182,19 @@ export default function SettingsPage() {
           })}
         </tbody>
       </table>
+      <div className="settings-updates">
+        <button onClick={handleCheckForUpdates} disabled={isChecking}>
+          {isChecking ? 'Checking…' : 'Check for updates'}
+        </button>
+        {updateStatus && (
+          <span className="settings-update-status">
+            {getUpdateMessage(updateStatus)}
+          </span>
+        )}
+        {updateStatus?.state === 'downloaded' && (
+          <button onClick={handleRestartToUpdate}>Restart now</button>
+        )}
+      </div>
       <p className="settings-version">v{version}</p>
     </div>
   )

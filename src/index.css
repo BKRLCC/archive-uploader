@@ -930,6 +930,19 @@ textarea {
   font-size: 0.8em;
 }
 
+.settings-updates {
+  margin-top: 2em;
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+  flex-wrap: wrap;
+}
+
+.settings-update-status {
+  font-size: 0.85em;
+  color: #555;
+}
+
 .folder-active-mark {
   color: hsl(0, 59%, 38%);
   font-weight: 700;

@@ -1,5 +1,6 @@
 import {
   app,
+  autoUpdater,
   BrowserWindow,
   dialog,
   ipcMain,
@@ -212,9 +213,47 @@ async function writeDepictionThumbnail(
   return thumbnailRelativePath
 }
 
+// Holds the primary window so background events (e.g. auto-update status) can
+// be forwarded to the renderer.
+let mainWindow: BrowserWindow | null = null
+
+type UpdateStatus = {
+  state:
+    | 'checking'
+    | 'available'
+    | 'not-available'
+    | 'downloaded'
+    | 'error'
+    | 'unsupported'
+  message?: string
+}
+
+function sendUpdateStatus(status: UpdateStatus) {
+  mainWindow?.webContents.send('update-status', status)
+}
+
 // Auto-update from GitHub Releases (only in production)
 if (!isDev) {
   updateElectronApp({ repo: 'BKRLCC/archive-uploader' })
+
+  autoUpdater.on('checking-for-update', () => {
+    sendUpdateStatus({ state: 'checking' })
+  })
+  autoUpdater.on('update-available', () => {
+    sendUpdateStatus({ state: 'available' })
+  })
+  autoUpdater.on('update-not-available', () => {
+    sendUpdateStatus({ state: 'not-available' })
+  })
+  autoUpdater.on('update-downloaded', () => {
+    sendUpdateStatus({ state: 'downloaded' })
+  })
+  autoUpdater.on('error', (error) => {
+    sendUpdateStatus({
+      state: 'error',
+      message: error?.message ?? 'Update error',
+    })
+  })
 }
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -224,7 +263,7 @@ if (started) {
 
 const createWindow = () => {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
@@ -809,6 +848,32 @@ ipcMain.handle('remove-saved-folder', (_, folderPath: string) => {
 ipcMain.handle('reload-app', (event) => {
   const win = BrowserWindow.fromWebContents(event.sender)
   if (win) win.webContents.reload()
+})
+
+ipcMain.handle('check-for-updates', () => {
+  if (isDev) {
+    return {
+      state: 'unsupported',
+      message: 'Updates are only available in the installed app.',
+    }
+  }
+  try {
+    autoUpdater.checkForUpdates()
+    return { state: 'checking' }
+  } catch (error) {
+    return {
+      state: 'error',
+      message:
+        error instanceof Error
+          ? error.message
+          : 'Could not check for updates.',
+    }
+  }
+})
+
+ipcMain.handle('quit-and-install-update', () => {
+  if (isDev) return
+  autoUpdater.quitAndInstall()
 })
 
 ipcMain.handle(
