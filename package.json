@@ -1,6 +1,6 @@
 {
   "name": "archive-uploader-app",
-  "productName": "archive-uploader-app",
+  "productName": "Balachi",
   "version": "1.1.19",
   "description": "My Electron application description",
   "main": ".vite/build/main.js",

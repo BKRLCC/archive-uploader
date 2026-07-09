@@ -46,7 +46,7 @@ export default function HomePage() {
   return (
     <div>
       <h1>👋 Hello!</h1>
-      <p>Baladji is your archive manager.</p>
+      <p>Balachi is your archive manager.</p>
       <p>Here you can: </p>
       <ul>
         <li>Browse the items in your archive folder</li>
@@ -58,8 +58,8 @@ export default function HomePage() {
       <h2>How it works</h2>
       <p>
         All your metadata is kept in Excel files called{' '}
-        <code>metadata.xlsx</code>. In the Baladji app, you will see these
-        files called "<code>⭐ Metadata</code>". You can make an{' '}
+        <code>metadata.xlsx</code>. In the Balachi app, you will see these files
+        called "<code>⭐ Metadata</code>". You can make an{' '}
         <code>⭐ Metadata</code> file in any folder by clicking the{' '}
         <span className="pretend-button">🌟 Create metadata file</span> button.
         When it comes to upload time, the app will read and combine all of these

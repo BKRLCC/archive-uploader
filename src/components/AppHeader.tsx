@@ -22,7 +22,7 @@ export default function AppHeader() {
         style={{ display: 'flex', alignItems: 'center', gap: 8 }}
       >
         <img src={logo} alt="" style={{ height: 28, width: 28 }} />
-        Baladji
+        Balachi
       </span>
       <div className="app-header-nav no-drag">
         <button
