@@ -53,6 +53,7 @@ export type Person = BaseItem & {
 // Language
 export type Language = BaseItem & {
   languageCode?: string // Language code, e.g. ISO 639-3 ("eng") or BCP-47 ("en-AU")
+  sameAs?: string // External identifying URL, e.g. https://aiatsis.gov.au/austlang/language/N173 (schema:sameAs)
 }
 
 // https://www.ldaca.edu.au/resources/user-guides/crate-o/convert-spreadsheet/#objects
@@ -170,6 +171,7 @@ export const ENTITY_FIELD_REGISTRY: {
     'isRef_enteredBy',
     'depiction',
     'languageCode',
+    'sameAs',
   ]),
   Dataset: defineEntityFields<BaseItem>()([
     '@id',
@@ -326,6 +328,7 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     'isRef_enteredBy',
     'depiction',
     'languageCode',
+    'sameAs',
   ],
   Tag: [
     '@id',
