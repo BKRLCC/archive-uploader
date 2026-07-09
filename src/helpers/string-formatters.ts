@@ -8,5 +8,5 @@ export function toCamelCase(str: string): string {
         ? word.toLowerCase()
         : word[0].toUpperCase() + word.slice(1).toLowerCase(),
     )
-    .join("");
+    .join('')
 }

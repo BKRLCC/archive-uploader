@@ -15,7 +15,9 @@ function getUpdateMessage(status: UpdateStatus): string {
     case 'error':
       return status.message ?? 'Could not check for updates.'
     case 'unsupported':
-      return status.message ?? 'Updates are only available in the installed app.'
+      return (
+        status.message ?? 'Updates are only available in the installed app.'
+      )
     default:
       return ''
   }

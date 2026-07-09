@@ -47,10 +47,18 @@ const config: ForgeConfig = {
       const nmSrc = path.join(process.cwd(), 'node_modules')
       const nmDest = path.join(buildPath, 'node_modules')
       await Promise.all([
-        cp(path.join(nmSrc, 'sharp'), path.join(nmDest, 'sharp'), { recursive: true }),
-        cp(path.join(nmSrc, '@img'), path.join(nmDest, '@img'), { recursive: true }),
-        cp(path.join(nmSrc, 'detect-libc'), path.join(nmDest, 'detect-libc'), { recursive: true }),
-        cp(path.join(nmSrc, 'semver'), path.join(nmDest, 'semver'), { recursive: true }),
+        cp(path.join(nmSrc, 'sharp'), path.join(nmDest, 'sharp'), {
+          recursive: true,
+        }),
+        cp(path.join(nmSrc, '@img'), path.join(nmDest, '@img'), {
+          recursive: true,
+        }),
+        cp(path.join(nmSrc, 'detect-libc'), path.join(nmDest, 'detect-libc'), {
+          recursive: true,
+        }),
+        cp(path.join(nmSrc, 'semver'), path.join(nmDest, 'semver'), {
+          recursive: true,
+        }),
       ])
     },
   },

@@ -29,10 +29,8 @@ contextBridge.exposeInMainWorld('api', {
   onUpdateStatus: (
     callback: (status: import('./api').UpdateStatus) => void,
   ): (() => void) => {
-    const listener = (
-      _event: unknown,
-      status: import('./api').UpdateStatus,
-    ) => callback(status)
+    const listener = (_event: unknown, status: import('./api').UpdateStatus) =>
+      callback(status)
     ipcRenderer.on('update-status', listener)
     return () => {
       ipcRenderer.removeListener('update-status', listener)

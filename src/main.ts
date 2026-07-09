@@ -864,9 +864,7 @@ ipcMain.handle('check-for-updates', () => {
     return {
       state: 'error',
       message:
-        error instanceof Error
-          ? error.message
-          : 'Could not check for updates.',
+        error instanceof Error ? error.message : 'Could not check for updates.',
     }
   }
 })
