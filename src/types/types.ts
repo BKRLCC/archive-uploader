@@ -51,7 +51,9 @@ export type Person = BaseItem & {
 }
 
 // Language
-export type Language = BaseItem & {}
+export type Language = BaseItem & {
+  languageCode?: string // Language code, e.g. ISO 639-3 ("eng") or BCP-47 ("en-AU")
+}
 
 // https://www.ldaca.edu.au/resources/user-guides/crate-o/convert-spreadsheet/#objects
 export type RepositoryObject = BaseItem & {
@@ -159,7 +161,7 @@ export const ENTITY_FIELD_REGISTRY: {
     'isRef_enteredBy',
     'depiction',
   ]),
-  Language: defineEntityFields<BaseItem>()([
+  Language: defineEntityFields<Language>()([
     '@id',
     '@type',
     'name',
@@ -167,6 +169,7 @@ export const ENTITY_FIELD_REGISTRY: {
     'dateAdded',
     'isRef_enteredBy',
     'depiction',
+    'languageCode',
   ]),
   Dataset: defineEntityFields<BaseItem>()([
     '@id',
@@ -322,6 +325,7 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     'dateAdded',
     'isRef_enteredBy',
     'depiction',
+    'languageCode',
   ],
   Tag: [
     '@id',

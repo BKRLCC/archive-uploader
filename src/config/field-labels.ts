@@ -12,6 +12,7 @@ const FIELD_LABELS: Record<string, string> = {
   depiction: '🖼️ Img',
   latitude: '📐 Latitude',
   longitude: '📐 Longitude',
+  languageCode: '🔤 Language Code',
   isRef_creator: '👤 Creators',
   isRef_contributor: '👥 Contributors',
   isRef_mentions: '🧑‍🧑‍🧒‍🧒 Depicted',

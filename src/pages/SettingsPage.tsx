@@ -104,7 +104,7 @@ export default function SettingsPage() {
     <div className="settings-page">
       <div className="settings-section-header">
         <h2>Root folders</h2>
-        <button onClick={handleAdd}>Add it</button>
+        <button onClick={handleAdd}>Add</button>
       </div>
       <p>
         If you have more than one archive that you're working with, you can
