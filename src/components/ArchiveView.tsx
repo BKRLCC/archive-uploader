@@ -739,15 +739,6 @@ export default function ArchiveView({ xlsxPath }: Props) {
                 <div className="section-toolbar">
                   <h2>{activeTab}</h2>
                   <div>
-                    <button
-                      className="refresh-btn"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        reloadSheet(activeTab)
-                      }}
-                    >
-                      ↻ Refresh
-                    </button>{' '}
                     {sheet && typeof sheet !== 'string' && (
                       <button
                         className="refresh-btn"
