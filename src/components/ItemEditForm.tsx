@@ -1,10 +1,16 @@
 import React, {
   forwardRef,
+  useEffect,
   useImperativeHandle,
   useMemo,
   useState,
 } from 'react'
-import Select from 'react-select'
+import Select, {
+  components as ReactSelectComponents,
+  type MultiValueGenericProps,
+  type OptionProps,
+  type SingleValueProps,
+} from 'react-select'
 import {
   getControlledVocabularyForField,
   getTagVocabularyKeyFromField,
@@ -25,6 +31,7 @@ import { selectTagVocabularies } from '../ducks/tags'
 import { getEntityFieldModel, resolveEditableEntityType } from '../types/types'
 import { getFieldDisplayLabel } from '../config/field-labels'
 import ClickableImagePreview from './ClickableImagePreview'
+import { ReferenceChip, type ReferenceEntity } from './ReferenceCell'
 import FileLinksField, { FILE_LINKS_FIELD_NAME } from './FileLinksField'
 import MapPickerModal from './MapPickerModal'
 
@@ -32,6 +39,54 @@ interface VocabOption {
   value: string
   label: string
   searchText: string
+  name?: string
+  depiction?: string
+  folder?: string | null
+}
+
+// Render a referenced entity as name + circular thumbnail inside react-select.
+// Falls back to the plain text label when no folder is known (e.g. before the
+// root folder loads, or for placeholder/unknown-id options).
+function renderVocabChip(data: VocabOption): React.ReactNode {
+  if (!data.folder) return data.label
+  const entity: ReferenceEntity = {
+    id: data.value,
+    name: data.name ?? data.label,
+    depiction: data.depiction,
+  }
+  return <ReferenceChip entity={entity} folder={data.folder} />
+}
+
+function RefOption(props: OptionProps<VocabOption, boolean>) {
+  return (
+    <ReactSelectComponents.Option {...props}>
+      {renderVocabChip(props.data)}
+    </ReactSelectComponents.Option>
+  )
+}
+
+function RefSingleValue(props: SingleValueProps<VocabOption, boolean>) {
+  return (
+    <ReactSelectComponents.SingleValue {...props}>
+      {renderVocabChip(props.data)}
+    </ReactSelectComponents.SingleValue>
+  )
+}
+
+function RefMultiValueLabel(
+  props: MultiValueGenericProps<VocabOption, boolean>,
+) {
+  return (
+    <ReactSelectComponents.MultiValueLabel {...props}>
+      {renderVocabChip(props.data)}
+    </ReactSelectComponents.MultiValueLabel>
+  )
+}
+
+const referenceSelectComponents = {
+  Option: RefOption,
+  SingleValue: RefSingleValue,
+  MultiValueLabel: RefMultiValueLabel,
 }
 
 export interface ItemEditFormHandle {
@@ -132,6 +187,27 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
     const languages = useAppSelector(selectLanguages)
     const tagVocabularies = useAppSelector(selectTagVocabularies)
 
+    const [rootFolder, setRootFolder] = useState<string | null>(null)
+    useEffect(() => {
+      let cancelled = false
+      window.api.getRootFolder().then((value) => {
+        if (!cancelled) setRootFolder(value)
+      })
+      return () => {
+        cancelled = true
+      }
+    }, [])
+    // Referenced entities are global metadata under fixed root subfolders;
+    // their depiction/thumbnail paths are relative to those folders.
+    const referenceFolders = useMemo(() => {
+      const base = rootFolder ? rootFolder.replace(/[/\\]+$/, '') : null
+      return {
+        People: base ? `${base}/People` : null,
+        Places: base ? `${base}/Places` : null,
+        Languages: base ? `${base}/Languages` : null,
+      }
+    }, [rootFolder])
+
     const languageOptions: VocabOption[] = languages.map((language) => {
       const id = language['@id']
       const name = language.name
@@ -140,6 +216,9 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
         value: id,
         label,
         searchText: `${name} ${id}`.toLowerCase(),
+        name,
+        depiction: language.depiction,
+        folder: referenceFolders.Languages,
       }
     })
     const languageOptionIds = new Set(
@@ -154,6 +233,9 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
         value: id,
         label,
         searchText: `${name} ${id}`.toLowerCase(),
+        name,
+        depiction: person.depiction,
+        folder: referenceFolders.People,
       }
     })
     const peopleOptionIds = new Set(peopleOptions.map((option) => option.value))
@@ -166,6 +248,9 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
         value: id,
         label,
         searchText: `${name} ${id}`.toLowerCase(),
+        name,
+        depiction: place.depiction,
+        folder: referenceFolders.Places,
       }
     })
     const placesOptionIds = new Set(placesOptions.map((option) => option.value))
@@ -748,6 +833,7 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                       ? 'Languages vocabulary unavailable'
                       : 'Select languages…'
                   }
+                  components={referenceSelectComponents}
                   styles={{
                     multiValue: (base) => ({
                       ...base,
@@ -803,6 +889,7 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                       ? 'Places vocabulary unavailable'
                       : 'Select places…'
                   }
+                  components={referenceSelectComponents}
                   styles={{
                     multiValue: (base) => ({
                       ...base,
@@ -926,6 +1013,7 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                         ? 'Places vocabulary unavailable'
                         : 'Select place…'
                     }
+                    components={referenceSelectComponents}
                     styles={{
                       control: (base) => ({
                         ...base,
@@ -967,6 +1055,7 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                       ? 'People vocabulary unavailable'
                       : 'Select people…'
                   }
+                  components={referenceSelectComponents}
                   styles={{
                     multiValue: (base) => ({
                       ...base,
@@ -1013,6 +1102,7 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                         ? 'People vocabulary unavailable'
                         : 'Select person…'
                     }
+                    components={referenceSelectComponents}
                     styles={{
                       control: (base) => ({
                         ...base,

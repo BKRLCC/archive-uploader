@@ -41,7 +41,7 @@ function initialFor(name: string, id: string): string {
   return firstChar ? firstChar.toUpperCase() : '?'
 }
 
-function ReferenceChip({
+export function ReferenceChip({
   entity,
   folder,
 }: {
