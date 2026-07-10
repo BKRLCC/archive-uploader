@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { SheetData } from '../api'
 import BulkAddPopup from './BulkAddPopup'
 import BulkAddListPopup from './BulkAddListPopup'
@@ -7,12 +7,23 @@ import EditDrawer from './EditDrawer'
 import EditRootDatasetForm from './EditRootDatasetForm'
 import Drawer from './Drawer'
 import ClickableImagePreview from './ClickableImagePreview'
+import ReferenceCell, {
+  normalizeReferenceId,
+  type ReferenceEntity,
+} from './ReferenceCell'
 import { getDepictionThumbnailRelativePath } from '../config/depiction-config'
-import { useAppDispatch } from '../ducks/hooks'
-import { removePeopleByIds, upsertPerson } from '../ducks/people'
+import { useAppDispatch, useAppSelector } from '../ducks/hooks'
+import { removePeopleByIds, upsertPerson, selectPeople } from '../ducks/people'
+import { selectPlaces } from '../ducks/places'
+import { selectLocalities } from '../ducks/localities'
+import { selectLanguages } from '../ducks/languages'
 import { loadTagVocabulariesFromFolder } from '../ducks/tags-loader'
 import { setTagVocabularies } from '../ducks/tags'
 import { getFieldDisplayLabel } from '../config/field-labels'
+import {
+  getControlledVocabularyForField,
+  isMultiSelectField,
+} from '../config/field-vocabularies'
 import type { Person } from '../types/types'
 import {
   getTableColumnLayout,
@@ -138,6 +149,59 @@ export default function ArchiveView({ xlsxPath }: Props) {
   const loadRequestRef = useRef(0)
 
   const folder = xlsxPath.replace(/[/\\][^/\\]+$/, '')
+
+  const [rootFolder, setRootFolder] = useState<string | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    window.api.getRootFolder().then((value) => {
+      if (!cancelled) setRootFolder(value)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const people = useAppSelector(selectPeople)
+  const places = useAppSelector(selectPlaces)
+  const localities = useAppSelector(selectLocalities)
+  const languages = useAppSelector(selectLanguages)
+
+  const referenceLookups = useMemo(() => {
+    const build = (
+      items: Array<{ '@id': string; name?: string; depiction?: string }>,
+    ): Map<string, ReferenceEntity> => {
+      const map = new Map<string, ReferenceEntity>()
+      for (const item of items) {
+        const id = String(item['@id'] ?? '').trim()
+        if (!id) continue
+        map.set(normalizeReferenceId(id), {
+          id,
+          name: String(item.name ?? ''),
+          depiction: item.depiction,
+        })
+      }
+      return map
+    }
+    return {
+      People: build(people),
+      Places: build(places),
+      Localities: build(localities),
+      Languages: build(languages),
+    } as Record<string, Map<string, ReferenceEntity>>
+  }, [people, places, localities, languages])
+
+  // Referenced entities are global metadata stored under fixed root subfolders;
+  // their depiction/thumbnail paths are relative to those folders, not the archive.
+  const referenceFolders = useMemo((): Record<string, string | null> => {
+    const base = rootFolder ? rootFolder.replace(/[/\\]+$/, '') : null
+    return {
+      People: base ? `${base}/People` : null,
+      Places: base ? `${base}/Places` : null,
+      Localities: base ? `${base}/Localities` : null,
+      Languages: base ? `${base}/Languages` : null,
+    }
+  }, [rootFolder])
 
   const clearSelection = useCallback(() => {
     setSelectedRows(new Set())
@@ -517,9 +581,27 @@ export default function ArchiveView({ xlsxPath }: Props) {
                   ]
                     .filter(Boolean)
                     .join(' ')
+                  const rawValue = row[i] ?? ''
+                  const vocab = getControlledVocabularyForField(headerName)
+                  const refMap = vocab ? referenceLookups[vocab] : undefined
+                  const refFolder = vocab ? referenceFolders[vocab] : undefined
+                  if (refMap && refFolder && rawValue.trim()) {
+                    const ids = isMultiSelectField(headerName)
+                      ? rawValue.split(/,\s*/).filter(Boolean)
+                      : [rawValue.trim()]
+                    return (
+                      <td key={i} className={className}>
+                        <ReferenceCell
+                          ids={ids}
+                          entities={refMap}
+                          folder={refFolder}
+                        />
+                      </td>
+                    )
+                  }
                   return (
                     <td key={i} className={className}>
-                      <span className="table-cell-text">{row[i] ?? ''}</span>
+                      <span className="table-cell-text">{rawValue}</span>
                     </td>
                   )
                 })}
