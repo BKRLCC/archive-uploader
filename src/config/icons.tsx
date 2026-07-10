@@ -12,4 +12,5 @@ export const UiIcons = {
   audio: '🎵',
   video: '🎬',
   doc: '📄',
+  refresh: '🔄',
 }

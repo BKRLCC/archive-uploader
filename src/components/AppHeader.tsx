@@ -27,6 +27,13 @@ export default function AppHeader() {
       <div className="app-header-nav no-drag">
         <button
           className="header-nav-btn"
+          onClick={() => void window.api.reloadApp()}
+          title="Refresh"
+        >
+          {UiIcons.refresh}
+        </button>
+        <button
+          className="header-nav-btn"
           onClick={() => navigate('/')}
           title="Home"
         >
