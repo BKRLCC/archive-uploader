@@ -138,7 +138,7 @@ export default function EditDrawer({
 
   return (
     <div className="drawer-inner">
-      <h3>Edit item</h3>
+      <h3>{isNew ? 'Add item' : 'Edit item'}</h3>
       <ItemEditForm
         ref={formRef}
         headers={headers}
