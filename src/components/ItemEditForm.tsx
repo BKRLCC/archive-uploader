@@ -3,6 +3,7 @@ import React, {
   useEffect,
   useImperativeHandle,
   useMemo,
+  useRef,
   useState,
 } from 'react'
 import Select, {
@@ -95,6 +96,7 @@ export interface ItemEditFormHandle {
     values: string[]
     virtualValues: Record<string, string>
   }
+  isDirty: () => boolean
 }
 
 interface ItemEditFormProps {
@@ -106,6 +108,7 @@ interface ItemEditFormProps {
   showField?: (fieldName: string) => boolean
   lockedFieldValues?: Record<string, string>
   onFeedback?: (message: string) => void
+  onDirtyChange?: (dirty: boolean) => void
 }
 
 function normalizeFieldName(fieldName: string): string {
@@ -142,6 +145,7 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
       showField,
       lockedFieldValues = {},
       onFeedback,
+      onDirtyChange,
     },
     ref,
   ) {
@@ -174,6 +178,18 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
       string | null
     >(null)
     const [isMapPickerOpen, setIsMapPickerOpen] = useState(false)
+
+    // Pristine baseline captured once at mount, used to detect unsaved changes.
+    const initialSnapshotRef = useRef<string | null>(null)
+    if (initialSnapshotRef.current === null) {
+      initialSnapshotRef.current = JSON.stringify({ values, virtualValues })
+    }
+    const dirty =
+      JSON.stringify({ values, virtualValues }) !== initialSnapshotRef.current
+
+    useEffect(() => {
+      onDirtyChange?.(dirty)
+    }, [dirty, onDirtyChange])
 
     const archiveFolderPath = xlsxPath.replace(/[/\\][^/\\]+$/, '')
     const hiddenFieldSet = useMemo(
@@ -541,8 +557,9 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
       () => ({
         validate: validateFields,
         getValues: getValuesSnapshot,
+        isDirty: () => dirty,
       }),
-      [renderedFields, values, virtualValues, lockedFieldValues],
+      [renderedFields, values, virtualValues, lockedFieldValues, dirty],
     )
 
     const handlePickDepiction = async (fieldName: string) => {

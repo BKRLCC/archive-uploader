@@ -137,6 +137,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
   const [bulkEditingRows, setBulkEditingRows] =
     useState<BulkEditingRows | null>(null)
   const [editingRootDataset, setEditingRootDataset] = useState(false)
+  const [drawerDirty, setDrawerDirty] = useState(false)
 
   const [populateFeedback, setPopulateFeedback] = useState('')
   const [populateBusy, setPopulateBusy] = useState(false)
@@ -215,7 +216,17 @@ export default function ArchiveView({ xlsxPath }: Props) {
     setBulkAddingItem(false)
     clearSelection()
     setEditingRootDataset(false)
+    setDrawerDirty(false)
   }, [clearSelection])
+
+  // Returns true if it's safe to discard the open item-edit drawer. Prompts the
+  // user when the drawer has unsaved changes; clears the dirty flag on confirm.
+  const confirmDiscard = useCallback((): boolean => {
+    if (!drawerDirty) return true
+    const ok = window.confirm('Discard unsaved changes to the current item?')
+    if (ok) setDrawerDirty(false)
+    return ok
+  }, [drawerDirty])
 
   const reloadSheet = useCallback(
     async (name: string) => {
@@ -519,6 +530,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
                     className="row-edit-btn"
                     onClick={(e) => {
                       e.stopPropagation()
+                      if (!confirmDiscard()) return
                       setEditingRootDataset(false)
                       setAddingItem(false)
                       setEditingRow({ rowIndex, row, sheetName })
@@ -633,7 +645,12 @@ export default function ArchiveView({ xlsxPath }: Props) {
     editingRootDataset || editingRow !== null || addingItem !== false
 
   return (
-    <div className="archive-page" onClick={closeDrawer}>
+    <div
+      className="archive-page"
+      onClick={() => {
+        if (confirmDiscard()) closeDrawer()
+      }}
+    >
       <div className="archive-main">
         <div className="collection-header">
           <div className="collection-header-text">
@@ -654,6 +671,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
               className="refresh-btn"
               onClick={(e) => {
                 e.stopPropagation()
+                if (!confirmDiscard()) return
                 closeDrawer()
                 setEditingRootDataset(true)
               }}
@@ -686,6 +704,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
                 className={`tab${activeTab === tab ? ' active' : ''}`}
                 onClick={(e) => {
                   e.stopPropagation()
+                  if (!confirmDiscard()) return
                   setActiveTab(tab)
                   closeDrawer()
                 }}
@@ -744,6 +763,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
                         className="refresh-btn"
                         onClick={(e) => {
                           e.stopPropagation()
+                          if (!confirmDiscard()) return
                           closeDrawer()
                           setAddingItem(activeTab)
                         }}
@@ -756,6 +776,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
                         className="refresh-btn"
                         onClick={(e) => {
                           e.stopPropagation()
+                          if (!confirmDiscard()) return
                           closeDrawer()
                           setBulkAddingItem(activeTab)
                           setBulkFeedback('')
@@ -769,6 +790,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
                         className="refresh-btn"
                         onClick={(e) => {
                           e.stopPropagation()
+                          if (!confirmDiscard()) return
                           closeDrawer()
                           setBulkAddingList(activeTab)
                           setBulkFeedback('')
@@ -849,6 +871,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
             const sheet = sheets[editingRow.sheetName]
             return sheet && typeof sheet !== 'string' ? (
               <EditDrawer
+                key={`edit:${editingRow.sheetName}:${editingRow.rowIndex}`}
                 headers={sheet.headers}
                 row={editingRow.row}
                 rowIndex={editingRow.rowIndex}
@@ -878,6 +901,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
                   void reloadTagsIfVocabFile()
                 }}
                 onClose={closeDrawer}
+                onDirtyChange={setDrawerDirty}
               />
             ) : null
           })()}
@@ -894,6 +918,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
                 : undefined
             return (
               <EditDrawer
+                key={`add:${addingItem}`}
                 headers={sheet.headers}
                 row={sheet.headers.map(() => '')}
                 rowIndex={-1}
@@ -909,6 +934,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
                   void reloadTagsIfVocabFile()
                 }}
                 onClose={closeDrawer}
+                onDirtyChange={setDrawerDirty}
                 isNew
               />
             )

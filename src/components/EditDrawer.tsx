@@ -22,6 +22,7 @@ interface Props {
   sheetName: string
   onSave: (rowIndex: number, updated: string[]) => void
   onClose: () => void
+  onDirtyChange?: (dirty: boolean) => void
   isNew?: boolean
   defaultType?: string
 }
@@ -34,12 +35,23 @@ export default function EditDrawer({
   sheetName,
   onSave,
   onClose,
+  onDirtyChange,
   isNew = false,
   defaultType,
 }: Props) {
   const formRef = useRef<ItemEditFormHandle>(null)
   const [saving, setSaving] = useState(false)
   const [feedback, setFeedback] = useState('')
+
+  function handleCancel() {
+    if (
+      formRef.current?.isDirty() &&
+      !window.confirm('Discard unsaved changes to the current item?')
+    ) {
+      return
+    }
+    onClose()
+  }
 
   async function handleSave() {
     if (!formRef.current) return
@@ -138,12 +150,13 @@ export default function EditDrawer({
           '@type': defaultType ?? getItemTypeForSheetName(sheetName),
         }}
         onFeedback={setFeedback}
+        onDirtyChange={onDirtyChange}
       />
       <div className="edit-actions">
         <button onClick={handleSave} disabled={saving}>
           Save
         </button>
-        <button onClick={onClose}>Cancel</button>
+        <button onClick={handleCancel}>Cancel</button>
       </div>
       {feedback && <p className="edit-feedback">{feedback}</p>}
     </div>
