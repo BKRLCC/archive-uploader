@@ -14,6 +14,10 @@ import ReferenceCell, {
 import { getDepictionThumbnailRelativePath } from '../config/depiction-config'
 import { useAppDispatch, useAppSelector } from '../ducks/hooks'
 import { removePeopleByIds, upsertPerson, selectPeople } from '../ducks/people'
+import {
+  removeOrganizationsByIds,
+  upsertOrganization,
+} from '../ducks/organizations'
 import { selectPlaces } from '../ducks/places'
 import { selectLocalities } from '../ducks/localities'
 import { selectLanguages } from '../ducks/languages'
@@ -24,7 +28,7 @@ import {
   getControlledVocabularyForField,
   isMultiSelectField,
 } from '../config/field-vocabularies'
-import type { Person } from '../types/types'
+import type { Person, Organization } from '../types/types'
 import {
   getTableColumnLayout,
   isHiddenTableColumn,
@@ -58,6 +62,10 @@ function normalizeSheetName(name: string): string {
 
 function isPeopleSheetName(name: string): boolean {
   return normalizeSheetName(name) === 'people'
+}
+
+function isOrganisationsSheetName(name: string): boolean {
+  return normalizeSheetName(name) === 'organisations'
 }
 
 function getHeaderIndex(headers: string[], key: string): number {
@@ -110,6 +118,59 @@ function mapRowToPerson(headers: string[], row: string[]): Person | null {
 }
 
 function getRowPersonId(headers: string[], row: string[]): string | null {
+  const idIndex = getHeaderIndex(headers, '@id')
+  if (idIndex < 0) return null
+  const id = String(row[idIndex] ?? '').trim()
+  return id || null
+}
+
+function mapRowToOrganization(
+  headers: string[],
+  row: string[],
+): Organization | null {
+  const idIndex = getHeaderIndex(headers, '@id')
+  const typeIndex = getHeaderIndex(headers, '@type')
+  const nameIndex = getHeaderIndex(headers, 'name')
+  if (idIndex < 0 || typeIndex < 0 || nameIndex < 0) return null
+
+  const id = String(row[idIndex] ?? '').trim()
+  const rawType = String(row[typeIndex] ?? '').trim()
+  const name = String(row[nameIndex] ?? '').trim()
+  if (!id || !name) return null
+  if (
+    !rawType ||
+    (rawType !== 'Organization' && !rawType.includes('Organization'))
+  ) {
+    return null
+  }
+
+  const organization: Organization = {
+    '@id': id,
+    '@type': 'Organization',
+    name,
+  }
+
+  const descriptionIndex = getHeaderIndex(headers, 'description')
+  const depictionIndex = getHeaderIndex(headers, 'depiction')
+  const urlIndex = getHeaderIndex(headers, 'url')
+  const sameAsIndex = getHeaderIndex(headers, 'sameAs')
+
+  const description =
+    descriptionIndex >= 0 ? String(row[descriptionIndex] ?? '').trim() : ''
+  const depiction =
+    depictionIndex >= 0 ? String(row[depictionIndex] ?? '').trim() : ''
+  const url = urlIndex >= 0 ? String(row[urlIndex] ?? '').trim() : ''
+  const sameAs = sameAsIndex >= 0 ? String(row[sameAsIndex] ?? '').trim() : ''
+
+  if (description) organization.description = description
+  if (depiction) organization.depiction = depiction
+  if (url) organization.url = url
+  if (sameAs) organization.sameAs = sameAs
+
+  return organization
+}
+
+function getRowOrganizationId(headers: string[], row: string[]): string | null {
   const idIndex = getHeaderIndex(headers, '@id')
   if (idIndex < 0) return null
   const id = String(row[idIndex] ?? '').trim()
@@ -343,12 +404,16 @@ export default function ArchiveView({ xlsxPath }: Props) {
     setBulkActionFeedback('Deleting…')
 
     const idsToRemove = (() => {
-      if (!isPeopleSheetName(sheetName)) return [] as string[]
+      if (!isPeopleSheetName(sheetName) && !isOrganisationsSheetName(sheetName))
+        return [] as string[]
       const sheet = sheets[sheetName]
       if (!sheet || typeof sheet === 'string') return [] as string[]
+      const getId = isOrganisationsSheetName(sheetName)
+        ? getRowOrganizationId
+        : getRowPersonId
       return rowIndices
         .map((rowIndex) => sheet.rows[rowIndex] ?? [])
-        .map((row) => getRowPersonId(sheet.headers, row))
+        .map((row) => getId(sheet.headers, row))
         .filter((id): id is string => Boolean(id))
     })()
 
@@ -359,7 +424,12 @@ export default function ArchiveView({ xlsxPath }: Props) {
         rowIndices,
       )
       if (idsToRemove.length > 0) {
-        dispatch(removePeopleByIds(Array.from(new Set(idsToRemove))))
+        const ids = Array.from(new Set(idsToRemove))
+        if (isOrganisationsSheetName(sheetName)) {
+          dispatch(removeOrganizationsByIds(ids))
+        } else {
+          dispatch(removePeopleByIds(ids))
+        }
       }
       setBulkActionFeedback(
         `✓ Deleted ${result.deletedCount} row${result.deletedCount === 1 ? '' : 's'}`,
@@ -896,6 +966,31 @@ export default function ArchiveView({ xlsxPath }: Props) {
                     if (nextPerson) {
                       dispatch(upsertPerson(nextPerson))
                     }
+                  } else if (isOrganisationsSheetName(editingRow.sheetName)) {
+                    const previousOrganization = mapRowToOrganization(
+                      sheet.headers,
+                      editingRow.row,
+                    )
+                    const nextOrganization = mapRowToOrganization(
+                      sheet.headers,
+                      updated,
+                    )
+
+                    if (
+                      previousOrganization &&
+                      (!nextOrganization ||
+                        nextOrganization['@id'] !== previousOrganization['@id'])
+                    ) {
+                      dispatch(
+                        removeOrganizationsByIds([
+                          previousOrganization['@id'],
+                        ]),
+                      )
+                    }
+
+                    if (nextOrganization) {
+                      dispatch(upsertOrganization(nextOrganization))
+                    }
                   }
                   void reloadSheet(editingRow.sheetName)
                   void reloadTagsIfVocabFile()
@@ -929,6 +1024,12 @@ export default function ArchiveView({ xlsxPath }: Props) {
                   if (isPeopleSheetName(addingItem)) {
                     const person = mapRowToPerson(sheet.headers, newRow)
                     if (person) dispatch(upsertPerson(person))
+                  } else if (isOrganisationsSheetName(addingItem)) {
+                    const organization = mapRowToOrganization(
+                      sheet.headers,
+                      newRow,
+                    )
+                    if (organization) dispatch(upsertOrganization(organization))
                   }
                   void reloadSheet(addingItem)
                   void reloadTagsIfVocabFile()
@@ -987,6 +1088,38 @@ export default function ArchiveView({ xlsxPath }: Props) {
 
                   if (idsToRemove.size > 0) {
                     dispatch(removePeopleByIds(Array.from(idsToRemove)))
+                  }
+                } else if (isOrganisationsSheetName(sheetName)) {
+                  const idsToRemove = new Set<string>()
+
+                  bulkEditingRows.rows.forEach((oldRow, index) => {
+                    const previousOrganization = mapRowToOrganization(
+                      bulkEditingSheet.headers,
+                      oldRow,
+                    )
+                    const nextOrganization = mapRowToOrganization(
+                      bulkEditingSheet.headers,
+                      updatedRows[index] ?? [],
+                    )
+
+                    if (
+                      previousOrganization &&
+                      (!nextOrganization ||
+                        nextOrganization['@id'] !==
+                          previousOrganization['@id'])
+                    ) {
+                      idsToRemove.add(previousOrganization['@id'])
+                    }
+
+                    if (nextOrganization) {
+                      dispatch(upsertOrganization(nextOrganization))
+                    }
+                  })
+
+                  if (idsToRemove.size > 0) {
+                    dispatch(
+                      removeOrganizationsByIds(Array.from(idsToRemove)),
+                    )
                   }
                 }
 

@@ -34,6 +34,7 @@ export const FIELD_VOCABULARIES: Record<string, ControlledVocabularySource> = {
   isRef_enteredBy: 'People',
   isRef_mentions: 'People', // People referenced or depicted (schema:mentions)
   isRef_contentLocation: 'Places',
+  isRef_locationCreated: 'Places',
   isRef_geo: 'Localities',
   isRef_sameAs: 'Licenses',
   isRef_isPartOf: 'RepositoryCollection',
@@ -46,6 +47,7 @@ export const MULTI_SELECT_FIELDS = new Set<string>([
   'isRef_contributor',
   'isRef_mentions',
   'isRef_contentLocation',
+  'isRef_locationCreated',
   'isRef_geo',
 ])
 

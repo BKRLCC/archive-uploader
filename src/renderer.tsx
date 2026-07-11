@@ -16,6 +16,11 @@ import { setLocalities, setLocalitiesLoading } from './ducks/localities'
 import { loadLocalitiesFromSpreadsheet } from './ducks/localities-loader'
 import { setLoading, setPeople } from './ducks/people'
 import { loadPeopleFromSpreadsheet } from './ducks/people-loader'
+import {
+  setOrganizations,
+  setOrganizationsLoading,
+} from './ducks/organizations'
+import { loadOrganizationsFromSpreadsheet } from './ducks/organizations-loader'
 import { setPlaces, setPlacesLoading } from './ducks/places'
 import { loadPlacesFromSpreadsheet } from './ducks/places-loader'
 import { setTagVocabularies, setTagsError, setTagsLoading } from './ducks/tags'
@@ -24,6 +29,7 @@ import { loadTagVocabulariesFromFolder } from './ducks/tags-loader'
 let hasBootstrappedLanguages = false
 let hasBootstrappedLocalities = false
 let hasBootstrappedPeople = false
+let hasBootstrappedOrganizations = false
 let hasBootstrappedPlaces = false
 let hasBootstrappedTags = false
 
@@ -41,6 +47,29 @@ function LanguagesBootstrap() {
         dispatch(setLanguages(languages))
       } finally {
         dispatch(setLanguagesLoading(false))
+      }
+    }
+
+    void run()
+  }, [dispatch])
+
+  return null
+}
+
+function OrganizationsBootstrap() {
+  const dispatch = useAppDispatch()
+
+  React.useEffect(() => {
+    if (hasBootstrappedOrganizations) return
+    hasBootstrappedOrganizations = true
+
+    const run = async () => {
+      dispatch(setOrganizationsLoading(true))
+      try {
+        const organizations = await loadOrganizationsFromSpreadsheet()
+        dispatch(setOrganizations(organizations))
+      } finally {
+        dispatch(setOrganizationsLoading(false))
       }
     }
 
@@ -170,6 +199,7 @@ root.render(
       <LanguagesBootstrap />
       <LocalitiesBootstrap />
       <PeopleBootstrap />
+      <OrganizationsBootstrap />
       <PlacesBootstrap />
       <TagsBootstrap />
       <HashRouter>

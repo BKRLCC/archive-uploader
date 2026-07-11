@@ -122,6 +122,8 @@ contextBridge.exposeInMainWorld('api', {
     ipcRenderer.invoke('get-derived-file-rows', xlsxPath, sheetName),
   createPeopleFolder: (rootFolder: string): Promise<{ path: string }> =>
     ipcRenderer.invoke('create-people-folder', rootFolder),
+  createOrganisationsFolder: (rootFolder: string): Promise<{ path: string }> =>
+    ipcRenderer.invoke('create-organisations-folder', rootFolder),
   createLanguagesFolder: (rootFolder: string): Promise<{ path: string }> =>
     ipcRenderer.invoke('create-languages-folder', rootFolder),
   createPlacesFolder: (rootFolder: string): Promise<{ path: string }> =>

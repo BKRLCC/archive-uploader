@@ -41,11 +41,15 @@ const HEADER_LAYOUTS: Record<string, TableColumnLayout> = {
     widthClassName: 'col-width-language',
     wrapMode: 'clamp-2',
   },
-  isref_mentions: {
+  isRef_mentions: {
     widthClassName: 'col-width-medium',
     wrapMode: 'clamp-2',
   },
   isref_contentlocation: {
+    widthClassName: 'col-width-medium',
+    wrapMode: 'clamp-2',
+  },
+  isref_locationcreated: {
     widthClassName: 'col-width-medium',
     wrapMode: 'clamp-2',
   },

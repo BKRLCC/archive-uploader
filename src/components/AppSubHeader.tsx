@@ -15,6 +15,7 @@ export default function AppSubHeader() {
   const isOnBrowser = location.pathname === '/browser'
   const currentPath = searchParams.get('path')
   const isFile = searchParams.get('type') === 'file'
+  const refreshKey = searchParams.get('r')
 
   useEffect(() => {
     window.api.getRootFolder().then(setRootFolder)
@@ -23,7 +24,7 @@ export default function AppSubHeader() {
   useEffect(() => {
     if (!isOnBrowser || !currentPath || isFile) return
     window.api.listFolder(currentPath).then(setEntries)
-  }, [isOnBrowser, currentPath, isFile])
+  }, [isOnBrowser, currentPath, isFile, refreshKey])
 
   if (!isOnBrowser || !currentPath || !rootFolder) return null
 
@@ -78,6 +79,24 @@ export default function AppSubHeader() {
                 }}
               >
                 👥 Create People folder
+              </button>
+            )}
+          {currentPath === rootFolder &&
+            !entries.some(
+              (e) => e.name === 'Organisations' && e.isDirectory,
+            ) && (
+              <button
+                className="create-archive-btn"
+                onClick={async (e) => {
+                  e.stopPropagation()
+                  await window.api.createOrganisationsFolder(rootFolder)
+                  navigate(
+                    `/browser?path=${encodeURIComponent(currentPath)}&r=${Date.now()}`,
+                    { replace: true },
+                  )
+                }}
+              >
+                🏠 Create Organisations folder
               </button>
             )}
           {currentPath === rootFolder &&

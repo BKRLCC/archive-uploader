@@ -2,6 +2,7 @@
   "names": [
     "metadata.xlsx",
     "people.xlsx",
+    "organisations.xlsx",
     "places.xlsx",
     "licenses.xlsx",
     "languages.xlsx"
@@ -9,6 +10,7 @@
   "labels": {
     "metadata.xlsx": "Metadata",
     "people.xlsx": "People",
+    "organisations.xlsx": "Organisations",
     "places.xlsx": "Places",
     "licenses.xlsx": "Licenses",
     "languages.xlsx": "Languages"

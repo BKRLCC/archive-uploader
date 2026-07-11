@@ -5,6 +5,8 @@ import { UiIcons } from '../config/icons'
 import { useAppDispatch } from '../ducks/hooks'
 import { loadPeopleFromSpreadsheet } from '../ducks/people-loader'
 import { setPeople } from '../ducks/people'
+import { loadOrganizationsFromSpreadsheet } from '../ducks/organizations-loader'
+import { setOrganizations } from '../ducks/organizations'
 import { loadLanguagesFromSpreadsheet } from '../ducks/languages-loader'
 import { setLanguages } from '../ducks/languages'
 import { loadPlacesFromSpreadsheet } from '../ducks/places-loader'
@@ -23,15 +25,17 @@ export default function HomePage() {
     setReloadBusy(true)
     setReloadFeedback('Reloading…')
     try {
-      const [people, languages, places, localities, vocabularies] =
+      const [people, organizations, languages, places, localities, vocabularies] =
         await Promise.all([
           loadPeopleFromSpreadsheet(),
+          loadOrganizationsFromSpreadsheet(),
           loadLanguagesFromSpreadsheet(),
           loadPlacesFromSpreadsheet(),
           loadLocalitiesFromSpreadsheet(),
           loadTagVocabulariesFromFolder(),
         ])
       dispatch(setPeople(people))
+      dispatch(setOrganizations(organizations))
       dispatch(setLanguages(languages))
       dispatch(setPlaces(places))
       dispatch(setLocalities(localities))

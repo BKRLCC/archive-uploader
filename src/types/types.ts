@@ -56,11 +56,18 @@ export type Language = BaseItem & {
   sameAs?: string // External identifying URL, e.g. https://aiatsis.gov.au/austlang/language/N173 (schema:sameAs)
 }
 
+// Organisation
+export type Organization = BaseItem & {
+  url?: string // Official website (schema:url)
+  sameAs?: string // External identifying URL, e.g. a ROR or Wikidata page (schema:sameAs)
+}
+
 // https://www.ldaca.edu.au/resources/user-guides/crate-o/convert-spreadsheet/#objects
 export type RepositoryObject = BaseItem & {
   dateCreated?: string
   isPublishable?: boolean
   isRef_contentLocation?: string
+  isRef_locationCreated?: string
   isRef_inLanguage?: string
   isRef_creator?: string
   isRef_contributor?: string
@@ -104,7 +111,7 @@ export type File = {
 // Maps each ItemDataType string to its TypeScript type, used to constrain TypeColumns.
 type ItemTypeMap = {
   Person: Person
-  Organization: BaseItem
+  Organization: Organization
   RepositoryObject: RepositoryObject
   Language: Language
   Dataset: BaseItem
@@ -147,13 +154,14 @@ export const ENTITY_FIELD_REGISTRY: {
     'isPublishable',
     'depiction',
     'isRef_contentLocation',
+    'isRef_locationCreated',
     'isRef_inLanguage',
     'isRef_creator',
     'isRef_contributor',
     'isRef_hasPart',
     'isRef_mentions',
   ]),
-  Organization: defineEntityFields<BaseItem>()([
+  Organization: defineEntityFields<Organization>()([
     '@id',
     '@type',
     'name',
@@ -161,6 +169,8 @@ export const ENTITY_FIELD_REGISTRY: {
     'dateAdded',
     'isRef_enteredBy',
     'depiction',
+    'url',
+    'sameAs',
   ]),
   Language: defineEntityFields<Language>()([
     '@id',
@@ -301,6 +311,8 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     'dateAdded',
     'isRef_enteredBy',
     'depiction',
+    'url',
+    'sameAs',
   ],
   RepositoryObject: [
     '@id',
@@ -313,6 +325,7 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     'isPublishable',
     'depiction',
     'isRef_contentLocation',
+    'isRef_locationCreated',
     'isRef_inLanguage',
     'isRef_creator',
     'isRef_contributor',
@@ -413,6 +426,7 @@ export type SpreadsheetSchema = {
 export type SpreadsheetType =
   | 'RepositoryObject'
   | 'People'
+  | 'Organisations'
   | 'Language'
   | 'Places'
   | 'Localities'
@@ -436,6 +450,16 @@ export const spreadsheets: Record<SpreadsheetType, SpreadsheetSchema> = {
         name: dataTypeLabels.Person.label,
         type: 'Person',
         headers: TypeColumns.Person,
+      },
+    ],
+  },
+  Organisations: {
+    folderName: 'Organisations',
+    tabs: [
+      {
+        name: dataTypeLabels.Organization.label,
+        type: 'Organization',
+        headers: TypeColumns.Organization,
       },
     ],
   },

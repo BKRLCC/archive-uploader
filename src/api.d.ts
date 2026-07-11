@@ -96,6 +96,7 @@ export interface Api {
     sheetName?: string,
   ) => Promise<SheetData>
   createPeopleFolder: (rootFolder: string) => Promise<{ path: string }>
+  createOrganisationsFolder: (rootFolder: string) => Promise<{ path: string }>
   createLanguagesFolder: (rootFolder: string) => Promise<{ path: string }>
   createPlacesFolder: (rootFolder: string) => Promise<{ path: string }>
   createLocalitiesFolder: (rootFolder: string) => Promise<{ path: string }>
