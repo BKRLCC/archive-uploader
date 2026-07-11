@@ -25,15 +25,21 @@ export default function HomePage() {
     setReloadBusy(true)
     setReloadFeedback('Reloading…')
     try {
-      const [people, organizations, languages, places, localities, vocabularies] =
-        await Promise.all([
-          loadPeopleFromSpreadsheet(),
-          loadOrganizationsFromSpreadsheet(),
-          loadLanguagesFromSpreadsheet(),
-          loadPlacesFromSpreadsheet(),
-          loadLocalitiesFromSpreadsheet(),
-          loadTagVocabulariesFromFolder(),
-        ])
+      const [
+        people,
+        organizations,
+        languages,
+        places,
+        localities,
+        vocabularies,
+      ] = await Promise.all([
+        loadPeopleFromSpreadsheet(),
+        loadOrganizationsFromSpreadsheet(),
+        loadLanguagesFromSpreadsheet(),
+        loadPlacesFromSpreadsheet(),
+        loadLocalitiesFromSpreadsheet(),
+        loadTagVocabulariesFromFolder(),
+      ])
       dispatch(setPeople(people))
       dispatch(setOrganizations(organizations))
       dispatch(setLanguages(languages))

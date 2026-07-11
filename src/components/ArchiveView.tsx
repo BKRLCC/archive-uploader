@@ -982,9 +982,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
                         nextOrganization['@id'] !== previousOrganization['@id'])
                     ) {
                       dispatch(
-                        removeOrganizationsByIds([
-                          previousOrganization['@id'],
-                        ]),
+                        removeOrganizationsByIds([previousOrganization['@id']]),
                       )
                     }
 
@@ -1105,8 +1103,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
                     if (
                       previousOrganization &&
                       (!nextOrganization ||
-                        nextOrganization['@id'] !==
-                          previousOrganization['@id'])
+                        nextOrganization['@id'] !== previousOrganization['@id'])
                     ) {
                       idsToRemove.add(previousOrganization['@id'])
                     }
@@ -1117,9 +1114,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
                   })
 
                   if (idsToRemove.size > 0) {
-                    dispatch(
-                      removeOrganizationsByIds(Array.from(idsToRemove)),
-                    )
+                    dispatch(removeOrganizationsByIds(Array.from(idsToRemove)))
                   }
                 }
 

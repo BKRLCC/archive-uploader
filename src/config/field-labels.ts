@@ -20,6 +20,7 @@ const FIELD_LABELS: Record<string, string> = {
   isRef_mentions: '🧑‍🧑‍🧒‍🧒 Depicted',
   isRef_contentLocation: '📍 Content Location',
   isRef_locationCreated: '🖌️ Created At',
+  isRef_location: '📍 Location',
   isRef_inLanguage: '🗣️ In Languages',
   isRef_hasPart: '📎 Files',
   isRef_geo: '🧭 Localities',

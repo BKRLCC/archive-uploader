@@ -60,6 +60,7 @@ export type Language = BaseItem & {
 export type Organization = BaseItem & {
   url?: string // Official website (schema:url)
   sameAs?: string // External identifying URL, e.g. a ROR or Wikidata page (schema:sameAs)
+  isRef_location?: string // Where the organisation is located (schema:location)
 }
 
 // https://www.ldaca.edu.au/resources/user-guides/crate-o/convert-spreadsheet/#objects
@@ -169,6 +170,7 @@ export const ENTITY_FIELD_REGISTRY: {
     'dateAdded',
     'isRef_enteredBy',
     'depiction',
+    'isRef_location',
     'url',
     'sameAs',
   ]),
@@ -311,6 +313,7 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     'dateAdded',
     'isRef_enteredBy',
     'depiction',
+    'isRef_location',
     'url',
     'sameAs',
   ],
