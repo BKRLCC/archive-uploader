@@ -2,6 +2,7 @@ import React, { useMemo, useRef, useState } from 'react'
 import { getItemTypeForSheetName } from '../helpers/item-types'
 import Drawer from './Drawer'
 import ItemEditForm, { type ItemEditFormHandle } from './ItemEditForm'
+import { DRAWER_WIDTH } from '../config/ui-config'
 
 interface BulkEditDrawerProps {
   open: boolean
@@ -96,7 +97,7 @@ export default function BulkEditDrawer({
   }
 
   return (
-    <Drawer open={open} width={360}>
+    <Drawer open={open} width={DRAWER_WIDTH}>
       <div className="drawer-inner">
         <h3>Edit selected items</h3>
         <p className="edit-field-readonly">

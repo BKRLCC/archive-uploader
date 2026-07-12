@@ -20,6 +20,7 @@ import {
   isArchiveEditableWorkbookPath,
 } from '../helpers/archive-workbooks'
 import { dataTypeLabels, labelToDataTypeMap } from '../config/datatype-labels'
+import { DRAWER_WIDTH } from '../config/ui-config'
 
 // ── Constants ────────────────────────────────────────────────────────────────
 
@@ -225,7 +226,7 @@ export default function BrowserPage() {
             </ul>
           </div>
         </div>
-        <Drawer open={selected !== null || showCreate} width={280}>
+        <Drawer open={selected !== null || showCreate} width={DRAWER_WIDTH}>
           {showCreate && currentPath ? (
             <CreateArchiveForm
               folderPath={currentPath}

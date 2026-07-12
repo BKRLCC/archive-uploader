@@ -597,7 +597,7 @@ textarea {
 }
 
 .drawer-inner {
-  padding: 1em;
+  padding: 0.5em 0.75em 0.5em 0.5em;
   box-sizing: border-box;
 }
 

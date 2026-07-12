@@ -33,6 +33,7 @@ import {
   getTableColumnLayout,
   isHiddenTableColumn,
 } from '../config/table-column-layout'
+import { DRAWER_WIDTH } from '../config/ui-config'
 
 type SheetState = SheetData | null | 'empty' | 'missing'
 
@@ -923,7 +924,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
           })()}
       </div>
 
-      <Drawer open={drawerOpen} width={320}>
+      <Drawer open={drawerOpen} width={DRAWER_WIDTH}>
         {editingRootDataset &&
           rootDatasetSheet &&
           typeof rootDatasetSheet !== 'string' && (
