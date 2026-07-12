@@ -13,4 +13,5 @@ export const UiIcons = {
   video: '🎬',
   doc: '📄',
   refresh: '🔄',
+  info: 'ℹ️',
 }

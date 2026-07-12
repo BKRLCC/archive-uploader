@@ -30,12 +30,16 @@ import { selectPeople } from '../ducks/people'
 import { selectPlaces } from '../ducks/places'
 import { selectTagVocabularies } from '../ducks/tags'
 import { getEntityFieldModel, resolveEditableEntityType } from '../types/types'
-import { getFieldDisplayLabel } from '../config/field-labels'
+import {
+  getFieldDisplayLabel,
+  getFieldDescription,
+} from '../config/field-labels'
 import { groupRenderedFields } from '../config/field-groups'
 import ClickableImagePreview from './ClickableImagePreview'
 import { ReferenceChip, type ReferenceEntity } from './ReferenceCell'
 import FileLinksField, { FILE_LINKS_FIELD_NAME } from './FileLinksField'
 import MapPickerModal from './MapPickerModal'
+import InfoButtonWithTooltip from './InfoButtonWithTooltip'
 
 interface VocabOption {
   value: string
@@ -641,6 +645,9 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                 <label key={fieldName} className="edit-field">
                   <span className="edit-field-key">
                     {getFieldDisplayLabel(fieldName)}
+                    <InfoButtonWithTooltip
+                      text={getFieldDescription(fieldName) ?? undefined}
+                    />
                   </span>
                   {isReadOnly ? (
                     <span className="edit-field-readonly">

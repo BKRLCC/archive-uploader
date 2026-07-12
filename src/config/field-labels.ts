@@ -28,6 +28,19 @@ const FIELD_LABELS: Record<string, string> = {
   isRef_isPartOf: '🗂️ Collection',
 }
 
+// Optional per-field help text shown via an info tooltip in the edit form.
+// Only fields listed here get an info icon.
+const FIELD_DESCRIPTIONS: Record<string, string> = {
+  isRef_contentLocation:
+    'The location depicted in the item, e.g. the setting of a video or the country depicted in a painting.',
+  isRef_locationCreated:
+    'The location where the item was created. You only need to fill this in if it is different from the content location.',
+  isPublishable:
+    'If checked, the item will be included in the public-facing website. If unchecked, it will be hidden from public view.',
+  isRef_inLanguage:
+    'The language(s) spoken in the item, e.g. the language of a video or audio recording.',
+}
+
 function normalizeFieldName(fieldName: string): string {
   return String(fieldName ?? '').trim()
 }
@@ -63,4 +76,10 @@ export function getFieldDisplayLabel(fieldName: string): string {
   if (tagLabel) return tagLabel
 
   return normalized
+}
+
+export function getFieldDescription(fieldName: string): string | null {
+  const normalized = normalizeFieldName(fieldName)
+  if (!normalized) return null
+  return FIELD_DESCRIPTIONS[normalized] ?? null
 }
