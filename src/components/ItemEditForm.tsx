@@ -27,6 +27,7 @@ import { selectLanguages } from '../ducks/languages'
 import { selectLocalities } from '../ducks/localities'
 import { selectPeople } from '../ducks/people'
 import { selectPlaces } from '../ducks/places'
+import { selectOrganizations } from '../ducks/organizations'
 import { selectTagVocabularies } from '../ducks/tags'
 import { getEntityFieldModel, resolveEditableEntityType } from '../types/types'
 import {
@@ -205,6 +206,7 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
     const places = useAppSelector(selectPlaces)
     const localities = useAppSelector(selectLocalities)
     const languages = useAppSelector(selectLanguages)
+    const organizations = useAppSelector(selectOrganizations)
     const tagVocabularies = useAppSelector(selectTagVocabularies)
 
     const [rootFolder, setRootFolder] = useState<string | null>(null)
@@ -225,6 +227,7 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
         People: base ? `${base}/People` : null,
         Places: base ? `${base}/Places` : null,
         Languages: base ? `${base}/Languages` : null,
+        Organisations: base ? `${base}/Organisations` : null,
       }
     }, [rootFolder])
 
@@ -274,6 +277,22 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
       }
     })
     const placesOptionIds = new Set(placesOptions.map((option) => option.value))
+
+    const organizationsOptions: VocabOption[] = organizations.map(
+      (organization) => {
+        const id = organization['@id']
+        const name = organization.name
+        const label = `${name} (${id})`
+        return {
+          value: id,
+          label,
+          searchText: `${name} ${id}`.toLowerCase(),
+          name,
+          depiction: organization.depiction,
+          folder: referenceFolders.Organisations,
+        }
+      },
+    )
 
     const localitiesOptions: VocabOption[] = localities.map((locality) => {
       const id = locality['@id']
@@ -646,6 +665,8 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
               const isLocalitiesControlled = vocabularySource === 'Localities'
               const isLanguagesControlled = vocabularySource === 'Languages'
               const isTagsControlled = vocabularySource === 'Tags'
+              const isOrganizationsControlled =
+                vocabularySource === 'Organization'
               const tagVocabulary = getTagVocabularyForField(fieldName)
               const tagOptions = tagVocabulary?.options ?? []
               const peopleSearch = vocabSearch[fieldName] ?? ''
@@ -1154,6 +1175,48 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                       {peopleOptions.length === 0 && (
                         <span className="edit-field-readonly">
                           People vocabulary is unavailable.
+                        </span>
+                      )}
+                    </>
+                  ) : isOrganizationsControlled ? (
+                    <>
+                      <Select
+                        isClearable
+                        isDisabled={organizationsOptions.length === 0}
+                        options={organizationsOptions}
+                        value={
+                          organizationsOptions.find(
+                            (option) => option.value === currentValue,
+                          ) ||
+                          (currentValue
+                            ? {
+                                value: currentValue,
+                                label: currentValue,
+                                searchText: currentValue,
+                              }
+                            : null)
+                        }
+                        onChange={(selected) => {
+                          const option = selected as VocabOption | null
+                          setFieldValue(fieldName, option?.value ?? '')
+                        }}
+                        placeholder={
+                          organizationsOptions.length === 0
+                            ? 'Organisations vocabulary unavailable'
+                            : 'Select organisation…'
+                        }
+                        components={referenceSelectComponents}
+                        styles={{
+                          control: (base) => ({
+                            ...base,
+                            borderColor: '#a62b2b',
+                            minHeight: 34,
+                          }),
+                        }}
+                      />
+                      {organizationsOptions.length === 0 && (
+                        <span className="edit-field-readonly">
+                          Organisations vocabulary is unavailable.
                         </span>
                       )}
                     </>

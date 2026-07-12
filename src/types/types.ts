@@ -77,6 +77,11 @@ export type RepositoryObject = BaseItem & {
    * People referenced or depicted in this resource (schema:mentions)
    */
   isRef_mentions?: string
+  width?: string // Width of the physical object, in cm
+  height?: string // Height of the physical object, in cm
+  depth?: string // Depth of the physical object, in cm
+  material?: string // Primary material(s) the object is made from
+  isRef_holdingOrganisation?: string // Organisation that holds/owns the object
 }
 
 export type License = BaseItem & {
@@ -161,6 +166,11 @@ export const ENTITY_FIELD_REGISTRY: {
     'isRef_contributor',
     'isRef_hasPart',
     'isRef_mentions',
+    'width',
+    'height',
+    'depth',
+    'material',
+    'isRef_holdingOrganisation',
   ]),
   Organization: defineEntityFields<Organization>()([
     '@id',

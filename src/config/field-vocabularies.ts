@@ -6,6 +6,7 @@ export type ControlledVocabularySource =
   | 'Licenses'
   | 'RepositoryCollection'
   | 'Tags'
+  | 'Organization'
 
 export const TAG_FIELD_PREFIX = 'isRef_tag_'
 
@@ -39,6 +40,7 @@ export const FIELD_VOCABULARIES: Record<string, ControlledVocabularySource> = {
   isRef_geo: 'Localities',
   isRef_sameAs: 'Licenses',
   isRef_isPartOf: 'RepositoryCollection',
+  isRef_holdingOrganisation: 'Organization',
 }
 
 // Multi-select fields (comma-separated @ids)

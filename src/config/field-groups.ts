@@ -53,6 +53,18 @@ export const FIELD_GROUPS: FieldGroupDef[] = [
     defaultOpen: false,
   },
   {
+    id: 'physical',
+    label: 'Physical object',
+    fields: [
+      'width',
+      'height',
+      'depth',
+      'material',
+      'isRef_holdingOrganisation',
+    ],
+    defaultOpen: false,
+  },
+  {
     id: 'metadata',
     label: 'System metadata',
     fields: ['dateAdded', '@id', '@type'],

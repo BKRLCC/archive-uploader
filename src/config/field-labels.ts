@@ -26,6 +26,11 @@ const FIELD_LABELS: Record<string, string> = {
   isRef_geo: '🧭 Localities',
   isRef_sameAs: '🔗 License Link',
   isRef_isPartOf: '🗂️ Collection',
+  width: '📏 Width (cm)',
+  height: '📏 Height (cm)',
+  depth: '📏 Depth (cm)',
+  material: '🧵 Material',
+  isRef_holdingOrganisation: '🏛️ Holding Organisation',
 }
 
 // Optional per-field help text shown via an info tooltip in the edit form.
@@ -53,6 +58,13 @@ const FIELD_DESCRIPTIONS: Record<string, string> = {
     "For Aboriginal languages, use the AIATSIS code. For other languages, use the ISO 639-3 code (two letters, e.g. 'en'). If you do not know the code, leave this field blank.",
   isRef_mentions:
     'People who are "in" the item, e.g. people depicted in a photo or mentioned in a text.',
+  width: 'The width of the physical object, in centimetres.',
+  height: 'The height of the physical object, in centimetres.',
+  depth: 'The depth of the physical object, in centimetres.',
+  material:
+    'The primary material(s) the object is made from, e.g. "oil on canvas" or "bark, ochre".',
+  isRef_holdingOrganisation:
+    'The organisation that currently holds or owns this object. Add it to the Organisations list first if it is not already there.',
 }
 
 function normalizeFieldName(fieldName: string): string {

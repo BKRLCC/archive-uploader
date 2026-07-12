@@ -18,6 +18,7 @@ import { removePeopleByIds, upsertPerson, selectPeople } from '../ducks/people'
 import {
   removeOrganizationsByIds,
   upsertOrganization,
+  selectOrganizations,
 } from '../ducks/organizations'
 import { selectPlaces } from '../ducks/places'
 import { selectLocalities } from '../ducks/localities'
@@ -238,7 +239,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
   const places = useAppSelector(selectPlaces)
   const localities = useAppSelector(selectLocalities)
   const languages = useAppSelector(selectLanguages)
-
+  const organizations = useAppSelector(selectOrganizations)
   const referenceLookups = useMemo(() => {
     const build = (
       items: Array<{ '@id': string; name?: string; depiction?: string }>,
@@ -260,8 +261,9 @@ export default function ArchiveView({ xlsxPath }: Props) {
       Places: build(places),
       Localities: build(localities),
       Languages: build(languages),
+      Organization: build(organizations),
     } as Record<string, Map<string, ReferenceEntity>>
-  }, [people, places, localities, languages])
+  }, [people, places, localities, languages, organizations])
 
   // Referenced entities are global metadata stored under fixed root subfolders;
   // their depiction/thumbnail paths are relative to those folders, not the archive.
@@ -272,6 +274,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
       Places: base ? `${base}/Places` : null,
       Localities: base ? `${base}/Localities` : null,
       Languages: base ? `${base}/Languages` : null,
+      Organization: base ? `${base}/Organisations` : null,
     }
   }, [rootFolder])
 
