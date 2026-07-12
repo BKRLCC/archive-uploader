@@ -605,6 +605,27 @@ textarea {
   margin-top: 0.5em;
 }
 
+.edit-group {
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  margin-bottom: 0.75em;
+  padding: 0 0.75em;
+}
+
+.edit-group-summary {
+  cursor: pointer;
+  list-style: revert;
+  font-weight: 600;
+  color: #a62b2b;
+  padding: 0.6em 0;
+  user-select: none;
+}
+
+.edit-group[open] > .edit-group-summary {
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 0.75em;
+}
+
 .edit-field {
   display: block;
   margin-bottom: 0.75em;
