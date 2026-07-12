@@ -671,6 +671,7 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                     {getFieldDisplayLabel(fieldName)}
                     <InfoButtonWithTooltip
                       text={getFieldDescription(fieldName) ?? undefined}
+                      position="right"
                     />
                   </span>
                   {isReadOnly ? (

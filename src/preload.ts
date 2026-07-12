@@ -40,6 +40,10 @@ contextBridge.exposeInMainWorld('api', {
     ipcRenderer.invoke('pick-depiction-file', archiveFolderPath),
   pickFiles: (archiveFolderPath: string): Promise<string[] | null> =>
     ipcRenderer.invoke('pick-files', archiveFolderPath),
+  scanFolderForNewFiles: (
+    archiveFolderPath: string,
+  ): Promise<string[] | null> =>
+    ipcRenderer.invoke('scan-folder-for-new-files', archiveFolderPath),
   pickLinkedFiles: (archiveFolderPath: string): Promise<string[] | null> =>
     ipcRenderer.invoke('pick-linked-files', archiveFolderPath),
   generateVideoDepiction: (

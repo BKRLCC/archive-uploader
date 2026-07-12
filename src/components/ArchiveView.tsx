@@ -7,6 +7,7 @@ import EditDrawer from './EditDrawer'
 import EditRootDatasetForm from './EditRootDatasetForm'
 import Drawer from './Drawer'
 import ClickableImagePreview from './ClickableImagePreview'
+import InfoButtonWithTooltip from './InfoButtonWithTooltip'
 import ReferenceCell, {
   normalizeReferenceId,
   type ReferenceEntity,
@@ -24,6 +25,8 @@ import { selectLanguages } from '../ducks/languages'
 import { loadTagVocabulariesFromFolder } from '../ducks/tags-loader'
 import { setTagVocabularies } from '../ducks/tags'
 import { getFieldDisplayLabel } from '../config/field-labels'
+import { parseHasPartPaths } from '../helpers/file-linkage'
+import { UiIcons } from '../config/icons'
 import {
   getControlledVocabularyForField,
   isMultiSelectField,
@@ -195,6 +198,9 @@ export default function ArchiveView({ xlsxPath }: Props) {
   const [addingItem, setAddingItem] = useState<string | false>(false)
   const [bulkAddingItem, setBulkAddingItem] = useState<string | false>(false)
   const [bulkAddingList, setBulkAddingList] = useState<string | false>(false)
+  const [searchNewItems, setSearchNewItems] = useState<
+    { sheetName: string; files: string[] } | false
+  >(false)
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set())
   const [bulkEditingRows, setBulkEditingRows] =
     useState<BulkEditingRows | null>(null)
@@ -279,6 +285,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
     setEditingRow(null)
     setAddingItem(false)
     setBulkAddingItem(false)
+    setSearchNewItems(false)
     clearSelection()
     setEditingRootDataset(false)
     setDrawerDirty(false)
@@ -302,6 +309,49 @@ export default function ArchiveView({ xlsxPath }: Props) {
       clearSelection()
     },
     [clearSelection, xlsxPath],
+  )
+
+  // Scans a chosen folder inside the archive for files that aren't yet linked
+  // via isRef_hasPart on the current sheet, then opens the bulk-add popup
+  // preloaded with only those undescribed files.
+  const handleSearchNewItems = useCallback(
+    async (sheetName: string, sheet: SheetData) => {
+      setBulkFeedback('')
+      let scanned: string[] | null
+      try {
+        scanned = await window.api.scanFolderForNewFiles(folder)
+      } catch (err) {
+        setBulkFeedback(`✗ ${(err as Error).message}`)
+        return
+      }
+      if (!scanned || scanned.length === 0) {
+        setBulkFeedback('No files found in the selected folder.')
+        return
+      }
+
+      const hasPartIndex = sheet.headers.findIndex(
+        (header) => header === 'isRef_hasPart',
+      )
+      const describedSet = new Set<string>()
+      if (hasPartIndex >= 0) {
+        sheet.rows.forEach((row) => {
+          parseHasPartPaths(String(row[hasPartIndex] ?? '')).forEach((p) =>
+            describedSet.add(p.toLowerCase()),
+          )
+        })
+      }
+
+      const undescribed = scanned.filter(
+        (file) => !describedSet.has(file.toLowerCase()),
+      )
+      if (undescribed.length === 0) {
+        setBulkFeedback('✓ No new files — everything is already described.')
+        return
+      }
+
+      setSearchNewItems({ sheetName, files: undescribed })
+    },
+    [folder],
   )
 
   const loadAll = useCallback(async () => {
@@ -882,6 +932,25 @@ export default function ArchiveView({ xlsxPath }: Props) {
                         + Bulk add list
                       </button>
                     )}
+                    {sheet && typeof sheet !== 'string' && (
+                      <>
+                        <button
+                          className="refresh-btn"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            if (!confirmDiscard()) return
+                            closeDrawer()
+                            void handleSearchNewItems(activeTab, sheet)
+                          }}
+                        >
+                          {UiIcons.search} Search for new items
+                        </button>
+                        <InfoButtonWithTooltip
+                          position="left"
+                          text="Scan a folder inside the archive for files that aren't yet linked to any item on this sheet, then add the undescribed ones in bulk."
+                        />
+                      </>
+                    )}
                     <span className="populate-feedback">{bulkFeedback}</span>
                   </div>
                 </div>
@@ -1192,6 +1261,61 @@ export default function ArchiveView({ xlsxPath }: Props) {
               }}
               onClose={() => {
                 setBulkAddingItem(false)
+              }}
+            />
+          )
+        })()}
+
+      {searchNewItems &&
+        (() => {
+          const sheet = sheets[searchNewItems.sheetName]
+          if (!sheet || typeof sheet === 'string') return null
+
+          const idIndex = sheet.headers.findIndex((header) => header === '@id')
+          const existingIds = new Set(
+            idIndex >= 0
+              ? sheet.rows
+                  .map((row) => String(row[idIndex] ?? '').trim())
+                  .filter(Boolean)
+              : [],
+          )
+
+          return (
+            <BulkAddPopup
+              isOpen
+              xlsxPath={xlsxPath}
+              sheetName={searchNewItems.sheetName}
+              headers={sheet.headers}
+              existingIds={existingIds}
+              presetFiles={searchNewItems.files}
+              onComplete={(addedRows, skippedFiles, depictionWarningFiles) => {
+                if (isPeopleSheetName(searchNewItems.sheetName)) {
+                  addedRows.forEach((row) => {
+                    const person = mapRowToPerson(sheet.headers, row)
+                    if (person) dispatch(upsertPerson(person))
+                  })
+                }
+
+                const addedCount = addedRows.length
+                const skippedCount = skippedFiles.length
+                const warningCount = depictionWarningFiles.length
+                setBulkFeedback(
+                  `✓ Added ${addedCount} item${addedCount === 1 ? '' : 's'}${
+                    skippedCount > 0
+                      ? ` (${skippedCount} skipped because IDs already exist)`
+                      : ''
+                  }${
+                    warningCount > 0
+                      ? ` (${warningCount} video depiction${warningCount === 1 ? '' : 's'} failed)`
+                      : ''
+                  }`,
+                )
+                void reloadSheet(searchNewItems.sheetName)
+                void reloadTagsIfVocabFile()
+                setSearchNewItems(false)
+              }}
+              onClose={() => {
+                setSearchNewItems(false)
               }}
             />
           )

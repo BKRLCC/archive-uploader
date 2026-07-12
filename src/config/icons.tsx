@@ -16,4 +16,5 @@ export const UiIcons = {
   refresh: '🔄',
   info: 'ℹ️',
   camera: '📷',
+  search: '🔍',
 }

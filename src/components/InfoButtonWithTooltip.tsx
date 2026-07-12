@@ -5,6 +5,7 @@ import { UiIcons } from '../config/icons'
 interface InfoButtonWithTooltipProps {
   text?: string
   ariaLabel?: string
+  position?: 'top' | 'bottom' | 'left' | 'right'
 }
 
 // Small info icon that reveals `text` in a tooltip on hover/focus.
@@ -14,10 +15,11 @@ interface InfoButtonWithTooltipProps {
 export default function InfoButtonWithTooltip({
   text,
   ariaLabel,
+  position,
 }: InfoButtonWithTooltipProps): React.ReactElement | null {
   if (!text) return null
   return (
-    <Tooltip content={text}>
+    <Tooltip content={text} position={position}>
       <button
         type="button"
         className="info-button"

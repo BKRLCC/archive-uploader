@@ -17,7 +17,7 @@ const FIELD_LABELS: Record<string, string> = {
   url: '🌐 Website',
   isRef_creator: '👤 Creators',
   isRef_contributor: '👥 Contributors',
-  isRef_mentions: '🧑‍🧑‍🧒‍🧒 Depicted',
+  isRef_mentions: '🧑‍🧑‍🧒‍🧒 Depicted / Mentioned',
   isRef_contentLocation: '📍 Content Location',
   isRef_locationCreated: '🖌️ Created At',
   isRef_location: '📍 Location',
@@ -46,11 +46,13 @@ const FIELD_DESCRIPTIONS: Record<string, string> = {
   isRef_enteredBy:
     'The person who entered the item into this archive. Add yourself to the people list if you are not already listed.',
   isRef_hasPart:
-    'All the files associated with this item. Usually only one but could be multiple, e.g. a video and its transcript, or multiple images of the same artwork.',
+    'All the files associated with this item. Often there is only one, but there could be multiple, e.g. a video and its transcript, or multiple images of the same artwork.',
   sameAs:
     'A URL that identifies this item in another system. For example, a link to the item in a museum collection or a link to a Wikipedia page about the item.',
   languageCode:
     "For Aboriginal languages, use the AIATSIS code. For other languages, use the ISO 639-3 code (two letters, e.g. 'en'). If you do not know the code, leave this field blank.",
+  isRef_mentions:
+    'People who are "in" the item, e.g. people depicted in a photo or mentioned in a text.',
 }
 
 function normalizeFieldName(fieldName: string): string {

@@ -15,6 +15,7 @@ interface BulkAddPopupProps {
   sheetName: string
   headers: string[]
   existingIds: Set<string>
+  presetFiles?: string[]
   onComplete: (
     addedRows: string[][],
     skippedFiles: string[],
@@ -50,6 +51,7 @@ export default function BulkAddPopup({
   sheetName,
   headers,
   existingIds,
+  presetFiles,
   onComplete,
   onClose,
 }: BulkAddPopupProps) {
@@ -66,9 +68,18 @@ export default function BulkAddPopup({
 
   useEffect(() => {
     if (!isOpen) return
-    setPickingFiles(true)
     setSaving(false)
     setFeedback('')
+
+    // When files are supplied by the caller (e.g. "Search for new items"),
+    // skip the file picker and use them directly.
+    if (presetFiles) {
+      setPickingFiles(false)
+      setSelectedFiles(presetFiles)
+      return
+    }
+
+    setPickingFiles(true)
     setSelectedFiles([])
 
     void window.api
@@ -86,7 +97,7 @@ export default function BulkAddPopup({
       .finally(() => {
         setPickingFiles(false)
       })
-  }, [archiveFolderPath, isOpen, onClose])
+  }, [archiveFolderPath, isOpen, onClose, presetFiles])
 
   const handleConfirm = async () => {
     if (!formRef.current) return

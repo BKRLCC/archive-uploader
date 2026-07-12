@@ -934,6 +934,50 @@ ipcMain.handle('pick-files', async (event, archiveFolderPath: string) => {
 })
 
 ipcMain.handle(
+  'scan-folder-for-new-files',
+  async (event, archiveFolderPath: string) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    win.focus()
+    const archiveFolderAbsolute = path.resolve(archiveFolderPath)
+    const { canceled, filePaths } = await dialog.showOpenDialog(win, {
+      properties: ['openDirectory'],
+      defaultPath: archiveFolderAbsolute,
+      title: 'Choose folder to scan for new files',
+    })
+    if (canceled || filePaths.length === 0) return null
+
+    const scanFolderAbsolute = path.resolve(filePaths[0])
+    // The scanned folder may be the archive folder itself or any folder nested
+    // within it, but not somewhere higher up or elsewhere in the tree.
+    if (
+      scanFolderAbsolute !== archiveFolderAbsolute &&
+      !isPathWithin(archiveFolderAbsolute, scanFolderAbsolute)
+    ) {
+      throw new Error('The scanned folder must be inside the archive folder.')
+    }
+
+    const entries = await fs.promises.readdir(scanFolderAbsolute, {
+      withFileTypes: true,
+    })
+
+    const relativePaths = entries
+      .filter((entry) => entry.isFile())
+      .map((entry) => entry.name)
+      // Skip hidden/system files and spreadsheets (e.g. metadata.xlsx).
+      .filter((name) => !name.startsWith('.'))
+      .filter((name) => !name.toLowerCase().endsWith('.xlsx'))
+      .map((name) =>
+        path
+          .relative(archiveFolderAbsolute, path.join(scanFolderAbsolute, name))
+          .split(path.sep)
+          .join('/'),
+      )
+
+    return relativePaths
+  },
+)
+
+ipcMain.handle(
   'pick-linked-files',
   async (event, archiveFolderPath: string) => {
     const win = BrowserWindow.fromWebContents(event.sender)
