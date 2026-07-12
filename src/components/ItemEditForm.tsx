@@ -19,8 +19,7 @@ import {
 } from '../config/field-vocabularies'
 import {
   DEPICTION_FIELD_NAME,
-  DEPICTION_FOLDER_HINT,
-  getDepictionThumbnailRelativePath,
+  normalizeDepictionRelativePath,
   hasAllowedDepictionExtension,
 } from '../config/depiction-config'
 import { useAppSelector } from '../ducks/hooks'
@@ -35,11 +34,11 @@ import {
   getFieldDescription,
 } from '../config/field-labels'
 import { groupRenderedFields } from '../config/field-groups'
-import ClickableImagePreview from './ClickableImagePreview'
 import { ReferenceChip, type ReferenceEntity } from './ReferenceCell'
 import FileLinksField, { FILE_LINKS_FIELD_NAME } from './FileLinksField'
 import MapPickerModal from './MapPickerModal'
 import InfoButtonWithTooltip from './InfoButtonWithTooltip'
+import ImageSelectBox from './ImageSelectBox'
 
 interface VocabOption {
   value: string
@@ -581,9 +580,45 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
       }
     }
 
+    const hasDepictionField = renderedFields.some(
+      (fieldName) =>
+        normalizeFieldName(fieldName) ===
+        normalizeFieldName(DEPICTION_FIELD_NAME),
+    )
+    const depictionValue = getFieldValue(DEPICTION_FIELD_NAME)
+    const depictionPreviewPath = depictionValue.trim()
+      ? (() => {
+          const originalRelativePath =
+            normalizeDepictionRelativePath(depictionValue)
+          if (!originalRelativePath) return ''
+          return `${archiveFolderPath.replace(/\\/g, '/')}/${originalRelativePath}`
+        })()
+      : ''
+    const groupedFields = renderedFields.filter(
+      (fieldName) =>
+        normalizeFieldName(fieldName) !==
+        normalizeFieldName(DEPICTION_FIELD_NAME),
+    )
+
     return (
       <div className="edit-fields">
-        {groupRenderedFields(renderedFields).map(({ def, fields }) => (
+        {hasDepictionField && (
+          <ImageSelectBox
+            imageUrl={
+              depictionPreviewPath
+                ? `localfile://${depictionPreviewPath}`
+                : undefined
+            }
+            onPick={() => {
+              void handlePickDepiction(DEPICTION_FIELD_NAME)
+            }}
+            onClear={() => {
+              setFieldValue(DEPICTION_FIELD_NAME, '')
+            }}
+            picking={depictionPickingField === DEPICTION_FIELD_NAME}
+          />
+        )}
+        {groupRenderedFields(groupedFields).map(({ def, fields }) => (
           <details
             key={def.id}
             className="edit-group"
@@ -597,7 +632,6 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
               const isDateAddedField = fieldName === 'dateAdded'
               const isBooleanField = fieldName === 'isPublishable'
               const isDescriptionField = fieldName === 'description'
-              const isDepictionField = fieldName === DEPICTION_FIELD_NAME
               const isLatitudeField =
                 fieldName === '.latitude' || fieldName === 'latitude'
               const isLongitudeField =
@@ -630,16 +664,6 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                     ),
                   ]
                 : filteredPeopleOptions
-
-              const previewPath =
-                isDepictionField && currentValue.trim()
-                  ? (() => {
-                      const thumbnailRelativePath =
-                        getDepictionThumbnailRelativePath(currentValue)
-                      if (!thumbnailRelativePath) return ''
-                      return `${archiveFolderPath.replace(/\\/g, '/')}/${thumbnailRelativePath}`
-                    })()
-                  : ''
 
               return (
                 <label key={fieldName} className="edit-field">
@@ -680,45 +704,6 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                         setFieldValue(fieldName, e.target.value)
                       }}
                     />
-                  ) : isDepictionField ? (
-                    <>
-                      <input
-                        type="text"
-                        value={currentValue}
-                        placeholder={`Relative image path (e.g., ${DEPICTION_FOLDER_HINT}photo.jpg)`}
-                        onChange={(e) => {
-                          setFieldValue(fieldName, e.target.value)
-                        }}
-                      />
-                      <div className="depiction-actions">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            void handlePickDepiction(fieldName)
-                          }}
-                          disabled={depictionPickingField === fieldName}
-                        >
-                          {depictionPickingField === fieldName
-                            ? 'Choosing…'
-                            : 'Choose image…'}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setFieldValue(fieldName, '')
-                          }}
-                          disabled={!currentValue}
-                        >
-                          Clear
-                        </button>
-                      </div>
-                      {previewPath && (
-                        <ClickableImagePreview
-                          imageUrl={`localfile://${previewPath}`}
-                          altText="Depiction Preview"
-                        />
-                      )}
-                    </>
                   ) : isDescriptionField ? (
                     <textarea
                       rows={5}

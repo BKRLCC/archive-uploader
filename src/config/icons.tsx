@@ -3,6 +3,7 @@ export const UiIcons = {
   createMetadata: '🌟',
   add: '➕',
   edit: '✏️',
+  clear: '❌',
   delete: '🗑️',
   fileBrowser: '🗂️',
   folder: '📁',
@@ -14,4 +15,5 @@ export const UiIcons = {
   doc: '📄',
   refresh: '🔄',
   info: 'ℹ️',
+  camera: '📷',
 }

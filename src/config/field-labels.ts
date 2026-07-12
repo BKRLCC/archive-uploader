@@ -39,6 +39,8 @@ const FIELD_DESCRIPTIONS: Record<string, string> = {
     'If checked, the item will be included in the public-facing website. If unchecked, it will be hidden from public view.',
   isRef_inLanguage:
     'The language(s) spoken in the item, e.g. the language of a video or audio recording.',
+  dateAdded:
+    'The date the item was added to this archive. This is automatically set when you create a new item, it cannot be changed manually.',
 }
 
 function normalizeFieldName(fieldName: string): string {
