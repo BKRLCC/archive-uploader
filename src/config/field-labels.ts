@@ -12,7 +12,7 @@ const FIELD_LABELS: Record<string, string> = {
   depiction: '🖼️ Img',
   latitude: '📐 Latitude',
   longitude: '📐 Longitude',
-  languageCode: '🔤 AIATSIS Code',
+  languageCode: '🔤 Language Code',
   sameAs: '🔗 Identifying URL',
   url: '🌐 Website',
   isRef_creator: '👤 Creators',
@@ -41,6 +41,16 @@ const FIELD_DESCRIPTIONS: Record<string, string> = {
     'The language(s) spoken in the item, e.g. the language of a video or audio recording.',
   dateAdded:
     'The date the item was added to this archive. This is automatically set when you create a new item, it cannot be changed manually.',
+  dateCreated:
+    'The date the item was created. This is the date the original work was created, not the date it was added to this archive.',
+  isRef_enteredBy:
+    'The person who entered the item into this archive. Add yourself to the people list if you are not already listed.',
+  isRef_hasPart:
+    'All the files associated with this item. Usually only one but could be multiple, e.g. a video and its transcript, or multiple images of the same artwork.',
+  sameAs:
+    'A URL that identifies this item in another system. For example, a link to the item in a museum collection or a link to a Wikipedia page about the item.',
+  languageCode:
+    "For Aboriginal languages, use the AIATSIS code. For other languages, use the ISO 639-3 code (two letters, e.g. 'en'). If you do not know the code, leave this field blank.",
 }
 
 function normalizeFieldName(fieldName: string): string {

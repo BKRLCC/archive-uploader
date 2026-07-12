@@ -666,7 +666,7 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                 : filteredPeopleOptions
 
               return (
-                <label key={fieldName} className="edit-field">
+                <div key={fieldName} className="edit-field">
                   <span className="edit-field-key">
                     {getFieldDisplayLabel(fieldName)}
                     <InfoButtonWithTooltip
@@ -1165,7 +1165,7 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                       }}
                     />
                   )}
-                </label>
+                </div>
               )
             })}
           </details>
