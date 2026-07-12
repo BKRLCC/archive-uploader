@@ -210,6 +210,9 @@ export default function ArchiveView({ xlsxPath }: Props) {
 
   const tableScrollRef = useRef<HTMLDivElement | null>(null)
   const loadRequestRef = useRef(0)
+  // Tracks whether a pointer interaction began inside the drawer, so a text
+  // selection that drags past the drawer edge doesn't count as a backdrop click.
+  const pointerDownInsideDrawerRef = useRef(false)
 
   const folder = xlsxPath.replace(/[/\\][^/\\]+$/, '')
 
@@ -718,7 +721,16 @@ export default function ArchiveView({ xlsxPath }: Props) {
   return (
     <div
       className="archive-page"
+      onMouseDown={(e) => {
+        const target = e.target
+        pointerDownInsideDrawerRef.current =
+          target instanceof Element && !!target.closest('.drawer')
+      }}
       onClick={() => {
+        if (pointerDownInsideDrawerRef.current) {
+          pointerDownInsideDrawerRef.current = false
+          return
+        }
         if (confirmDiscard()) closeDrawer()
       }}
     >
