@@ -760,6 +760,30 @@ textarea {
   padding: 0.3em 0.7em;
 }
 
+.approximate-date-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4em;
+}
+
+.approximate-date-inputs {
+  display: flex;
+  gap: 0.5em;
+  align-items: center;
+}
+
+.approximate-date-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  font-size: 0.85em;
+}
+
+.approximate-date-hint {
+  font-size: 0.8em;
+  color: #a62b2b;
+}
+
 .edit-actions {
   margin-top: 1em;
   display: flex;

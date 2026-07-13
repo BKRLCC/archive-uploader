@@ -77,6 +77,7 @@ export type RepositoryObject = BaseItem & {
    * People referenced or depicted in this resource (schema:mentions)
    */
   isRef_mentions?: string
+  dateCreatedApproximate?: string // Human-readable approximate date, e.g. "Before 1957"
   width?: string // Width of the physical object, in cm
   height?: string // Height of the physical object, in cm
   depth?: string // Depth of the physical object, in cm
@@ -166,6 +167,7 @@ export const ENTITY_FIELD_REGISTRY: {
     'isRef_contributor',
     'isRef_hasPart',
     'isRef_mentions',
+    'dateCreatedApproximate',
     'width',
     'height',
     'depth',

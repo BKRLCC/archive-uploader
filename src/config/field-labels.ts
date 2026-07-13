@@ -6,6 +6,7 @@ const FIELD_LABELS: Record<string, string> = {
   name: '📝 Name',
   description: '📄 Description',
   dateCreated: '📅 Date Created',
+  dateCreatedApproximate: '📅 Approximate Date',
   dateAdded: '🗓️ Date Added',
   isRef_enteredBy: '✍️ Entered By',
   isPublishable: '🌐 Publish',
@@ -47,7 +48,7 @@ const FIELD_DESCRIPTIONS: Record<string, string> = {
   dateAdded:
     'The date the item was added to this archive. This is automatically set when you create a new item, it cannot be changed manually.',
   dateCreated:
-    'The date the item was created. This is the date the original work was created, not the date it was added to this archive.',
+    'The date the original item was created (not the date added to the archive). If you do not know the exact date, add a date here anyway for the system, then tick the "Approximate?" checkbox to add a human-readable label (e.g. "Before 1957").',
   isRef_enteredBy:
     'The person who entered the item into this archive. Add yourself to the people list if you are not already listed.',
   isRef_hasPart:

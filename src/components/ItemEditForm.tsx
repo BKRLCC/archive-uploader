@@ -40,6 +40,7 @@ import FileLinksField, { FILE_LINKS_FIELD_NAME } from './FileLinksField'
 import MapPickerModal from './MapPickerModal'
 import InfoButtonWithTooltip from './InfoButtonWithTooltip'
 import ImageSelectBox from './ImageSelectBox'
+import ApproximateDateField from './ApproximateDateField'
 
 interface VocabOption {
   value: string
@@ -719,11 +720,14 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                       }}
                     />
                   ) : isDateCreatedField ? (
-                    <input
-                      type="date"
-                      value={currentValue}
-                      onChange={(e) => {
-                        setFieldValue(fieldName, e.target.value)
+                    <ApproximateDateField
+                      dateValue={currentValue}
+                      approximateValue={getFieldValue('dateCreatedApproximate')}
+                      onDateChange={(nextValue) => {
+                        setFieldValue(fieldName, nextValue)
+                      }}
+                      onApproximateChange={(nextValue) => {
+                        setFieldValue('dateCreatedApproximate', nextValue)
                       }}
                     />
                   ) : isDescriptionField ? (
