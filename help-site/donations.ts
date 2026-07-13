@@ -76,11 +76,18 @@ function buildReadme(kind: 'simple' | 'full'): string {
     lines.push('This is the simple pack. It contains:')
     lines.push('')
     lines.push('  metadata.xlsx   The main spreadsheet describing your items.')
-    lines.push('  files/          Put the files you are donating in here.')
     lines.push('')
     lines.push(
       'Open metadata.xlsx and fill in one row per item on the "Items" tab.',
     )
+    lines.push('')
+    lines.push(
+      'Put the files you are donating in this same folder, alongside',
+    )
+    lines.push(
+      'metadata.xlsx. In the spreadsheet, just write the file name on its',
+    )
+    lines.push('own (for example: photo.jpg) — no folder needed.')
   } else {
     lines.push('This is the full pack. It contains:')
     lines.push('')
@@ -97,6 +104,14 @@ function buildReadme(kind: 'simple' | 'full'): string {
       'Start with metadata.xlsx. Fill in the other spreadsheets only if you',
     )
     lines.push('need them — you do not have to use every folder.')
+    lines.push('')
+    lines.push(
+      'Put the files you are donating in the files/ folder. In the',
+    )
+    lines.push(
+      'spreadsheet, write the path including that folder (for example:',
+    )
+    lines.push('files/photo.jpg).')
   }
   lines.push('')
   lines.push(HELP_SITE_URL_HINT)
@@ -118,11 +133,15 @@ async function buildPack(
     addFolderToZip(zip, folder)
   }
 
-  // A placeholder so the (otherwise empty) files folder survives zipping.
-  zip.file(
-    'files/PUT-YOUR-FILES-HERE.txt',
-    'Put the files you are donating into this folder.\n',
-  )
+  // The full pack keeps a dedicated files/ folder (with a placeholder so the
+  // otherwise-empty folder survives zipping). The simple pack stays flat:
+  // donors drop files beside metadata.xlsx and reference them by bare filename.
+  if (kind === 'full') {
+    zip.file(
+      'files/PUT-YOUR-FILES-HERE.txt',
+      'Put the files you are donating into this folder.\n',
+    )
+  }
 
   zip.file('README.txt', buildReadme(kind))
 
