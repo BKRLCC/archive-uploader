@@ -32,6 +32,7 @@ const FIELD_LABELS: Record<string, string> = {
   depth: '📏 Depth (cm)',
   material: '🧵 Material',
   isRef_holdingOrganisation: '🏛️ Holding Organisation',
+  identifier: '🔢 External ID',
 }
 
 // Optional per-field help text shown via an info tooltip in the edit form.
@@ -65,7 +66,9 @@ const FIELD_DESCRIPTIONS: Record<string, string> = {
   material:
     'The primary material(s) the object is made from, e.g. "oil on canvas" or "bark, ochre".',
   isRef_holdingOrganisation:
-    'The organisation that currently holds or owns this object. Add it to the Organisations list first if it is not already there.',
+    'The organisation that currently holds this object or record. Add it to the Organisations list first if it is not already there.',
+  identifier:
+    'A catalogue or accession number assigned to this item by an external institution, e.g. a museum collection number.',
 }
 
 function normalizeFieldName(fieldName: string): string {

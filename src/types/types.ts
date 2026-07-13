@@ -83,6 +83,8 @@ export type RepositoryObject = BaseItem & {
   depth?: string // Depth of the physical object, in cm
   material?: string // Primary material(s) the object is made from
   isRef_holdingOrganisation?: string // Organisation that holds/owns the object
+  identifier?: string // External catalogue or accession number (schema:identifier)
+  sameAs?: string // External identifying URL, e.g. a museum collection page (schema:sameAs)
 }
 
 export type License = BaseItem & {
@@ -173,6 +175,8 @@ export const ENTITY_FIELD_REGISTRY: {
     'depth',
     'material',
     'isRef_holdingOrganisation',
+    'identifier',
+    'sameAs',
   ]),
   Organization: defineEntityFields<Organization>()([
     '@id',

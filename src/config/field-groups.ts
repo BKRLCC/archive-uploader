@@ -29,7 +29,6 @@ export const FIELD_GROUPS: FieldGroupDef[] = [
       'latitude',
       'longitude',
       'languageCode',
-      'sameAs',
       'isRef_inLanguage',
       'url',
       'isRef_enteredBy',
@@ -55,13 +54,13 @@ export const FIELD_GROUPS: FieldGroupDef[] = [
   {
     id: 'physical',
     label: 'Physical object',
-    fields: [
-      'width',
-      'height',
-      'depth',
-      'material',
-      'isRef_holdingOrganisation',
-    ],
+    fields: ['width', 'height', 'depth', 'material'],
+    defaultOpen: false,
+  },
+  {
+    id: 'external',
+    label: 'External record',
+    fields: ['isRef_holdingOrganisation', 'sameAs', 'identifier'],
     defaultOpen: false,
   },
   {
