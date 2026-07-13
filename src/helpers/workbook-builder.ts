@@ -1,5 +1,6 @@
 import * as XLSX from 'xlsx'
 
+import { groupRenderedFields } from '../config/field-groups'
 import {
   getEntityFieldModel,
   resolveEditableEntityType,
@@ -24,6 +25,22 @@ function headersForTab(tab: SpreadsheetTab, fullHeaders: boolean): string[] {
     if (!headers.includes(field)) headers.push(field)
   }
   return headers
+}
+
+// Orders a tab's headers to match the edit-form field grouping (FIELD_GROUPS)
+// so related columns sit together and the sheets are easier to fill in. `@id`
+// and `@type` are pinned first; grouped fields follow in config order; any
+// fields not in a group keep their original order at the end. The result is a
+// permutation of the input — no column is added or removed.
+function orderHeaders(headers: string[]): string[] {
+  const pinned = ['@id', '@type'].filter((h) => headers.includes(h))
+  const rest = headers.filter((h) => !pinned.includes(h))
+
+  const grouped = groupRenderedFields(rest).flatMap((group) => group.fields)
+  const claimed = new Set(grouped)
+  const leftovers = rest.filter((h) => !claimed.has(h))
+
+  return [...pinned, ...grouped, ...leftovers]
 }
 
 // Computes sensible column widths (in characters) for a sheet by auto-fitting
@@ -72,10 +89,15 @@ export function buildWorkbook(
   XLSX.utils.book_append_sheet(workbook, rootDataset, 'RootDataset')
 
   for (const tab of schema.tabs) {
-    const rows: string[][] = [
-      headersForTab(tab, fullHeaders),
-      ...(tab.seedRows ?? []),
-    ]
+    const baseHeaders = headersForTab(tab, fullHeaders)
+    const orderedHeaders = orderHeaders(baseHeaders)
+    // Reorder each seed row to match the reordered headers so the seed data
+    // stays aligned with its columns.
+    const permutation = orderedHeaders.map((h) => baseHeaders.indexOf(h))
+    const seedRows = (tab.seedRows ?? []).map((row) =>
+      permutation.map((sourceIndex) => row[sourceIndex] ?? ''),
+    )
+    const rows: string[][] = [orderedHeaders, ...seedRows]
     const sheet = XLSX.utils.aoa_to_sheet(rows)
     sheet['!cols'] = columnWidths(rows)
     XLSX.utils.book_append_sheet(workbook, sheet, tab.name)

@@ -41,6 +41,10 @@ function packFolder(schemaKey: SpreadsheetType): PackFolder {
 // The root Resources workbook (no dedicated folder — sits at the pack root).
 const ROOT_FOLDER = packFolder('RepositoryObject')
 
+// Folder name the app uses for licence records (single source of truth). Both
+// packs get a licence explainer here; the full pack also gets the spreadsheet.
+const LICENSE_FOLDER = spreadsheets['ldac:DataReuseLicense'].folderName
+
 // Sub-folders included in the full pack, in a sensible reading order.
 const FULL_SUBFOLDERS: PackFolder[] = [
   packFolder('People'),
@@ -76,14 +80,15 @@ function buildReadme(kind: 'simple' | 'full'): string {
     lines.push('This is the simple pack. It contains:')
     lines.push('')
     lines.push('  metadata.xlsx   The main spreadsheet describing your items.')
+    lines.push(
+      '  Licenses/       Add a licence describing how files may be used.',
+    )
     lines.push('')
     lines.push(
       'Open metadata.xlsx and fill in one row per item on the "Items" tab.',
     )
     lines.push('')
-    lines.push(
-      'Put the files you are donating in this same folder, alongside',
-    )
+    lines.push('Put the files you are donating in this same folder, alongside')
     lines.push(
       'metadata.xlsx. In the spreadsheet, just write the file name on its',
     )
@@ -98,16 +103,14 @@ function buildReadme(kind: 'simple' | 'full'): string {
     lines.push('  Places/         Places referred to by your items.')
     lines.push('  Localities/     Map localities (geographic areas).')
     lines.push('  Languages/      Languages spoken in your items.')
-    lines.push('  Licenses/       Reuse licenses for your items.')
+    lines.push('  Licenses/       A licence describing how files may be used.')
     lines.push('')
     lines.push(
       'Start with metadata.xlsx. Fill in the other spreadsheets only if you',
     )
     lines.push('need them — you do not have to use every folder.')
     lines.push('')
-    lines.push(
-      'Put the files you are donating in the files/ folder. In the',
-    )
+    lines.push('Put the files you are donating in the files/ folder. In the')
     lines.push(
       'spreadsheet, write the path including that folder (for example:',
     )
@@ -115,6 +118,33 @@ function buildReadme(kind: 'simple' | 'full'): string {
   }
   lines.push('')
   lines.push(HELP_SITE_URL_HINT)
+  lines.push('')
+  return lines.join('\n')
+}
+
+function buildLicenceNote(kind: 'simple' | 'full'): string {
+  const lines: string[] = []
+  lines.push('ABOUT LICENCES')
+  lines.push('==============')
+  lines.push('')
+  lines.push(
+    'A licence is a short document that says what people are allowed to do',
+  )
+  lines.push(
+    'with the files you are donating — for example whether they can be',
+  )
+  lines.push('shared, published, or used by community members and researchers.')
+  lines.push('')
+  lines.push('Please add a licence to this folder describing those terms.')
+  if (kind === 'full') {
+    lines.push('')
+    lines.push(
+      'This folder also contains metadata.xlsx, where you can record the',
+    )
+    lines.push('licence details in a spreadsheet if you prefer.')
+  }
+  lines.push('')
+  lines.push('If you are not sure what licence to use, we can help you choose.')
   lines.push('')
   return lines.join('\n')
 }
@@ -142,6 +172,11 @@ async function buildPack(
       'Put the files you are donating into this folder.\n',
     )
   }
+
+  // Both packs include a Licences folder explaining that a licence describing
+  // what people may do with the files should be added. The full pack also
+  // contains the licence spreadsheet (added via FULL_SUBFOLDERS above).
+  zip.file(`${LICENSE_FOLDER}/ABOUT-LICENCES.txt`, buildLicenceNote(kind))
 
   zip.file('README.txt', buildReadme(kind))
 
