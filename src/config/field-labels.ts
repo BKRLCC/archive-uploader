@@ -39,6 +39,7 @@ const FIELD_LABELS: Record<string, string> = {
 // Optional per-field help text shown via an info tooltip in the edit form.
 // Only fields listed here get an info icon.
 const FIELD_DESCRIPTIONS: Record<string, string> = {
+  name: 'The title of the item. This is the main label that will be displayed in the archive.',
   isRef_contentLocation:
     'The location depicted in the item, e.g. the setting of a video or the country depicted in a painting.',
   isRef_locationCreated:
