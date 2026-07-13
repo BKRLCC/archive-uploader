@@ -52,7 +52,9 @@ const FULL_SUBFOLDERS: PackFolder[] = [
 ]
 
 function workbookBuffer(schemaKey: SpreadsheetType): Buffer {
-  const workbook = buildWorkbook(schemaKey, { name: '', description: '' })
+  // Donation packs include every supported column so institutions can see the
+  // full range of information they can record.
+  const workbook = buildWorkbook(schemaKey, { name: '', description: '' }, true)
   return XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' }) as Buffer
 }
 
