@@ -26,6 +26,28 @@ function headersForTab(tab: SpreadsheetTab, fullHeaders: boolean): string[] {
   return headers
 }
 
+// Computes sensible column widths (in characters) for a sheet by auto-fitting
+// each column to its longest cell, clamped to a readable min/max. Applied to
+// every generated sheet so downloaded workbooks aren't cramped.
+function columnWidths(rows: string[][]): { wch: number }[] {
+  const columnCount = rows.reduce((max, row) => Math.max(max, row.length), 0)
+  const MIN_WIDTH = 12
+  const MAX_WIDTH = 45
+  const PADDING = 2
+
+  const widths: { wch: number }[] = []
+  for (let col = 0; col < columnCount; col++) {
+    let longest = 0
+    for (const row of rows) {
+      const cell = row[col]
+      if (cell != null) longest = Math.max(longest, String(cell).length)
+    }
+    const wch = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, longest + PADDING))
+    widths.push({ wch })
+  }
+  return widths
+}
+
 // Builds a metadata workbook for a given spreadsheet schema. Shared by the
 // Electron app (folder creation) and the help-site donation-pack generator so
 // both produce identical archives. Pass `fullHeaders` to include every
@@ -38,13 +60,15 @@ export function buildWorkbook(
   const schema = spreadsheets[schemaKey]
   const workbook = XLSX.utils.book_new()
 
-  const rootDataset = XLSX.utils.aoa_to_sheet([
+  const rootDatasetRows: string[][] = [
     ['Name', 'Value'],
     ['@id', './'],
     ['@type', '[Dataset, RepositoryCollection]'],
     ['name', meta.name],
     ['description', meta.description],
-  ])
+  ]
+  const rootDataset = XLSX.utils.aoa_to_sheet(rootDatasetRows)
+  rootDataset['!cols'] = columnWidths(rootDatasetRows)
   XLSX.utils.book_append_sheet(workbook, rootDataset, 'RootDataset')
 
   for (const tab of schema.tabs) {
@@ -52,19 +76,15 @@ export function buildWorkbook(
       headersForTab(tab, fullHeaders),
       ...(tab.seedRows ?? []),
     ]
-    XLSX.utils.book_append_sheet(
-      workbook,
-      XLSX.utils.aoa_to_sheet(rows),
-      tab.name,
-    )
+    const sheet = XLSX.utils.aoa_to_sheet(rows)
+    sheet['!cols'] = columnWidths(rows)
+    XLSX.utils.book_append_sheet(workbook, sheet, tab.name)
   }
 
   for (const extra of schema.extraSheets ?? []) {
-    XLSX.utils.book_append_sheet(
-      workbook,
-      XLSX.utils.aoa_to_sheet(extra.rows),
-      extra.name,
-    )
+    const sheet = XLSX.utils.aoa_to_sheet(extra.rows)
+    sheet['!cols'] = columnWidths(extra.rows)
+    XLSX.utils.book_append_sheet(workbook, sheet, extra.name)
   }
 
   return workbook
