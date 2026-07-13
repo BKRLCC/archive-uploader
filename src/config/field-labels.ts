@@ -82,6 +82,12 @@ const FIELD_DESCRIPTIONS: Record<string, string> = {
   // Corresponds to Dublin Core's dcterms:provenance.
   provenance:
     'The history of ownership and custody of this item — how it came to be in this archive. ',
+  latitude:
+    "The latitude of the item's location, in decimal degrees. The range of valid values is -90 to 90. ",
+  longitude:
+    "The longitude of the item's location, in decimal degrees. The range of valid values is -180 to 180.",
+  depiction:
+    'A single image that represents this item in the archive. This is additional to any files attached to the item, and is used as a thumbnail in lists and search results.',
 }
 
 function normalizeFieldName(fieldName: string): string {

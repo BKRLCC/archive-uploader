@@ -53,8 +53,9 @@
   --badge-group-ink: #a62b2b;
   --radius: 10px;
   --wrap: 860px;
-  --font-body: 'Muli', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-    Helvetica, Arial, sans-serif;
+  --font-body:
+    'Muli', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
+    Arial, sans-serif;
   --font-heading: 'Meloso', 'Muli', sans-serif;
 }
 
@@ -94,6 +95,21 @@ h4 {
   background: var(--accent-soft);
   border-bottom: 1px solid var(--line);
   padding: 40px 0 32px;
+}
+
+.site-nav {
+  margin-bottom: 14px;
+  font-size: 0.9rem;
+}
+
+.site-nav a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.site-nav a:hover {
+  text-decoration: underline;
 }
 
 .site-header h1 {
@@ -282,4 +298,74 @@ main.wrap {
   margin: 0;
   color: var(--muted);
   font-size: 0.9rem;
+}
+
+/* Download cards (donations page) */
+.button-link {
+  display: inline-block;
+  font-family: var(--font-heading);
+  background-color: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 0.6em 1.2em;
+  border-radius: 20px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.button-link:hover {
+  background-color: var(--accent-ink);
+}
+
+.download-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+  margin: 28px 0;
+}
+
+.download-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 22px 24px 26px;
+  display: flex;
+  flex-direction: column;
+}
+
+.download-card h3 {
+  margin: 0 0 8px;
+  font-size: 1.3rem;
+}
+
+.download-card-lead {
+  margin: 0 0 14px;
+  color: var(--muted);
+}
+
+.download-card-list {
+  margin: 0 0 20px;
+  padding-left: 1.1em;
+  color: var(--ink);
+  font-size: 0.92rem;
+}
+
+.download-card-list li {
+  margin-bottom: 4px;
+}
+
+.download-card-list code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.85em;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  padding: 0 4px;
+}
+
+.download-card .button-link {
+  margin-top: auto;
+  align-self: flex-start;
+  font-size: 0.95rem;
 }

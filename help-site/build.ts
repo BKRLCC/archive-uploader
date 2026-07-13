@@ -32,6 +32,7 @@ import {
   isMultiSelectField,
   type ControlledVocabularySource,
 } from '../src/config/field-vocabularies'
+import { buildDonations } from './donations'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const HELP_DIR = __dirname
@@ -195,7 +196,7 @@ function buildReference(): string {
   return parts.join('\n')
 }
 
-function main(): void {
+async function main(): Promise<void> {
   const templatePath = join(HELP_DIR, 'template.html')
   const stylesPath = join(HELP_DIR, 'styles.css')
 
@@ -223,6 +224,11 @@ function main(): void {
   console.log(
     `Help site built: ${count} sheets -> ${join(OUT_DIR, 'index.html')}`,
   )
+
+  await buildDonations(OUT_DIR, HELP_DIR)
 }
 
-main()
+main().catch((err) => {
+  console.error(err)
+  process.exitCode = 1
+})

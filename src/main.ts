@@ -13,7 +13,8 @@ import fs from 'node:fs'
 import { createHash } from 'node:crypto'
 import * as XLSX from 'xlsx'
 import started from 'electron-squirrel-startup'
-import { spreadsheets, type SpreadsheetType } from './types/types'
+import { spreadsheets } from './types/types'
+import { buildWorkbook } from './helpers/workbook-builder'
 import { deriveFileRowsFromItems } from './helpers/file-linkage'
 import { deriveWKTFromRawCoordinates } from './helpers/geometry-utils'
 import {
@@ -312,42 +313,6 @@ app.on('activate', () => {
 })
 
 // ── Workbook builder ─────────────────────────────────────────────────────────
-
-function buildWorkbook(
-  schemaKey: SpreadsheetType,
-  meta: { name: string; description: string },
-): XLSX.WorkBook {
-  const schema = spreadsheets[schemaKey]
-  const workbook = XLSX.utils.book_new()
-
-  const rootDataset = XLSX.utils.aoa_to_sheet([
-    ['Name', 'Value'],
-    ['@id', './'],
-    ['@type', '[Dataset, RepositoryCollection]'],
-    ['name', meta.name],
-    ['description', meta.description],
-  ])
-  XLSX.utils.book_append_sheet(workbook, rootDataset, 'RootDataset')
-
-  for (const tab of schema.tabs) {
-    const rows: string[][] = [tab.headers, ...(tab.seedRows ?? [])]
-    XLSX.utils.book_append_sheet(
-      workbook,
-      XLSX.utils.aoa_to_sheet(rows),
-      tab.name,
-    )
-  }
-
-  for (const extra of schema.extraSheets ?? []) {
-    XLSX.utils.book_append_sheet(
-      workbook,
-      XLSX.utils.aoa_to_sheet(extra.rows),
-      extra.name,
-    )
-  }
-
-  return workbook
-}
 
 function trimTrailingEmptyRows(rows: string[][]): string[][] {
   if (rows.length === 0) return rows
