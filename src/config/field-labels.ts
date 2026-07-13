@@ -33,6 +33,7 @@ const FIELD_LABELS: Record<string, string> = {
   material: '🧵 Material',
   isRef_holdingOrganisation: '🏛️ Holding Organisation',
   identifier: '🔢 External ID',
+  provenance: '📜 Provenance',
 }
 
 // Optional per-field help text shown via an info tooltip in the edit form.
@@ -68,7 +69,10 @@ const FIELD_DESCRIPTIONS: Record<string, string> = {
   isRef_holdingOrganisation:
     'The organisation that currently holds this object or record. Add it to the Organisations list first if it is not already there.',
   identifier:
-    'A catalogue or accession number assigned to this item by an external institution, e.g. a museum collection number.',
+    'A catalogue or accession number assigned to this item by the external institution above, e.g. a museum collection number.',
+  // Corresponds to Dublin Core's dcterms:provenance.
+  provenance:
+    'The history of ownership and custody of this item — how it came to be in this archive. ',
 }
 
 function normalizeFieldName(fieldName: string): string {

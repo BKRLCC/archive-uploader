@@ -652,6 +652,7 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
               const isDateAddedField = fieldName === 'dateAdded'
               const isBooleanField = fieldName === 'isPublishable'
               const isDescriptionField = fieldName === 'description'
+              const isProvenanceField = fieldName === 'provenance'
               const isLatitudeField =
                 fieldName === '.latitude' || fieldName === 'latitude'
               const isLongitudeField =
@@ -733,6 +734,14 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                   ) : isDescriptionField ? (
                     <textarea
                       rows={5}
+                      value={currentValue}
+                      onChange={(e) => {
+                        setFieldValue(fieldName, e.target.value)
+                      }}
+                    />
+                  ) : isProvenanceField ? (
+                    <textarea
+                      rows={4}
                       value={currentValue}
                       onChange={(e) => {
                         setFieldValue(fieldName, e.target.value)

@@ -60,7 +60,7 @@ export const FIELD_GROUPS: FieldGroupDef[] = [
   {
     id: 'external',
     label: 'External record',
-    fields: ['isRef_holdingOrganisation', 'sameAs', 'identifier'],
+    fields: ['sameAs', 'isRef_holdingOrganisation', 'identifier', 'provenance'],
     defaultOpen: false,
   },
   {
