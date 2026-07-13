@@ -39,6 +39,9 @@ jspm_packages/
 # TypeScript v1 declaration files
 typings/
 
+# Generated help site output
+help-site/out/
+
 # TypeScript cache
 *.tsbuildinfo
 
