@@ -39,7 +39,13 @@ const FIELD_LABELS: Record<string, string> = {
 // Optional per-field help text shown via an info tooltip in the edit form.
 // Only fields listed here get an info icon.
 const FIELD_DESCRIPTIONS: Record<string, string> = {
+  '@id':
+    'The unique identifier for this item in the archive. This is automatically generated and cannot be changed.',
+  '@type':
+    'The type of this item in the archive. This is automatically generated and cannot be changed.',
   name: 'The title of the item. This is the main label that will be displayed in the archive.',
+  description:
+    'A short description of the item. This is the main text that will be displayed in the archive.',
   isRef_contentLocation:
     'The location depicted in the item, e.g. the setting of a video or the country depicted in a painting.',
   isRef_locationCreated:
@@ -52,6 +58,8 @@ const FIELD_DESCRIPTIONS: Record<string, string> = {
     'The date the item was added to this archive. This is automatically set when you create a new item, it cannot be changed manually.',
   dateCreated:
     'The date the original item was created (not the date added to the archive). If you do not know the exact date, add a date here anyway for the system, then tick the "Approximate?" checkbox to add a human-readable label (e.g. "Before 1957").',
+  dateCreatedApproximate:
+    'A human-readable label for the date created, e.g. "Before 1957". This is optional, but can be useful if you do not know the exact date.',
   isRef_enteredBy:
     'The person who entered the item into this archive. Add yourself to the people list if you are not already listed.',
   isRef_hasPart:

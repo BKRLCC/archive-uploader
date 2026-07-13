@@ -36,7 +36,19 @@ import {
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const HELP_DIR = __dirname
 const OUT_DIR = join(HELP_DIR, 'out')
+const FONTS_SRC_DIR = join(HELP_DIR, '..', 'src', 'fonts')
 const PLACEHOLDER = '<!--FIELD_REFERENCE-->'
+
+// Brand fonts copied into the output so the public site matches the app.
+// Paths are relative to src/fonts and preserved under out/fonts.
+const FONT_FILES = [
+  'meloso/MelosoVariable-Regular.ttf',
+  'muli/Muli.ttf',
+  'muli/Muli-Italic.ttf',
+  'muli/Muli-Light.ttf',
+  'muli/Muli-SemiBold.ttf',
+  'muli/Muli-Bold.ttf',
+]
 
 // Entity types shown in the main reference, in reading order.
 const MAIN_ENTITY_ORDER: ItemDataType[] = [
@@ -200,6 +212,12 @@ function main(): void {
   mkdirSync(OUT_DIR, { recursive: true })
   writeFileSync(join(OUT_DIR, 'index.html'), html, 'utf8')
   copyFileSync(stylesPath, join(OUT_DIR, 'styles.css'))
+
+  for (const relPath of FONT_FILES) {
+    const dest = join(OUT_DIR, 'fonts', relPath)
+    mkdirSync(dirname(dest), { recursive: true })
+    copyFileSync(join(FONTS_SRC_DIR, relPath), dest)
+  }
 
   const count = [...MAIN_ENTITY_ORDER, ...ADVANCED_ENTITY_ORDER].length
   console.log(

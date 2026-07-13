@@ -1,19 +1,61 @@
+/* Brand fonts (copied into out/fonts by the build script) */
+@font-face {
+  font-family: 'Meloso';
+  src: url('./fonts/meloso/MelosoVariable-Regular.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Muli';
+  src: url('./fonts/muli/Muli.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Muli';
+  src: url('./fonts/muli/Muli-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+}
+@font-face {
+  font-family: 'Muli';
+  src: url('./fonts/muli/Muli-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Muli';
+  src: url('./fonts/muli/Muli-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Muli';
+  src: url('./fonts/muli/Muli-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+}
+
 :root {
-  --bg: #f7f5f0;
+  --bg: #f7f3f1;
   --surface: #ffffff;
   --ink: #23201b;
   --muted: #6b655c;
-  --line: #e3ddd2;
-  --accent: #8a5a2b;
-  --accent-soft: #f0e6d8;
+  --line: #e6ddd9;
+  --accent: #a62b2b;
+  --accent-ink: hsl(0, 59%, 38%);
+  --accent-soft: #f4e4e4;
   --badge-ref: #e7efe6;
   --badge-ref-ink: #3f6b47;
   --badge-multi: #e6ecf5;
   --badge-multi-ink: #3f5a7b;
-  --badge-group: #f0e6d8;
-  --badge-group-ink: #8a5a2b;
+  --badge-group: #f4e4e4;
+  --badge-group-ink: #a62b2b;
   --radius: 10px;
   --wrap: 860px;
+  --font-body: 'Muli', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    Helvetica, Arial, sans-serif;
+  --font-heading: 'Meloso', 'Muli', sans-serif;
 }
 
 * {
@@ -28,10 +70,16 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--ink);
-  font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial,
-    sans-serif;
+  font-family: var(--font-body);
   line-height: 1.55;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading);
+  color: var(--accent-ink);
 }
 
 .wrap {
@@ -87,8 +135,10 @@ main.wrap {
   cursor: pointer;
   list-style: none;
   padding: 18px 22px;
+  font-family: var(--font-heading);
   font-size: 1.2rem;
   font-weight: 600;
+  color: var(--accent-ink);
   display: flex;
   align-items: center;
   gap: 10px;
