@@ -1038,6 +1038,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
                 rowIndex={editingRow.rowIndex}
                 xlsxPath={xlsxPath}
                 sheetName={editingRow.sheetName}
+                defaultType={isTagsVocabFile ? 'DefinedTerm' : undefined}
                 onSave={(_rowIndex: number, updated: string[]) => {
                   if (isPeopleSheetName(editingRow.sheetName)) {
                     const previousPerson = mapRowToPerson(
@@ -1108,7 +1109,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
                 rowIndex={-1}
                 xlsxPath={xlsxPath}
                 sheetName={addingItem}
-                defaultType={inferredType}
+                defaultType={isTagsVocabFile ? 'DefinedTerm' : inferredType}
                 onSave={(_rowIndex: number, newRow: string[]) => {
                   if (isPeopleSheetName(addingItem)) {
                     const person = mapRowToPerson(sheet.headers, newRow)
@@ -1146,6 +1147,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
               rowIndices={bulkEditingRows.rowIndices}
               xlsxPath={xlsxPath}
               sheetName={bulkEditingRows.sheetName}
+              defaultType={isTagsVocabFile ? 'DefinedTerm' : undefined}
               onComplete={async (updatedRows) => {
                 const sheetName = bulkEditingRows.sheetName
 
@@ -1347,7 +1349,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
               xlsxPath={xlsxPath}
               sheetName={bulkAddingList}
               headers={sheet.headers}
-              defaultType={inferredType}
+              defaultType={isTagsVocabFile ? 'DefinedTerm' : inferredType}
               onComplete={(addedRows) => {
                 const addedCount = addedRows.length
                 setBulkFeedback(

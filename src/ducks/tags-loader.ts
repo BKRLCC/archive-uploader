@@ -1,5 +1,5 @@
 import type { DirEntry, SheetData } from '../api'
-import type { Tag } from '../types/types'
+import type { DefinedTerm } from '../types/types'
 import {
   workbookNameToTagFieldName,
   workbookNameToTagVocabularyKey,
@@ -36,7 +36,7 @@ const getCell = (
 const mapRowsToVocabulary = (
   workbookName: string,
   sheet: SheetData,
-): { terms: Record<string, Tag>; options: TagVocabularyOption[] } => {
+): { terms: Record<string, DefinedTerm>; options: TagVocabularyOption[] } => {
   const indexMap = buildHeaderIndexMap(sheet.headers)
   const missingColumns = REQUIRED_COLUMNS.filter(
     (column) => indexMap[column] === undefined,
@@ -50,7 +50,7 @@ const mapRowsToVocabulary = (
   }
 
   const optionsById = new Map<string, TagVocabularyOption>()
-  const termsById = new Map<string, Tag>()
+  const termsById = new Map<string, DefinedTerm>()
 
   sheet.rows.forEach((row) => {
     if (row.every((cell) => !cell || !String(cell).trim())) return
@@ -69,7 +69,7 @@ const mapRowsToVocabulary = (
       )
     }
 
-    const term: Tag = {
+    const term: DefinedTerm = {
       '@id': id,
       '@type': 'DefinedTerm',
       name,

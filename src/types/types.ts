@@ -30,12 +30,10 @@ export type BaseItem = {
 
 export type DefinedTermType = 'DefinedTerm'
 
-export type Tag = {
-  '@id': string
+// A controlled-vocabulary term (tag). Same shape as BaseItem, but pinned to the
+// DefinedTerm @type.
+export type DefinedTerm = Omit<BaseItem, '@type'> & {
   '@type': DefinedTermType
-  name: string
-  description?: string
-  depiction?: string
 }
 
 const defineEntityFields =
@@ -146,7 +144,7 @@ type ItemTypeMap = {
 }
 
 type EditableEntityTypeMap = ItemTypeMap & {
-  DefinedTerm: Tag
+  DefinedTerm: DefinedTerm
 }
 
 export type EditableEntityType = keyof EditableEntityTypeMap
@@ -289,11 +287,13 @@ export const ENTITY_FIELD_REGISTRY: {
     '.filename',
     'isRef_isPartOf',
   ]),
-  DefinedTerm: defineEntityFields<Tag>()([
+  DefinedTerm: defineEntityFields<DefinedTerm>()([
     '@id',
     '@type',
     'name',
     'description',
+    'dateAdded',
+    'isRef_enteredBy',
     'depiction',
   ]),
 }

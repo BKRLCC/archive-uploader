@@ -13,6 +13,7 @@ interface BulkEditDrawerProps {
   sheetName: string
   onComplete: (updatedRows: string[][]) => void
   onClose: () => void
+  defaultType?: string
 }
 
 function getSharedInitialValues(headers: string[], rows: string[][]): string[] {
@@ -36,6 +37,7 @@ export default function BulkEditDrawer({
   sheetName,
   onComplete,
   onClose,
+  defaultType,
 }: BulkEditDrawerProps) {
   const formRef = useRef<ItemEditFormHandle>(null)
   const [saving, setSaving] = useState(false)
@@ -112,7 +114,7 @@ export default function BulkEditDrawer({
           sheetName={sheetName}
           hiddenFields={['@id']}
           lockedFieldValues={{
-            '@type': getItemTypeForSheetName(sheetName),
+            '@type': defaultType ?? getItemTypeForSheetName(sheetName),
           }}
           onFeedback={setFeedback}
         />
