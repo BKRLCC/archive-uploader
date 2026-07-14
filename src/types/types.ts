@@ -101,6 +101,8 @@ export type RepositoryCollection = BaseItem & {
   isRef_author?: string // Reference to the authoring person (schema:author)
   isRef_publisher?: string // Reference to the publishing organization (schema:publisher)
   datePublished?: string // Publication date in ISO YYYY-MM-DD format (schema:datePublished)
+  isRef_inLanguage?: string // References to language entities the collection is in (schema:inLanguage)
+  'isRef_ldac:subjectLanguage'?: string // References to language entities the collection is about (ldac:subjectLanguage)
 }
 
 export type Place = BaseItem & {
@@ -243,6 +245,8 @@ export const ENTITY_FIELD_REGISTRY: {
     'isRef_author',
     'isRef_publisher',
     'datePublished',
+    'isRef_inLanguage',
+    'isRef_ldac:subjectLanguage',
   ]),
   'ldac:DataReuseLicense': defineEntityFields<License>()([
     '@id',

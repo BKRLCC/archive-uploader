@@ -5,7 +5,9 @@ import { useAppSelector } from '../ducks/hooks'
 import { selectLicenses } from '../ducks/licenses'
 import { selectPeople } from '../ducks/people'
 import { selectOrganizations } from '../ducks/organizations'
+import { selectLanguages } from '../ducks/languages'
 import ReferenceSelect, { type ReferenceOption } from './ReferenceSelect'
+import MultiReferenceSelect from './MultiReferenceSelect'
 import DatePicker from './DatePicker'
 
 const EDITABLE_ROWS = [
@@ -16,6 +18,8 @@ const EDITABLE_ROWS = [
   'isRef_author',
   'isRef_publisher',
   'datePublished',
+  'isRef_inLanguage',
+  'isRef_ldac:subjectLanguage',
 ]
 const COLLECTION_TYPE = 'RepositoryCollection'
 
@@ -36,6 +40,7 @@ export default function EditRootDatasetForm({
   const licenses = useAppSelector(selectLicenses)
   const people = useAppSelector(selectPeople)
   const organizations = useAppSelector(selectOrganizations)
+  const languages = useAppSelector(selectLanguages)
 
   const toOptions = (
     entries: { '@id': string; name: string }[],
@@ -65,6 +70,24 @@ export default function EditRootDatasetForm({
       options: toOptions(organizations),
       placeholder: 'Select an organization…',
       emptyLabel: 'No organizations available',
+    },
+  }
+
+  // Language fields reference the Languages list and allow multiple selections,
+  // stored as a comma-separated list of @ids.
+  const languageFields: Record<
+    string,
+    { options: ReferenceOption[]; placeholder: string; emptyLabel: string }
+  > = {
+    isRef_inLanguage: {
+      options: toOptions(languages),
+      placeholder: 'Select languages…',
+      emptyLabel: 'No languages available',
+    },
+    'isRef_ldac:subjectLanguage': {
+      options: toOptions(languages),
+      placeholder: 'Select languages…',
+      emptyLabel: 'No languages available',
     },
   }
 
@@ -108,6 +131,7 @@ export default function EditRootDatasetForm({
         {displayKeys.map((key) => {
           const isEditable = EDITABLE_ROWS.includes(key)
           const referenceField = referenceFields[key]
+          const languageField = languageFields[key]
           return (
             <label key={key} className="edit-field">
               <span className="edit-field-key">
@@ -126,6 +150,16 @@ export default function EditRootDatasetForm({
                   }
                   placeholder={referenceField.placeholder}
                   emptyLabel={referenceField.emptyLabel}
+                />
+              ) : languageField ? (
+                <MultiReferenceSelect
+                  options={languageField.options}
+                  value={values[key] ?? ''}
+                  onChange={(value) =>
+                    setValues((prev) => ({ ...prev, [key]: value }))
+                  }
+                  placeholder={languageField.placeholder}
+                  emptyLabel={languageField.emptyLabel}
                 />
               ) : key === 'datePublished' ? (
                 <DatePicker

@@ -4,7 +4,9 @@ import { useAppSelector } from '../ducks/hooks'
 import { selectLicenses } from '../ducks/licenses'
 import { selectPeople } from '../ducks/people'
 import { selectOrganizations } from '../ducks/organizations'
+import { selectLanguages } from '../ducks/languages'
 import ReferenceSelect, { type ReferenceOption } from './ReferenceSelect'
+import MultiReferenceSelect from './MultiReferenceSelect'
 import DatePicker from './DatePicker'
 
 const COLLECTION_TYPE = 'RepositoryCollection'
@@ -27,12 +29,15 @@ export default function CreateArchiveForm({
   const [author, setAuthor] = useState('')
   const [publisher, setPublisher] = useState('')
   const [datePublished, setDatePublished] = useState('')
+  const [inLanguage, setInLanguage] = useState('')
+  const [subjectLanguage, setSubjectLanguage] = useState('')
   const [busy, setBusy] = useState(false)
   const [feedback, setFeedback] = useState('')
 
   const licenses = useAppSelector(selectLicenses)
   const people = useAppSelector(selectPeople)
   const organizations = useAppSelector(selectOrganizations)
+  const languages = useAppSelector(selectLanguages)
 
   const toOptions = (
     entries: { '@id': string; name: string }[],
@@ -59,6 +64,8 @@ export default function CreateArchiveForm({
         isRef_author: author,
         isRef_publisher: publisher,
         datePublished: datePublished,
+        isRef_inLanguage: inLanguage,
+        'isRef_ldac:subjectLanguage': subjectLanguage,
       })
       onCreated()
     } catch (err) {
@@ -144,6 +151,33 @@ export default function CreateArchiveForm({
               {getFieldDisplayLabel('datePublished', COLLECTION_TYPE)}
             </span>
             <DatePicker value={datePublished} onChange={setDatePublished} />
+          </label>
+          <label className="edit-field">
+            <span className="edit-field-key">
+              {getFieldDisplayLabel('isRef_inLanguage', COLLECTION_TYPE)}
+            </span>
+            <MultiReferenceSelect
+              options={toOptions(languages)}
+              value={inLanguage}
+              onChange={setInLanguage}
+              placeholder="Select languages…"
+              emptyLabel="No languages available"
+            />
+          </label>
+          <label className="edit-field">
+            <span className="edit-field-key">
+              {getFieldDisplayLabel(
+                'isRef_ldac:subjectLanguage',
+                COLLECTION_TYPE,
+              )}
+            </span>
+            <MultiReferenceSelect
+              options={toOptions(languages)}
+              value={subjectLanguage}
+              onChange={setSubjectLanguage}
+              placeholder="Select languages…"
+              emptyLabel="No languages available"
+            />
           </label>
         </div>
         <div className="edit-actions">

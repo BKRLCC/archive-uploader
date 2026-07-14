@@ -24,6 +24,7 @@ const FIELD_LABELS: Record<string, string> = {
   isRef_locationCreated: '🖌️ Created At',
   isRef_location: '📍 Location',
   isRef_inLanguage: '🗣️ In Languages',
+  'isRef_ldac:subjectLanguage': '🗣️ Subject Languages',
   isRef_hasPart: '📎 Files',
   isRef_geo: '🧭 Localities',
   isRef_sameAs: '🔗 Alternative license location',
@@ -116,6 +117,8 @@ const FIELD_DESCRIPTIONS: Record<string, string> = {
     'The organization that published this collection. Choose one from the organisations defined in your archive.',
   datePublished:
     'The date this collection was published, as a full date (YYYY-MM-DD).',
+  'isRef_ldac:subjectLanguage':
+    'The language(s) this collection is about — its subject matter — as opposed to the language(s) it is written or spoken in. Choose from the languages defined in your archive.',
 }
 
 // Per-type overrides for field descriptions. When a field means something

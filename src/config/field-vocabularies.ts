@@ -44,6 +44,7 @@ export const FIELD_VOCABULARIES: Record<string, ControlledVocabularySource> = {
   isRef_publisher: 'Organization',
   isRef_isPartOf: 'RepositoryCollection',
   isRef_holdingOrganisation: 'Organization',
+  'isRef_ldac:subjectLanguage': 'Languages',
 }
 
 // Multi-select fields (comma-separated @ids)
@@ -56,6 +57,7 @@ export const MULTI_SELECT_FIELDS = new Set<string>([
   'isRef_locationCreated',
   'isRef_location',
   'isRef_geo',
+  'isRef_ldac:subjectLanguage',
 ])
 
 export const isMultiSelectField = (fieldName: string): boolean =>
