@@ -6,6 +6,7 @@ import { selectLicenses } from '../ducks/licenses'
 import { selectPeople } from '../ducks/people'
 import { selectOrganizations } from '../ducks/organizations'
 import ReferenceSelect, { type ReferenceOption } from './ReferenceSelect'
+import DatePicker from './DatePicker'
 
 const EDITABLE_ROWS = [
   'name',
@@ -14,6 +15,7 @@ const EDITABLE_ROWS = [
   'isRef_license',
   'isRef_author',
   'isRef_publisher',
+  'datePublished',
 ]
 const COLLECTION_TYPE = 'RepositoryCollection'
 
@@ -124,6 +126,13 @@ export default function EditRootDatasetForm({
                   }
                   placeholder={referenceField.placeholder}
                   emptyLabel={referenceField.emptyLabel}
+                />
+              ) : key === 'datePublished' ? (
+                <DatePicker
+                  value={values[key] ?? ''}
+                  onChange={(value) =>
+                    setValues((prev) => ({ ...prev, [key]: value }))
+                  }
                 />
               ) : key === 'description' ? (
                 <textarea

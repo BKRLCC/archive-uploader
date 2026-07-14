@@ -114,6 +114,7 @@ contextBridge.exposeInMainWorld('api', {
       isRef_license?: string
       isRef_author?: string
       isRef_publisher?: string
+      datePublished?: string
     },
   ): Promise<{ path: string }> =>
     ipcRenderer.invoke('create-archive', folderPath, meta),

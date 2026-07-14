@@ -31,6 +31,7 @@ const FIELD_LABELS: Record<string, string> = {
   isRef_license: '📜 License',
   isRef_author: '👤 Author',
   isRef_publisher: '🏛️ Publisher',
+  datePublished: '📅 Date Published',
   width: '📏 Width (cm)',
   height: '📏 Height (cm)',
   depth: '📏 Depth (cm)',
@@ -113,6 +114,8 @@ const FIELD_DESCRIPTIONS: Record<string, string> = {
     'The person who authored this collection. Choose one from the people defined in your archive.',
   isRef_publisher:
     'The organization that published this collection. Choose one from the organisations defined in your archive.',
+  datePublished:
+    'The date this collection was published, as a full date (YYYY-MM-DD).',
 }
 
 // Per-type overrides for field descriptions. When a field means something

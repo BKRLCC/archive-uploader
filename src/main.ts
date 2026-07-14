@@ -585,6 +585,7 @@ ipcMain.handle(
       isRef_license?: string
       isRef_author?: string
       isRef_publisher?: string
+      datePublished?: string
     },
   ) => {
     const xlsxPath = folderPath + '/metadata.xlsx'

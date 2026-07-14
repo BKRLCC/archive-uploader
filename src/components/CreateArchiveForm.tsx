@@ -5,6 +5,7 @@ import { selectLicenses } from '../ducks/licenses'
 import { selectPeople } from '../ducks/people'
 import { selectOrganizations } from '../ducks/organizations'
 import ReferenceSelect, { type ReferenceOption } from './ReferenceSelect'
+import DatePicker from './DatePicker'
 
 const COLLECTION_TYPE = 'RepositoryCollection'
 
@@ -25,6 +26,7 @@ export default function CreateArchiveForm({
   const [license, setLicense] = useState('')
   const [author, setAuthor] = useState('')
   const [publisher, setPublisher] = useState('')
+  const [datePublished, setDatePublished] = useState('')
   const [busy, setBusy] = useState(false)
   const [feedback, setFeedback] = useState('')
 
@@ -56,6 +58,7 @@ export default function CreateArchiveForm({
         isRef_license: license,
         isRef_author: author,
         isRef_publisher: publisher,
+        datePublished: datePublished,
       })
       onCreated()
     } catch (err) {
@@ -135,6 +138,12 @@ export default function CreateArchiveForm({
               placeholder="Select an organization…"
               emptyLabel="No organizations available"
             />
+          </label>
+          <label className="edit-field">
+            <span className="edit-field-key">
+              {getFieldDisplayLabel('datePublished', COLLECTION_TYPE)}
+            </span>
+            <DatePicker value={datePublished} onChange={setDatePublished} />
           </label>
         </div>
         <div className="edit-actions">

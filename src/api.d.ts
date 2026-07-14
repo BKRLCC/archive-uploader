@@ -89,6 +89,7 @@ export interface Api {
       isRef_license?: string
       isRef_author?: string
       isRef_publisher?: string
+      datePublished?: string
     },
   ) => Promise<{ path: string }>
   addSheetRow: (

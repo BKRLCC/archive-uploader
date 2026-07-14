@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import DatePicker from './DatePicker'
 
 interface ApproximateDateFieldProps {
   /** Exact machine date (ISO YYYY-MM-DD). */
@@ -29,13 +30,7 @@ export default function ApproximateDateField({
   return (
     <div className="approximate-date-field">
       <div className="approximate-date-inputs">
-        <input
-          type="date"
-          value={dateValue}
-          onChange={(e) => {
-            onDateChange(e.target.value)
-          }}
-        />
+        <DatePicker value={dateValue} onChange={onDateChange} />
         <label className="approximate-date-toggle">
           <input
             type="checkbox"
