@@ -636,7 +636,7 @@ textarea {
   position: absolute;
   z-index: 1000;
   min-width: 12em;
-  max-width: 20em;
+  max-width: 15em;
   padding: 0.5em 0.65em;
   background: #333;
   color: #fff;
@@ -650,6 +650,7 @@ textarea {
   visibility: hidden;
   transition: opacity 0.12s ease;
   pointer-events: none;
+  word-wrap: break-word;
 }
 
 .tooltip-bubble--top {
@@ -1110,4 +1111,13 @@ textarea {
 
 .btn-icon:hover {
   opacity: 1;
+}
+
+.license-id-field {
+  margin-top: 0.8em;
+}
+
+.license-id-mode-option {
+  display: inline-flex;
+  align-items: center;
 }

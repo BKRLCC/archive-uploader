@@ -75,7 +75,7 @@ export default function LicenseIdField({
               handleModeChange('url')
             }}
           />
-          Standard licence (URL)
+          URL
         </label>
         <label className="license-id-mode-option">
           <input
@@ -86,7 +86,7 @@ export default function LicenseIdField({
               handleModeChange('file')
             }}
           />
-          Custom licence (file)
+          File
         </label>
       </div>
 
