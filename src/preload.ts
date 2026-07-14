@@ -117,6 +117,7 @@ contextBridge.exposeInMainWorld('api', {
       datePublished?: string
       isRef_inLanguage?: string
       'isRef_ldac:subjectLanguage'?: string
+      'ldac:metadataIsPublic'?: string
     },
   ): Promise<{ path: string }> =>
     ipcRenderer.invoke('create-archive', folderPath, meta),

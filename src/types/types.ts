@@ -103,6 +103,7 @@ export type RepositoryCollection = BaseItem & {
   datePublished?: string // Publication date in ISO YYYY-MM-DD format (schema:datePublished)
   isRef_inLanguage?: string // References to language entities the collection is in (schema:inLanguage)
   'isRef_ldac:subjectLanguage'?: string // References to language entities the collection is about (ldac:subjectLanguage)
+  'ldac:metadataIsPublic'?: boolean // Whether this collection's metadata may be shown publicly (ldac:metadataIsPublic)
 }
 
 export type Place = BaseItem & {
@@ -247,6 +248,7 @@ export const ENTITY_FIELD_REGISTRY: {
     'datePublished',
     'isRef_inLanguage',
     'isRef_ldac:subjectLanguage',
+    'ldac:metadataIsPublic',
   ]),
   'ldac:DataReuseLicense': defineEntityFields<License>()([
     '@id',

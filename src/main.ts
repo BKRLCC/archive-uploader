@@ -588,6 +588,7 @@ ipcMain.handle(
       datePublished?: string
       isRef_inLanguage?: string
       'isRef_ldac:subjectLanguage'?: string
+      'ldac:metadataIsPublic'?: string
     },
   ) => {
     const xlsxPath = folderPath + '/metadata.xlsx'

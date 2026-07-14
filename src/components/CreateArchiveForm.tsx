@@ -31,6 +31,7 @@ export default function CreateArchiveForm({
   const [datePublished, setDatePublished] = useState('')
   const [inLanguage, setInLanguage] = useState('')
   const [subjectLanguage, setSubjectLanguage] = useState('')
+  const [metadataIsPublic, setMetadataIsPublic] = useState(false)
   const [busy, setBusy] = useState(false)
   const [feedback, setFeedback] = useState('')
 
@@ -66,6 +67,7 @@ export default function CreateArchiveForm({
         datePublished: datePublished,
         isRef_inLanguage: inLanguage,
         'isRef_ldac:subjectLanguage': subjectLanguage,
+        'ldac:metadataIsPublic': metadataIsPublic ? 'TRUE' : 'FALSE',
       })
       onCreated()
     } catch (err) {
@@ -177,6 +179,16 @@ export default function CreateArchiveForm({
               onChange={setSubjectLanguage}
               placeholder="Select languages…"
               emptyLabel="No languages available"
+            />
+          </label>
+          <label className="edit-field">
+            <span className="edit-field-key">
+              {getFieldDisplayLabel('ldac:metadataIsPublic', COLLECTION_TYPE)}
+            </span>
+            <input
+              type="checkbox"
+              checked={metadataIsPublic}
+              onChange={(e) => setMetadataIsPublic(e.target.checked)}
             />
           </label>
         </div>

@@ -20,6 +20,7 @@ const EDITABLE_ROWS = [
   'datePublished',
   'isRef_inLanguage',
   'isRef_ldac:subjectLanguage',
+  'ldac:metadataIsPublic',
 ]
 const COLLECTION_TYPE = 'RepositoryCollection'
 
@@ -166,6 +167,17 @@ export default function EditRootDatasetForm({
                   value={values[key] ?? ''}
                   onChange={(value) =>
                     setValues((prev) => ({ ...prev, [key]: value }))
+                  }
+                />
+              ) : key === 'ldac:metadataIsPublic' ? (
+                <input
+                  type="checkbox"
+                  checked={values[key] === 'TRUE'}
+                  onChange={(e) =>
+                    setValues((prev) => ({
+                      ...prev,
+                      [key]: e.target.checked ? 'TRUE' : 'FALSE',
+                    }))
                   }
                 />
               ) : key === 'description' ? (
