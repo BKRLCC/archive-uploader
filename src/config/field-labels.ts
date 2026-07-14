@@ -29,6 +29,8 @@ const FIELD_LABELS: Record<string, string> = {
   isRef_sameAs: '🔗 Alternative license location',
   isRef_isPartOf: '🗂️ Collection',
   isRef_license: '📜 License',
+  isRef_author: '👤 Author',
+  isRef_publisher: '🏛️ Publisher',
   width: '📏 Width (cm)',
   height: '📏 Height (cm)',
   depth: '📏 Depth (cm)',
@@ -107,6 +109,10 @@ const FIELD_DESCRIPTIONS: Record<string, string> = {
     'A single image that represents this item in the archive. This is additional to any files attached to the item, and is used as a thumbnail in lists and search results.',
   isRef_license:
     'The license that governs how this collection may be reused. Choose one from the licenses defined in your archive.',
+  isRef_author:
+    'The person who authored this collection. Choose one from the people defined in your archive.',
+  isRef_publisher:
+    'The organization that published this collection. Choose one from the organisations defined in your archive.',
 }
 
 // Per-type overrides for field descriptions. When a field means something

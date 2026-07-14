@@ -98,6 +98,8 @@ export type License = BaseItem & {
 export type RepositoryCollection = BaseItem & {
   identifier?: string // Persistent, managed unique ID in URL format (e.g. a DOI) for the collection (schema:identifier)
   isRef_license?: string // Reference to a license entity in the Licenses sheet (ldac:license)
+  isRef_author?: string // Reference to the authoring person (schema:author)
+  isRef_publisher?: string // Reference to the publishing organization (schema:publisher)
 }
 
 export type Place = BaseItem & {
@@ -237,6 +239,8 @@ export const ENTITY_FIELD_REGISTRY: {
     'depiction',
     'identifier',
     'isRef_license',
+    'isRef_author',
+    'isRef_publisher',
   ]),
   'ldac:DataReuseLicense': defineEntityFields<License>()([
     '@id',

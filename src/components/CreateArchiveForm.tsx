@@ -1,15 +1,12 @@
 import React, { useState } from 'react'
-import Select from 'react-select'
 import { getFieldDisplayLabel } from '../config/field-labels'
 import { useAppSelector } from '../ducks/hooks'
 import { selectLicenses } from '../ducks/licenses'
+import { selectPeople } from '../ducks/people'
+import { selectOrganizations } from '../ducks/organizations'
+import ReferenceSelect, { type ReferenceOption } from './ReferenceSelect'
 
 const COLLECTION_TYPE = 'RepositoryCollection'
-
-interface LicenseOption {
-  value: string
-  label: string
-}
 
 interface Props {
   folderPath: string
@@ -26,16 +23,22 @@ export default function CreateArchiveForm({
   const [description, setDescription] = useState('')
   const [identifier, setIdentifier] = useState('')
   const [license, setLicense] = useState('')
+  const [author, setAuthor] = useState('')
+  const [publisher, setPublisher] = useState('')
   const [busy, setBusy] = useState(false)
   const [feedback, setFeedback] = useState('')
 
   const licenses = useAppSelector(selectLicenses)
-  const licenseOptions: LicenseOption[] = licenses.map((entry) => ({
-    value: entry['@id'],
-    label: entry.name || entry['@id'],
-  }))
-  const selectedLicense =
-    licenseOptions.find((option) => option.value === license) ?? null
+  const people = useAppSelector(selectPeople)
+  const organizations = useAppSelector(selectOrganizations)
+
+  const toOptions = (
+    entries: { '@id': string; name: string }[],
+  ): ReferenceOption[] =>
+    entries.map((entry) => ({
+      value: entry['@id'],
+      label: entry.name || entry['@id'],
+    }))
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -51,6 +54,8 @@ export default function CreateArchiveForm({
         description: description.trim(),
         identifier: identifier.trim(),
         isRef_license: license,
+        isRef_author: author,
+        isRef_publisher: publisher,
       })
       onCreated()
     } catch (err) {
@@ -99,18 +104,36 @@ export default function CreateArchiveForm({
             <span className="edit-field-key">
               {getFieldDisplayLabel('isRef_license', COLLECTION_TYPE)}
             </span>
-            <Select<LicenseOption>
-              isClearable
-              options={licenseOptions}
-              value={selectedLicense}
-              onChange={(option) => setLicense(option?.value ?? '')}
-              placeholder={
-                licenseOptions.length === 0
-                  ? 'No licenses available'
-                  : 'Select a license…'
-              }
-              noOptionsMessage={() => 'No licenses available'}
-              isDisabled={licenseOptions.length === 0}
+            <ReferenceSelect
+              options={toOptions(licenses)}
+              value={license}
+              onChange={setLicense}
+              placeholder="Select a license…"
+              emptyLabel="No licenses available"
+            />
+          </label>
+          <label className="edit-field">
+            <span className="edit-field-key">
+              {getFieldDisplayLabel('isRef_author', COLLECTION_TYPE)}
+            </span>
+            <ReferenceSelect
+              options={toOptions(people)}
+              value={author}
+              onChange={setAuthor}
+              placeholder="Select a person…"
+              emptyLabel="No people available"
+            />
+          </label>
+          <label className="edit-field">
+            <span className="edit-field-key">
+              {getFieldDisplayLabel('isRef_publisher', COLLECTION_TYPE)}
+            </span>
+            <ReferenceSelect
+              options={toOptions(organizations)}
+              value={publisher}
+              onChange={setPublisher}
+              placeholder="Select an organization…"
+              emptyLabel="No organizations available"
             />
           </label>
         </div>

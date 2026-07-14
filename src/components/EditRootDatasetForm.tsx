@@ -1,17 +1,21 @@
 import React, { useState } from 'react'
-import Select from 'react-select'
 import type { SheetData } from '../api'
 import { getFieldDisplayLabel } from '../config/field-labels'
 import { useAppSelector } from '../ducks/hooks'
 import { selectLicenses } from '../ducks/licenses'
+import { selectPeople } from '../ducks/people'
+import { selectOrganizations } from '../ducks/organizations'
+import ReferenceSelect, { type ReferenceOption } from './ReferenceSelect'
 
-const EDITABLE_ROWS = ['name', 'description', 'identifier', 'isRef_license']
+const EDITABLE_ROWS = [
+  'name',
+  'description',
+  'identifier',
+  'isRef_license',
+  'isRef_author',
+  'isRef_publisher',
+]
 const COLLECTION_TYPE = 'RepositoryCollection'
-
-interface LicenseOption {
-  value: string
-  label: string
-}
 
 interface Props {
   sheetData: SheetData
@@ -28,11 +32,39 @@ export default function EditRootDatasetForm({
 }: Props) {
   const valueIndex = sheetData.headers.indexOf('Value')
   const licenses = useAppSelector(selectLicenses)
+  const people = useAppSelector(selectPeople)
+  const organizations = useAppSelector(selectOrganizations)
 
-  const licenseOptions: LicenseOption[] = licenses.map((license) => ({
-    value: license['@id'],
-    label: license.name || license['@id'],
-  }))
+  const toOptions = (
+    entries: { '@id': string; name: string }[],
+  ): ReferenceOption[] =>
+    entries.map((entry) => ({
+      value: entry['@id'],
+      label: entry.name || entry['@id'],
+    }))
+
+  // Reference fields rendered as single-select dropdowns, each backed by its
+  // own controlled vocabulary and an "empty" message.
+  const referenceFields: Record<
+    string,
+    { options: ReferenceOption[]; placeholder: string; emptyLabel: string }
+  > = {
+    isRef_license: {
+      options: toOptions(licenses),
+      placeholder: 'Select a license…',
+      emptyLabel: 'No licenses available',
+    },
+    isRef_author: {
+      options: toOptions(people),
+      placeholder: 'Select a person…',
+      emptyLabel: 'No people available',
+    },
+    isRef_publisher: {
+      options: toOptions(organizations),
+      placeholder: 'Select an organization…',
+      emptyLabel: 'No organizations available',
+    },
+  }
 
   const initialValues = Object.fromEntries(
     sheetData.rows.map((row) => [row[0] ?? '', row[valueIndex] ?? '']),
@@ -73,9 +105,7 @@ export default function EditRootDatasetForm({
       <div className="edit-fields">
         {displayKeys.map((key) => {
           const isEditable = EDITABLE_ROWS.includes(key)
-          const selectedLicense =
-            licenseOptions.find((option) => option.value === values[key]) ??
-            null
+          const referenceField = referenceFields[key]
           return (
             <label key={key} className="edit-field">
               <span className="edit-field-key">
@@ -85,24 +115,15 @@ export default function EditRootDatasetForm({
                 <span className="edit-field-readonly">
                   {values[key] || '—'}
                 </span>
-              ) : key === 'isRef_license' ? (
-                <Select<LicenseOption>
-                  isClearable
-                  options={licenseOptions}
-                  value={selectedLicense}
-                  onChange={(option) =>
-                    setValues((prev) => ({
-                      ...prev,
-                      [key]: option?.value ?? '',
-                    }))
+              ) : referenceField ? (
+                <ReferenceSelect
+                  options={referenceField.options}
+                  value={values[key] ?? ''}
+                  onChange={(value) =>
+                    setValues((prev) => ({ ...prev, [key]: value }))
                   }
-                  placeholder={
-                    licenseOptions.length === 0
-                      ? 'No licenses available'
-                      : 'Select a license…'
-                  }
-                  noOptionsMessage={() => 'No licenses available'}
-                  isDisabled={licenseOptions.length === 0}
+                  placeholder={referenceField.placeholder}
+                  emptyLabel={referenceField.emptyLabel}
                 />
               ) : key === 'description' ? (
                 <textarea

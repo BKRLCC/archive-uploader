@@ -76,6 +76,8 @@ export function buildWorkbook(
     description: string
     identifier?: string
     isRef_license?: string
+    isRef_author?: string
+    isRef_publisher?: string
   },
   fullHeaders = false,
 ): XLSX.WorkBook {
@@ -90,6 +92,8 @@ export function buildWorkbook(
     ['description', meta.description],
     ['identifier', meta.identifier ?? ''],
     ['isRef_license', meta.isRef_license ?? ''],
+    ['isRef_author', meta.isRef_author ?? ''],
+    ['isRef_publisher', meta.isRef_publisher ?? ''],
   ]
   const rootDataset = XLSX.utils.aoa_to_sheet(rootDatasetRows)
   rootDataset['!cols'] = columnWidths(rootDatasetRows)
