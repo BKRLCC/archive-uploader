@@ -40,6 +40,8 @@ contextBridge.exposeInMainWorld('api', {
     ipcRenderer.invoke('pick-depiction-file', archiveFolderPath),
   pickFiles: (archiveFolderPath: string): Promise<string[] | null> =>
     ipcRenderer.invoke('pick-files', archiveFolderPath),
+  pickLicenseFile: (archiveFolderPath: string): Promise<string | null> =>
+    ipcRenderer.invoke('pick-license-file', archiveFolderPath),
   scanFolderForNewFiles: (
     archiveFolderPath: string,
   ): Promise<string[] | null> =>

@@ -33,6 +33,8 @@ import {
   isMultiSelectField,
 } from '../config/field-vocabularies'
 import type { Person, Organization } from '../types/types'
+import { resolveEditableEntityType } from '../types/types'
+import { getItemTypeForSheetName } from '../helpers/item-types'
 import {
   getTableColumnLayout,
   isHiddenTableColumn,
@@ -537,6 +539,10 @@ export default function ArchiveView({ xlsxPath }: Props) {
       return <p className="items-state">This tab is empty.</p>
     if (!sheet) return <p className="items-state">Loading…</p>
 
+    const resolvedSheetType = resolveEditableEntityType(
+      getItemTypeForSheetName(sheetName),
+    )
+
     const depictionIndex = sheet.headers.indexOf('depiction')
     const hasDepiction = depictionIndex !== -1
     const idIndex = sheet.headers.findIndex((header) => header === '@id')
@@ -619,7 +625,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
                     .filter(Boolean)
                     .join(' ')}
                 >
-                  {getFieldDisplayLabel('depiction')}
+                  {getFieldDisplayLabel('depiction', resolvedSheetType)}
                 </th>
               )}
               {visibleIndices.map((i) => {
@@ -628,7 +634,7 @@ export default function ArchiveView({ xlsxPath }: Props) {
                 const className = layout.widthClassName ?? 'col-width-default'
                 return (
                   <th key={i} className={className}>
-                    {getFieldDisplayLabel(headerName)}
+                    {getFieldDisplayLabel(headerName, resolvedSheetType)}
                   </th>
                 )
               })}

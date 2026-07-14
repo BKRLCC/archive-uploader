@@ -47,6 +47,7 @@ export interface Api {
   onUpdateStatus: (callback: (status: UpdateStatus) => void) => () => void
   pickDepictionFile: (archiveFolderPath: string) => Promise<string | null>
   pickFiles: (archiveFolderPath: string) => Promise<string[] | null>
+  pickLicenseFile: (archiveFolderPath: string) => Promise<string | null>
   scanFolderForNewFiles: (archiveFolderPath: string) => Promise<string[] | null>
   pickLinkedFiles: (archiveFolderPath: string) => Promise<string[] | null>
   generateVideoDepiction: (

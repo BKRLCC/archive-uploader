@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react'
 import { getItemTypeForSheetName } from '../helpers/item-types'
 import { toCamelCase } from '../helpers/string-formatters'
+import { resolveEditableEntityType } from '../types/types'
 import ItemEditForm, { type ItemEditFormHandle } from './ItemEditForm'
 
 function generateId(type: string, name: string): string {
@@ -43,6 +44,25 @@ export default function EditDrawer({
   const [saving, setSaving] = useState(false)
   const [feedback, setFeedback] = useState('')
 
+  // Licences identify themselves by @id (a URL or a file path), so unlike every
+  // other entity the @id is user-supplied rather than auto-generated, and its
+  // coupled @type is set by the editor rather than locked.
+  const isLicenseSheet =
+    resolveEditableEntityType(
+      defaultType ?? getItemTypeForSheetName(sheetName),
+    ) === 'ldac:DataReuseLicense'
+
+  // For a new licence the @type is no longer locked (the editor sets it), so
+  // seed it into the initial row instead, defaulting to the URL variant.
+  const initialRow = (() => {
+    if (!isLicenseSheet) return row
+    const typeIdx = headers.indexOf('@type')
+    if (typeIdx < 0 || String(row[typeIdx] ?? '').trim()) return row
+    const seeded = [...row]
+    seeded[typeIdx] = defaultType ?? getItemTypeForSheetName(sheetName)
+    return seeded
+  })()
+
   function handleCancel() {
     if (
       formRef.current?.isDirty() &&
@@ -79,7 +99,19 @@ export default function EditDrawer({
 
       const typeIdx = headers.indexOf('@type')
       const typeVal = values[typeIdx] ?? ''
-      const id = generateId(typeVal, nameVal)
+
+      const idIdx = headers.indexOf('@id')
+      let id: string
+      if (isLicenseSheet) {
+        id = (values[idIdx] ?? '').trim()
+        if (!id) {
+          setFeedback('✗ A licence URL or file is required')
+          setSaving(false)
+          return
+        }
+      } else {
+        id = generateId(typeVal, nameVal)
+      }
 
       const updatedValues: Record<string, string> = { '@id': id }
       headers.forEach((header, index) => {
@@ -114,7 +146,9 @@ export default function EditDrawer({
 
     const updatedValues: Record<string, string> = {}
     headers.forEach((header, index) => {
-      if (header !== '@id') updatedValues[header] = values[index] ?? ''
+      if (header !== '@id' || isLicenseSheet) {
+        updatedValues[header] = values[index] ?? ''
+      }
     })
     Object.entries(virtualValues).forEach(([field, value]) => {
       const trimmed = String(value ?? '').trim()
@@ -142,13 +176,17 @@ export default function EditDrawer({
       <ItemEditForm
         ref={formRef}
         headers={headers}
-        initialValues={row}
+        initialValues={initialRow}
         xlsxPath={xlsxPath}
         sheetName={sheetName}
-        hiddenFields={isNew ? ['@id'] : []}
-        lockedFieldValues={{
-          '@type': defaultType ?? getItemTypeForSheetName(sheetName),
-        }}
+        hiddenFields={isNew && !isLicenseSheet ? ['@id'] : []}
+        lockedFieldValues={
+          isLicenseSheet
+            ? {}
+            : {
+                '@type': defaultType ?? getItemTypeForSheetName(sheetName),
+              }
+        }
         onFeedback={setFeedback}
         onDirtyChange={onDirtyChange}
       />

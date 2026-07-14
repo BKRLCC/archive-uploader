@@ -899,6 +899,53 @@ ipcMain.handle('pick-files', async (event, archiveFolderPath: string) => {
 })
 
 ipcMain.handle(
+  'pick-license-file',
+  async (event, archiveFolderPath: string) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    win.focus()
+    const archiveFolderAbsolute = path.resolve(archiveFolderPath)
+    const { canceled, filePaths } = await dialog.showOpenDialog(win, {
+      properties: ['openFile'],
+      defaultPath: archiveFolderAbsolute,
+      title: 'Choose licence file',
+    })
+    if (canceled || filePaths.length === 0) return null
+
+    const selectedAbsolute = path.resolve(filePaths[0])
+    const licenseFolderName = spreadsheets['ldac:DataReuseLicense'].folderName
+    const licenseFolderAbsolute = path.join(
+      archiveFolderAbsolute,
+      licenseFolderName,
+    )
+    await fs.promises.mkdir(licenseFolderAbsolute, { recursive: true })
+
+    // Choose a collision-safe destination filename inside the Licenses folder.
+    const originalName = path.basename(selectedAbsolute)
+    const ext = path.extname(originalName)
+    const stem = path.basename(originalName, ext)
+    let destName = originalName
+    let counter = 1
+    while (fs.existsSync(path.join(licenseFolderAbsolute, destName))) {
+      const candidateAbsolute = path.join(licenseFolderAbsolute, destName)
+      // If the existing file is the very one selected, reuse it as-is.
+      if (path.resolve(candidateAbsolute) === selectedAbsolute) break
+      destName = `${stem}-${counter}${ext}`
+      counter += 1
+    }
+
+    const destAbsolute = path.join(licenseFolderAbsolute, destName)
+    if (path.resolve(destAbsolute) !== selectedAbsolute) {
+      await fs.promises.copyFile(selectedAbsolute, destAbsolute)
+    }
+
+    return path
+      .relative(archiveFolderAbsolute, destAbsolute)
+      .split(path.sep)
+      .join('/')
+  },
+)
+
+ipcMain.handle(
   'scan-folder-for-new-files',
   async (event, archiveFolderPath: string) => {
     const win = BrowserWindow.fromWebContents(event.sender)

@@ -41,6 +41,7 @@ import MapPickerModal from './MapPickerModal'
 import InfoButtonWithTooltip from './InfoButtonWithTooltip'
 import ImageSelectBox from './ImageSelectBox'
 import ApproximateDateField from './ApproximateDateField'
+import LicenseIdField from './LicenseIdField'
 
 interface VocabOption {
   value: string
@@ -638,188 +639,262 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
             picking={depictionPickingField === DEPICTION_FIELD_NAME}
           />
         )}
-        {groupRenderedFields(groupedFields).map(({ def, fields }) => (
-          <details
-            key={def.id}
-            className="edit-group"
-            open={def.defaultOpen ?? false}
-          >
-            <summary className="edit-group-summary">{def.label}</summary>
-            {fields.map((fieldName) => {
-              const isReadOnly = fieldName === '@id'
-              const isTypeField = fieldName === '@type'
-              const isDateCreatedField = fieldName === 'dateCreated'
-              const isDateAddedField = fieldName === 'dateAdded'
-              const isBooleanField = fieldName === 'isPublishable'
-              const isDescriptionField = fieldName === 'description'
-              const isProvenanceField = fieldName === 'provenance'
-              const isLatitudeField =
-                fieldName === '.latitude' || fieldName === 'latitude'
-              const isLongitudeField =
-                fieldName === '.longitude' || fieldName === 'longitude'
-              const isFileLinksField =
-                normalizeFieldName(fieldName) ===
-                normalizeFieldName(FILE_LINKS_FIELD_NAME)
-              const vocabularySource =
-                getControlledVocabularyForField(fieldName)
-              const isPeopleControlled = vocabularySource === 'People'
-              const isPlacesControlled = vocabularySource === 'Places'
-              const isLocalitiesControlled = vocabularySource === 'Localities'
-              const isLanguagesControlled = vocabularySource === 'Languages'
-              const isTagsControlled = vocabularySource === 'Tags'
-              const isOrganizationsControlled =
-                vocabularySource === 'Organization'
-              const tagVocabulary = getTagVocabularyForField(fieldName)
-              const tagOptions = tagVocabulary?.options ?? []
-              const peopleSearch = vocabSearch[fieldName] ?? ''
-              const filteredPeopleOptions = peopleOptions.filter((option) =>
-                option.searchText.includes(peopleSearch.toLowerCase()),
-              )
-              const currentValue = getFieldValue(fieldName)
-              const currentOption = peopleOptions.find(
-                (option) => option.value === currentValue,
-              )
-              const renderedPeopleOptions = currentOption
-                ? [
-                    currentOption,
-                    ...filteredPeopleOptions.filter(
-                      (option) => option.value !== currentOption.value,
-                    ),
-                  ]
-                : filteredPeopleOptions
+        {groupRenderedFields(groupedFields, resolvedEntityType).map(
+          ({ def, fields }) => (
+            <details
+              key={def.id}
+              className="edit-group"
+              open={def.defaultOpen ?? false}
+            >
+              <summary className="edit-group-summary">{def.label}</summary>
+              {fields.map((fieldName) => {
+                const isReadOnly = fieldName === '@id'
+                const isLicenseIdField =
+                  fieldName === '@id' &&
+                  resolvedEntityType === 'ldac:DataReuseLicense'
+                const isTypeField = fieldName === '@type'
+                const isDateCreatedField = fieldName === 'dateCreated'
+                const isDateAddedField = fieldName === 'dateAdded'
+                const isBooleanField = fieldName === 'isPublishable'
+                const isDescriptionField = fieldName === 'description'
+                const isProvenanceField = fieldName === 'provenance'
+                const isLatitudeField =
+                  fieldName === '.latitude' || fieldName === 'latitude'
+                const isLongitudeField =
+                  fieldName === '.longitude' || fieldName === 'longitude'
+                const isFileLinksField =
+                  normalizeFieldName(fieldName) ===
+                  normalizeFieldName(FILE_LINKS_FIELD_NAME)
+                const vocabularySource =
+                  getControlledVocabularyForField(fieldName)
+                const isPeopleControlled = vocabularySource === 'People'
+                const isPlacesControlled = vocabularySource === 'Places'
+                const isLocalitiesControlled = vocabularySource === 'Localities'
+                const isLanguagesControlled = vocabularySource === 'Languages'
+                const isTagsControlled = vocabularySource === 'Tags'
+                const isOrganizationsControlled =
+                  vocabularySource === 'Organization'
+                const tagVocabulary = getTagVocabularyForField(fieldName)
+                const tagOptions = tagVocabulary?.options ?? []
+                const peopleSearch = vocabSearch[fieldName] ?? ''
+                const filteredPeopleOptions = peopleOptions.filter((option) =>
+                  option.searchText.includes(peopleSearch.toLowerCase()),
+                )
+                const currentValue = getFieldValue(fieldName)
+                const currentOption = peopleOptions.find(
+                  (option) => option.value === currentValue,
+                )
+                const renderedPeopleOptions = currentOption
+                  ? [
+                      currentOption,
+                      ...filteredPeopleOptions.filter(
+                        (option) => option.value !== currentOption.value,
+                      ),
+                    ]
+                  : filteredPeopleOptions
 
-              return (
-                <div key={fieldName} className="edit-field">
-                  <span className="edit-field-key">
-                    {getFieldDisplayLabel(fieldName)}
-                    <InfoButtonWithTooltip
-                      text={getFieldDescription(fieldName) ?? undefined}
-                      position="right"
-                    />
-                  </span>
-                  {isReadOnly ? (
-                    <span className="edit-field-readonly">
-                      {currentValue || '—'}
+                return (
+                  <div key={fieldName} className="edit-field">
+                    <span className="edit-field-key">
+                      {getFieldDisplayLabel(fieldName, resolvedEntityType)}
+                      <InfoButtonWithTooltip
+                        text={
+                          getFieldDescription(fieldName, resolvedEntityType) ??
+                          undefined
+                        }
+                        position="right"
+                      />
                     </span>
-                  ) : isTypeField ? (
-                    <span className="edit-field-readonly">
-                      {currentValue || '—'}
-                    </span>
-                  ) : isDateAddedField ? (
-                    <span className="edit-field-readonly">
-                      {currentValue || '—'}
-                    </span>
-                  ) : isBooleanField ? (
-                    <input
-                      type="checkbox"
-                      checked={currentValue === 'TRUE'}
-                      onChange={(e) => {
-                        setFieldValue(
-                          fieldName,
-                          e.target.checked ? 'TRUE' : 'FALSE',
-                        )
-                      }}
-                    />
-                  ) : isDateCreatedField ? (
-                    <ApproximateDateField
-                      dateValue={currentValue}
-                      approximateValue={getFieldValue('dateCreatedApproximate')}
-                      onDateChange={(nextValue) => {
-                        setFieldValue(fieldName, nextValue)
-                      }}
-                      onApproximateChange={(nextValue) => {
-                        setFieldValue('dateCreatedApproximate', nextValue)
-                      }}
-                    />
-                  ) : isDescriptionField ? (
-                    <textarea
-                      rows={5}
-                      value={currentValue}
-                      onChange={(e) => {
-                        setFieldValue(fieldName, e.target.value)
-                      }}
-                    />
-                  ) : isProvenanceField ? (
-                    <textarea
-                      rows={4}
-                      value={currentValue}
-                      onChange={(e) => {
-                        setFieldValue(fieldName, e.target.value)
-                      }}
-                    />
-                  ) : isLatitudeField ? (
-                    <>
+                    {isLicenseIdField ? (
+                      <LicenseIdField
+                        value={currentValue}
+                        archiveFolderPath={archiveFolderPath}
+                        onChange={(nextId, nextType) => {
+                          setFieldValue(fieldName, nextId)
+                          setFieldValue('@type', nextType)
+                        }}
+                        onFeedback={onFeedback}
+                      />
+                    ) : isReadOnly ? (
                       <span className="edit-field-readonly">
                         {currentValue || '—'}
                       </span>
-                      <div className="coordinate-actions">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIsMapPickerOpen(true)
-                          }}
-                        >
-                          Edit
-                        </button>
-                      </div>
-                      <MapPickerModal
-                        isOpen={isMapPickerOpen}
-                        initialLatitude={getFieldValue(fieldName)}
-                        initialLongitude={getFieldValue(
-                          fieldName === 'latitude' ? 'longitude' : '.longitude',
-                        )}
-                        onClose={() => {
-                          setIsMapPickerOpen(false)
-                        }}
-                        onConfirm={(latitude, longitude) => {
-                          setFieldValue(fieldName, latitude)
+                    ) : isTypeField ? (
+                      <span className="edit-field-readonly">
+                        {currentValue || '—'}
+                      </span>
+                    ) : isDateAddedField ? (
+                      <span className="edit-field-readonly">
+                        {currentValue || '—'}
+                      </span>
+                    ) : isBooleanField ? (
+                      <input
+                        type="checkbox"
+                        checked={currentValue === 'TRUE'}
+                        onChange={(e) => {
                           setFieldValue(
+                            fieldName,
+                            e.target.checked ? 'TRUE' : 'FALSE',
+                          )
+                        }}
+                      />
+                    ) : isDateCreatedField ? (
+                      <ApproximateDateField
+                        dateValue={currentValue}
+                        approximateValue={getFieldValue(
+                          'dateCreatedApproximate',
+                        )}
+                        onDateChange={(nextValue) => {
+                          setFieldValue(fieldName, nextValue)
+                        }}
+                        onApproximateChange={(nextValue) => {
+                          setFieldValue('dateCreatedApproximate', nextValue)
+                        }}
+                      />
+                    ) : isDescriptionField ? (
+                      <textarea
+                        rows={5}
+                        value={currentValue}
+                        onChange={(e) => {
+                          setFieldValue(fieldName, e.target.value)
+                        }}
+                      />
+                    ) : isProvenanceField ? (
+                      <textarea
+                        rows={4}
+                        value={currentValue}
+                        onChange={(e) => {
+                          setFieldValue(fieldName, e.target.value)
+                        }}
+                      />
+                    ) : isLatitudeField ? (
+                      <>
+                        <span className="edit-field-readonly">
+                          {currentValue || '—'}
+                        </span>
+                        <div className="coordinate-actions">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsMapPickerOpen(true)
+                            }}
+                          >
+                            Edit
+                          </button>
+                        </div>
+                        <MapPickerModal
+                          isOpen={isMapPickerOpen}
+                          initialLatitude={getFieldValue(fieldName)}
+                          initialLongitude={getFieldValue(
                             fieldName === 'latitude'
                               ? 'longitude'
                               : '.longitude',
-                            longitude,
-                          )
-                          setIsMapPickerOpen(false)
-                        }}
-                      />
-                    </>
-                  ) : isLongitudeField ? (
-                    <>
-                      <span className="edit-field-readonly">
-                        {currentValue || '—'}
-                      </span>
-                      <div className="coordinate-actions">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIsMapPickerOpen(true)
+                          )}
+                          onClose={() => {
+                            setIsMapPickerOpen(false)
                           }}
-                        >
-                          Edit
-                        </button>
-                      </div>
-                    </>
-                  ) : isFileLinksField ? (
-                    <FileLinksField
-                      value={currentValue}
-                      archiveFolderPath={archiveFolderPath}
-                      onChange={(nextValue) => {
-                        setFieldValue(fieldName, nextValue)
-                      }}
-                      onFeedback={onFeedback}
-                    />
-                  ) : isTagsControlled ? (
-                    <>
+                          onConfirm={(latitude, longitude) => {
+                            setFieldValue(fieldName, latitude)
+                            setFieldValue(
+                              fieldName === 'latitude'
+                                ? 'longitude'
+                                : '.longitude',
+                              longitude,
+                            )
+                            setIsMapPickerOpen(false)
+                          }}
+                        />
+                      </>
+                    ) : isLongitudeField ? (
+                      <>
+                        <span className="edit-field-readonly">
+                          {currentValue || '—'}
+                        </span>
+                        <div className="coordinate-actions">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsMapPickerOpen(true)
+                            }}
+                          >
+                            Edit
+                          </button>
+                        </div>
+                      </>
+                    ) : isFileLinksField ? (
+                      <FileLinksField
+                        value={currentValue}
+                        archiveFolderPath={archiveFolderPath}
+                        onChange={(nextValue) => {
+                          setFieldValue(fieldName, nextValue)
+                        }}
+                        onFeedback={onFeedback}
+                      />
+                    ) : isTagsControlled ? (
+                      <>
+                        <Select
+                          isMulti
+                          isDisabled={tagOptions.length === 0}
+                          options={tagOptions}
+                          value={currentValue
+                            .split(/,\s*/)
+                            .filter(Boolean)
+                            .map(
+                              (id) =>
+                                tagOptions.find(
+                                  (option) => option.value === id,
+                                ) || {
+                                  value: id,
+                                  label: id,
+                                  searchText: id,
+                                },
+                            )}
+                          onChange={(selected) => {
+                            const ids = (selected as VocabOption[]).map(
+                              (option) => option.value,
+                            )
+                            setFieldValue(fieldName, ids.join(', '))
+                          }}
+                          placeholder={
+                            tagOptions.length === 0
+                              ? `Vocabulary unavailable (${tagVocabulary?.workbookName ?? fieldName})`
+                              : `Select ${tagVocabulary?.workbookName ?? 'tags'}…`
+                          }
+                          styles={{
+                            multiValue: (base) => ({
+                              ...base,
+                              background: 'rgba(166,43,43,0.15)',
+                            }),
+                            multiValueLabel: (base) => ({
+                              ...base,
+                              color: '#a62b2b',
+                            }),
+                            control: (base) => ({
+                              ...base,
+                              borderColor: '#a62b2b',
+                              minHeight: 34,
+                            }),
+                          }}
+                        />
+                        {tagOptions.length === 0 && (
+                          <span className="edit-field-readonly">
+                            Tag vocabulary is unavailable. Use the refresh
+                            action in the subheader.
+                          </span>
+                        )}
+                      </>
+                    ) : isLanguagesControlled &&
+                      isMultiSelectField(fieldName) ? (
                       <Select
                         isMulti
-                        isDisabled={tagOptions.length === 0}
-                        options={tagOptions}
+                        isDisabled={languageOptions.length === 0}
+                        options={languageOptions}
                         value={currentValue
                           .split(/,\s*/)
                           .filter(Boolean)
                           .map(
                             (id) =>
-                              tagOptions.find(
+                              languageOptions.find(
                                 (option) => option.value === id,
                               ) || {
                                 value: id,
@@ -834,9 +909,117 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                           setFieldValue(fieldName, ids.join(', '))
                         }}
                         placeholder={
-                          tagOptions.length === 0
-                            ? `Vocabulary unavailable (${tagVocabulary?.workbookName ?? fieldName})`
-                            : `Select ${tagVocabulary?.workbookName ?? 'tags'}…`
+                          languageOptions.length === 0
+                            ? 'Languages vocabulary unavailable'
+                            : 'Select languages…'
+                        }
+                        components={referenceSelectComponents}
+                        styles={{
+                          multiValue: (base) => ({
+                            ...base,
+                            background: 'rgba(166,43,43,0.15)',
+                          }),
+                          multiValueLabel: (base) => ({
+                            ...base,
+                            color: '#a62b2b',
+                          }),
+                          control: (base) => ({
+                            ...base,
+                            borderColor: '#a62b2b',
+                            minHeight: 34,
+                          }),
+                        }}
+                      />
+                    ) : isLanguagesControlled ? (
+                      <select
+                        value={currentValue}
+                        onChange={(e) => {
+                          setFieldValue(fieldName, e.target.value)
+                        }}
+                        disabled={languageOptions.length === 0}
+                      >
+                        <option value="">Select language…</option>
+                        {languageOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    ) : isPlacesControlled && isMultiSelectField(fieldName) ? (
+                      <Select
+                        isMulti
+                        isDisabled={placesOptions.length === 0}
+                        options={placesOptions}
+                        value={currentValue
+                          .split(/,\s*/)
+                          .filter(Boolean)
+                          .map(
+                            (id) =>
+                              placesOptions.find(
+                                (option) => option.value === id,
+                              ) || {
+                                value: id,
+                                label: id,
+                                searchText: id,
+                              },
+                          )}
+                        onChange={(selected) => {
+                          const ids = (selected as VocabOption[]).map(
+                            (option) => option.value,
+                          )
+                          setFieldValue(fieldName, ids.join(', '))
+                        }}
+                        placeholder={
+                          placesOptions.length === 0
+                            ? 'Places vocabulary unavailable'
+                            : 'Select places…'
+                        }
+                        components={referenceSelectComponents}
+                        styles={{
+                          multiValue: (base) => ({
+                            ...base,
+                            background: 'rgba(166,43,43,0.15)',
+                          }),
+                          multiValueLabel: (base) => ({
+                            ...base,
+                            color: '#a62b2b',
+                          }),
+                          control: (base) => ({
+                            ...base,
+                            borderColor: '#a62b2b',
+                            minHeight: 34,
+                          }),
+                        }}
+                      />
+                    ) : isLocalitiesControlled &&
+                      isMultiSelectField(fieldName) ? (
+                      <Select
+                        isMulti
+                        isDisabled={localitiesOptions.length === 0}
+                        options={localitiesOptions}
+                        value={currentValue
+                          .split(/,\s*/)
+                          .filter(Boolean)
+                          .map(
+                            (id) =>
+                              localitiesOptions.find(
+                                (option) => option.value === id,
+                              ) || {
+                                value: id,
+                                label: id,
+                                searchText: id,
+                              },
+                          )}
+                        onChange={(selected) => {
+                          const ids = (selected as VocabOption[]).map(
+                            (option) => option.value,
+                          )
+                          setFieldValue(fieldName, ids.join(', '))
+                        }}
+                        placeholder={
+                          localitiesOptions.length === 0
+                            ? 'Localities vocabulary unavailable'
+                            : 'Select localities…'
                         }
                         styles={{
                           multiValue: (base) => ({
@@ -854,330 +1037,128 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                           }),
                         }}
                       />
-                      {tagOptions.length === 0 && (
-                        <span className="edit-field-readonly">
-                          Tag vocabulary is unavailable. Use the refresh action
-                          in the subheader.
-                        </span>
-                      )}
-                    </>
-                  ) : isLanguagesControlled && isMultiSelectField(fieldName) ? (
-                    <Select
-                      isMulti
-                      isDisabled={languageOptions.length === 0}
-                      options={languageOptions}
-                      value={currentValue
-                        .split(/,\s*/)
-                        .filter(Boolean)
-                        .map(
-                          (id) =>
-                            languageOptions.find(
-                              (option) => option.value === id,
-                            ) || {
-                              value: id,
-                              label: id,
-                              searchText: id,
-                            },
-                        )}
-                      onChange={(selected) => {
-                        const ids = (selected as VocabOption[]).map(
-                          (option) => option.value,
-                        )
-                        setFieldValue(fieldName, ids.join(', '))
-                      }}
-                      placeholder={
-                        languageOptions.length === 0
-                          ? 'Languages vocabulary unavailable'
-                          : 'Select languages…'
-                      }
-                      components={referenceSelectComponents}
-                      styles={{
-                        multiValue: (base) => ({
-                          ...base,
-                          background: 'rgba(166,43,43,0.15)',
-                        }),
-                        multiValueLabel: (base) => ({
-                          ...base,
-                          color: '#a62b2b',
-                        }),
-                        control: (base) => ({
-                          ...base,
-                          borderColor: '#a62b2b',
-                          minHeight: 34,
-                        }),
-                      }}
-                    />
-                  ) : isLanguagesControlled ? (
-                    <select
-                      value={currentValue}
-                      onChange={(e) => {
-                        setFieldValue(fieldName, e.target.value)
-                      }}
-                      disabled={languageOptions.length === 0}
-                    >
-                      <option value="">Select language…</option>
-                      {languageOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  ) : isPlacesControlled && isMultiSelectField(fieldName) ? (
-                    <Select
-                      isMulti
-                      isDisabled={placesOptions.length === 0}
-                      options={placesOptions}
-                      value={currentValue
-                        .split(/,\s*/)
-                        .filter(Boolean)
-                        .map(
-                          (id) =>
-                            placesOptions.find(
-                              (option) => option.value === id,
-                            ) || {
-                              value: id,
-                              label: id,
-                              searchText: id,
-                            },
-                        )}
-                      onChange={(selected) => {
-                        const ids = (selected as VocabOption[]).map(
-                          (option) => option.value,
-                        )
-                        setFieldValue(fieldName, ids.join(', '))
-                      }}
-                      placeholder={
-                        placesOptions.length === 0
-                          ? 'Places vocabulary unavailable'
-                          : 'Select places…'
-                      }
-                      components={referenceSelectComponents}
-                      styles={{
-                        multiValue: (base) => ({
-                          ...base,
-                          background: 'rgba(166,43,43,0.15)',
-                        }),
-                        multiValueLabel: (base) => ({
-                          ...base,
-                          color: '#a62b2b',
-                        }),
-                        control: (base) => ({
-                          ...base,
-                          borderColor: '#a62b2b',
-                          minHeight: 34,
-                        }),
-                      }}
-                    />
-                  ) : isLocalitiesControlled &&
-                    isMultiSelectField(fieldName) ? (
-                    <Select
-                      isMulti
-                      isDisabled={localitiesOptions.length === 0}
-                      options={localitiesOptions}
-                      value={currentValue
-                        .split(/,\s*/)
-                        .filter(Boolean)
-                        .map(
-                          (id) =>
+                    ) : isLocalitiesControlled ? (
+                      <>
+                        <Select
+                          isClearable
+                          isDisabled={localitiesOptions.length === 0}
+                          options={localitiesOptions}
+                          value={
                             localitiesOptions.find(
-                              (option) => option.value === id,
-                            ) || {
-                              value: id,
-                              label: id,
-                              searchText: id,
-                            },
+                              (option) => option.value === currentValue,
+                            ) ||
+                            (currentValue
+                              ? {
+                                  value: currentValue,
+                                  label: currentValue,
+                                  searchText: currentValue,
+                                }
+                              : null)
+                          }
+                          onChange={(selected) => {
+                            const option = selected as VocabOption | null
+                            setFieldValue(fieldName, option?.value ?? '')
+                          }}
+                          placeholder={
+                            localitiesOptions.length === 0
+                              ? 'Localities vocabulary unavailable'
+                              : 'Select locality…'
+                          }
+                          styles={{
+                            control: (base) => ({
+                              ...base,
+                              borderColor: '#a62b2b',
+                              minHeight: 34,
+                            }),
+                          }}
+                        />
+                        {localitiesOptions.length === 0 && (
+                          <span className="edit-field-readonly">
+                            Localities vocabulary is unavailable.
+                          </span>
                         )}
-                      onChange={(selected) => {
-                        const ids = (selected as VocabOption[]).map(
-                          (option) => option.value,
-                        )
-                        setFieldValue(fieldName, ids.join(', '))
-                      }}
-                      placeholder={
-                        localitiesOptions.length === 0
-                          ? 'Localities vocabulary unavailable'
-                          : 'Select localities…'
-                      }
-                      styles={{
-                        multiValue: (base) => ({
-                          ...base,
-                          background: 'rgba(166,43,43,0.15)',
-                        }),
-                        multiValueLabel: (base) => ({
-                          ...base,
-                          color: '#a62b2b',
-                        }),
-                        control: (base) => ({
-                          ...base,
-                          borderColor: '#a62b2b',
-                          minHeight: 34,
-                        }),
-                      }}
-                    />
-                  ) : isLocalitiesControlled ? (
-                    <>
-                      <Select
-                        isClearable
-                        isDisabled={localitiesOptions.length === 0}
-                        options={localitiesOptions}
-                        value={
-                          localitiesOptions.find(
-                            (option) => option.value === currentValue,
-                          ) ||
-                          (currentValue
-                            ? {
-                                value: currentValue,
-                                label: currentValue,
-                                searchText: currentValue,
-                              }
-                            : null)
-                        }
-                        onChange={(selected) => {
-                          const option = selected as VocabOption | null
-                          setFieldValue(fieldName, option?.value ?? '')
-                        }}
-                        placeholder={
-                          localitiesOptions.length === 0
-                            ? 'Localities vocabulary unavailable'
-                            : 'Select locality…'
-                        }
-                        styles={{
-                          control: (base) => ({
-                            ...base,
-                            borderColor: '#a62b2b',
-                            minHeight: 34,
-                          }),
-                        }}
-                      />
-                      {localitiesOptions.length === 0 && (
-                        <span className="edit-field-readonly">
-                          Localities vocabulary is unavailable.
-                        </span>
-                      )}
-                    </>
-                  ) : isPlacesControlled ? (
-                    <>
-                      <Select
-                        isClearable
-                        isDisabled={placesOptions.length === 0}
-                        options={placesOptions}
-                        value={
-                          placesOptions.find(
-                            (option) => option.value === currentValue,
-                          ) ||
-                          (currentValue
-                            ? {
-                                value: currentValue,
-                                label: currentValue,
-                                searchText: currentValue,
-                              }
-                            : null)
-                        }
-                        onChange={(selected) => {
-                          const option = selected as VocabOption | null
-                          setFieldValue(fieldName, option?.value ?? '')
-                        }}
-                        placeholder={
-                          placesOptions.length === 0
-                            ? 'Places vocabulary unavailable'
-                            : 'Select place…'
-                        }
-                        components={referenceSelectComponents}
-                        styles={{
-                          control: (base) => ({
-                            ...base,
-                            borderColor: '#a62b2b',
-                            minHeight: 34,
-                          }),
-                        }}
-                      />
-                      {placesOptions.length === 0 && (
-                        <span className="edit-field-readonly">
-                          Places vocabulary is unavailable.
-                        </span>
-                      )}
-                    </>
-                  ) : isPeopleControlled && isMultiSelectField(fieldName) ? (
-                    <Select
-                      isMulti
-                      isDisabled={peopleOptions.length === 0}
-                      options={peopleOptions}
-                      value={currentValue
-                        .split(/,\s*/)
-                        .filter(Boolean)
-                        .map(
-                          (id) =>
-                            peopleOptions.find(
-                              (option) => option.value === id,
-                            ) || {
-                              value: id,
-                              label: id,
-                              searchText: id,
-                            },
+                      </>
+                    ) : isPlacesControlled ? (
+                      <>
+                        <Select
+                          isClearable
+                          isDisabled={placesOptions.length === 0}
+                          options={placesOptions}
+                          value={
+                            placesOptions.find(
+                              (option) => option.value === currentValue,
+                            ) ||
+                            (currentValue
+                              ? {
+                                  value: currentValue,
+                                  label: currentValue,
+                                  searchText: currentValue,
+                                }
+                              : null)
+                          }
+                          onChange={(selected) => {
+                            const option = selected as VocabOption | null
+                            setFieldValue(fieldName, option?.value ?? '')
+                          }}
+                          placeholder={
+                            placesOptions.length === 0
+                              ? 'Places vocabulary unavailable'
+                              : 'Select place…'
+                          }
+                          components={referenceSelectComponents}
+                          styles={{
+                            control: (base) => ({
+                              ...base,
+                              borderColor: '#a62b2b',
+                              minHeight: 34,
+                            }),
+                          }}
+                        />
+                        {placesOptions.length === 0 && (
+                          <span className="edit-field-readonly">
+                            Places vocabulary is unavailable.
+                          </span>
                         )}
-                      onChange={(selected) => {
-                        const ids = (selected as VocabOption[]).map(
-                          (option) => option.value,
-                        )
-                        setFieldValue(fieldName, ids.join(', '))
-                      }}
-                      placeholder={
-                        peopleOptions.length === 0
-                          ? 'People vocabulary unavailable'
-                          : 'Select people…'
-                      }
-                      components={referenceSelectComponents}
-                      styles={{
-                        multiValue: (base) => ({
-                          ...base,
-                          background: 'rgba(166,43,43,0.15)',
-                        }),
-                        multiValueLabel: (base) => ({
-                          ...base,
-                          color: '#a62b2b',
-                        }),
-                        control: (base) => ({
-                          ...base,
-                          borderColor: '#a62b2b',
-                          minHeight: 34,
-                        }),
-                      }}
-                    />
-                  ) : isPeopleControlled ? (
-                    <>
+                      </>
+                    ) : isPeopleControlled && isMultiSelectField(fieldName) ? (
                       <Select
-                        isClearable
+                        isMulti
                         isDisabled={peopleOptions.length === 0}
-                        options={renderedPeopleOptions}
-                        value={
-                          renderedPeopleOptions.find(
-                            (option) => option.value === currentValue,
-                          ) ||
-                          (currentValue
-                            ? {
-                                value: currentValue,
-                                label: currentValue,
-                                searchText: currentValue,
-                              }
-                            : null)
-                        }
-                        onInputChange={(inputValue) => {
-                          setVocabSearch((prev) => ({
-                            ...prev,
-                            [fieldName]: inputValue,
-                          }))
-                        }}
+                        options={peopleOptions}
+                        value={currentValue
+                          .split(/,\s*/)
+                          .filter(Boolean)
+                          .map(
+                            (id) =>
+                              peopleOptions.find(
+                                (option) => option.value === id,
+                              ) || {
+                                value: id,
+                                label: id,
+                                searchText: id,
+                              },
+                          )}
                         onChange={(selected) => {
-                          const option = selected as VocabOption | null
-                          setFieldValue(fieldName, option?.value ?? '')
+                          const ids = (selected as VocabOption[]).map(
+                            (option) => option.value,
+                          )
+                          setFieldValue(fieldName, ids.join(', '))
                         }}
                         placeholder={
                           peopleOptions.length === 0
                             ? 'People vocabulary unavailable'
-                            : 'Select person…'
+                            : 'Select people…'
                         }
                         components={referenceSelectComponents}
                         styles={{
+                          multiValue: (base) => ({
+                            ...base,
+                            background: 'rgba(166,43,43,0.15)',
+                          }),
+                          multiValueLabel: (base) => ({
+                            ...base,
+                            color: '#a62b2b',
+                          }),
                           control: (base) => ({
                             ...base,
                             borderColor: '#a62b2b',
@@ -1185,68 +1166,111 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                           }),
                         }}
                       />
-                      {peopleOptions.length === 0 && (
-                        <span className="edit-field-readonly">
-                          People vocabulary is unavailable.
-                        </span>
-                      )}
-                    </>
-                  ) : isOrganizationsControlled ? (
-                    <>
-                      <Select
-                        isClearable
-                        isDisabled={organizationsOptions.length === 0}
-                        options={organizationsOptions}
-                        value={
-                          organizationsOptions.find(
-                            (option) => option.value === currentValue,
-                          ) ||
-                          (currentValue
-                            ? {
-                                value: currentValue,
-                                label: currentValue,
-                                searchText: currentValue,
-                              }
-                            : null)
-                        }
-                        onChange={(selected) => {
-                          const option = selected as VocabOption | null
-                          setFieldValue(fieldName, option?.value ?? '')
-                        }}
-                        placeholder={
-                          organizationsOptions.length === 0
-                            ? 'Organisations vocabulary unavailable'
-                            : 'Select organisation…'
-                        }
-                        components={referenceSelectComponents}
-                        styles={{
-                          control: (base) => ({
-                            ...base,
-                            borderColor: '#a62b2b',
-                            minHeight: 34,
-                          }),
+                    ) : isPeopleControlled ? (
+                      <>
+                        <Select
+                          isClearable
+                          isDisabled={peopleOptions.length === 0}
+                          options={renderedPeopleOptions}
+                          value={
+                            renderedPeopleOptions.find(
+                              (option) => option.value === currentValue,
+                            ) ||
+                            (currentValue
+                              ? {
+                                  value: currentValue,
+                                  label: currentValue,
+                                  searchText: currentValue,
+                                }
+                              : null)
+                          }
+                          onInputChange={(inputValue) => {
+                            setVocabSearch((prev) => ({
+                              ...prev,
+                              [fieldName]: inputValue,
+                            }))
+                          }}
+                          onChange={(selected) => {
+                            const option = selected as VocabOption | null
+                            setFieldValue(fieldName, option?.value ?? '')
+                          }}
+                          placeholder={
+                            peopleOptions.length === 0
+                              ? 'People vocabulary unavailable'
+                              : 'Select person…'
+                          }
+                          components={referenceSelectComponents}
+                          styles={{
+                            control: (base) => ({
+                              ...base,
+                              borderColor: '#a62b2b',
+                              minHeight: 34,
+                            }),
+                          }}
+                        />
+                        {peopleOptions.length === 0 && (
+                          <span className="edit-field-readonly">
+                            People vocabulary is unavailable.
+                          </span>
+                        )}
+                      </>
+                    ) : isOrganizationsControlled ? (
+                      <>
+                        <Select
+                          isClearable
+                          isDisabled={organizationsOptions.length === 0}
+                          options={organizationsOptions}
+                          value={
+                            organizationsOptions.find(
+                              (option) => option.value === currentValue,
+                            ) ||
+                            (currentValue
+                              ? {
+                                  value: currentValue,
+                                  label: currentValue,
+                                  searchText: currentValue,
+                                }
+                              : null)
+                          }
+                          onChange={(selected) => {
+                            const option = selected as VocabOption | null
+                            setFieldValue(fieldName, option?.value ?? '')
+                          }}
+                          placeholder={
+                            organizationsOptions.length === 0
+                              ? 'Organisations vocabulary unavailable'
+                              : 'Select organisation…'
+                          }
+                          components={referenceSelectComponents}
+                          styles={{
+                            control: (base) => ({
+                              ...base,
+                              borderColor: '#a62b2b',
+                              minHeight: 34,
+                            }),
+                          }}
+                        />
+                        {organizationsOptions.length === 0 && (
+                          <span className="edit-field-readonly">
+                            Organisations vocabulary is unavailable.
+                          </span>
+                        )}
+                      </>
+                    ) : (
+                      <input
+                        type="text"
+                        value={currentValue}
+                        onChange={(e) => {
+                          setFieldValue(fieldName, e.target.value)
                         }}
                       />
-                      {organizationsOptions.length === 0 && (
-                        <span className="edit-field-readonly">
-                          Organisations vocabulary is unavailable.
-                        </span>
-                      )}
-                    </>
-                  ) : (
-                    <input
-                      type="text"
-                      value={currentValue}
-                      onChange={(e) => {
-                        setFieldValue(fieldName, e.target.value)
-                      }}
-                    />
-                  )}
-                </div>
-              )
-            })}
-          </details>
-        ))}
+                    )}
+                  </div>
+                )
+              })}
+            </details>
+          ),
+        )}
       </div>
     )
   },

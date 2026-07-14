@@ -1,4 +1,5 @@
 import { TAG_FIELD_PREFIX } from './field-vocabularies'
+import type { EditableEntityType } from '../types/types'
 
 const FIELD_LABELS: Record<string, string> = {
   '@id': '🆔 Identifier',
@@ -34,6 +35,18 @@ const FIELD_LABELS: Record<string, string> = {
   isRef_holdingOrganisation: '🏛️ Holding Organisation',
   identifier: '🔢 External ID',
   provenance: '📜 Provenance',
+}
+
+// Per-type overrides for field labels. A field can mean something different for
+// a specific entity type (as LDaCA's conventions require), so list the type
+// here and only the fields whose label differs — everything else falls back to
+// the base FIELD_LABELS above.
+const FIELD_LABEL_OVERRIDES: Partial<
+  Record<EditableEntityType, Record<string, string>>
+> = {
+  'ldac:DataReuseLicense': {
+    '@id': '📜 Licence (URL or file)',
+  },
 }
 
 // Optional per-field help text shown via an info tooltip in the edit form.
@@ -90,6 +103,22 @@ const FIELD_DESCRIPTIONS: Record<string, string> = {
     'A single image that represents this item in the archive. This is additional to any files attached to the item, and is used as a thumbnail in lists and search results.',
 }
 
+// Per-type overrides for field descriptions. When a field means something
+// different for a specific entity type (as LDaCA's conventions increasingly
+// require), list the type here and only the fields that differ — everything
+// else falls back to the base FIELD_DESCRIPTIONS above.
+const FIELD_DESCRIPTION_OVERRIDES: Partial<
+  Record<EditableEntityType, Record<string, string>>
+> = {
+  'ldac:DataReuseLicense': {
+    '@id':
+      'For a standard licence, use its URL (e.g. https://creativecommons.org/licenses/by/4.0/). For a custom licence, choose a file and the app will copy it into the Licenses folder and use its path here. This field becomes the @id of the licence entity in the archive.',
+    '@type':
+      'The type of this licence. This is set automatically based on whether the licence is a URL or a file, and does not need to be edited manually.',
+    description: 'A description of the license.',
+  },
+}
+
 function normalizeFieldName(fieldName: string): string {
   return String(fieldName ?? '').trim()
 }
@@ -114,9 +143,17 @@ function getTagFieldDisplayLabel(fieldName: string): string | null {
   return `🏷️ Tag: ${humanizedSuffix}`
 }
 
-export function getFieldDisplayLabel(fieldName: string): string {
+export function getFieldDisplayLabel(
+  fieldName: string,
+  entityType?: EditableEntityType | null,
+): string {
   const normalized = normalizeFieldName(fieldName)
   if (!normalized) return ''
+
+  if (entityType) {
+    const override = FIELD_LABEL_OVERRIDES[entityType]?.[normalized]
+    if (override) return override
+  }
 
   const explicit = FIELD_LABELS[normalized]
   if (explicit) return explicit
@@ -127,8 +164,15 @@ export function getFieldDisplayLabel(fieldName: string): string {
   return normalized
 }
 
-export function getFieldDescription(fieldName: string): string | null {
+export function getFieldDescription(
+  fieldName: string,
+  entityType?: EditableEntityType | null,
+): string | null {
   const normalized = normalizeFieldName(fieldName)
   if (!normalized) return null
+  if (entityType) {
+    const override = FIELD_DESCRIPTION_OVERRIDES[entityType]?.[normalized]
+    if (override) return override
+  }
   return FIELD_DESCRIPTIONS[normalized] ?? null
 }
