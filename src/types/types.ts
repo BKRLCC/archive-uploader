@@ -94,6 +94,12 @@ export type License = BaseItem & {
   isRef_isPartOf?: string
 }
 
+// A collection described by a metadata.xlsx RootDataset tab.
+export type RepositoryCollection = BaseItem & {
+  identifier?: string // Persistent, managed unique ID in URL format (e.g. a DOI) for the collection (schema:identifier)
+  isRef_license?: string // Reference to a license entity in the Licenses sheet (ldac:license)
+}
+
 export type Place = BaseItem & {
   latitude?: string // Latitude in decimal degrees (WGS84)
   longitude?: string // Longitude in decimal degrees (WGS84)
@@ -126,7 +132,7 @@ type ItemTypeMap = {
   Language: Language
   Dataset: BaseItem
   Tag: BaseItem
-  RepositoryCollection: BaseItem
+  RepositoryCollection: RepositoryCollection
   'ldac:DataReuseLicense': License
   Place: Place
   Geometry: Geometry
@@ -221,7 +227,7 @@ export const ENTITY_FIELD_REGISTRY: {
     'isRef_enteredBy',
     'depiction',
   ]),
-  RepositoryCollection: defineEntityFields<BaseItem>()([
+  RepositoryCollection: defineEntityFields<RepositoryCollection>()([
     '@id',
     '@type',
     'name',
@@ -229,6 +235,8 @@ export const ENTITY_FIELD_REGISTRY: {
     'dateAdded',
     'isRef_enteredBy',
     'depiction',
+    'identifier',
+    'isRef_license',
   ]),
   'ldac:DataReuseLicense': defineEntityFields<License>()([
     '@id',
@@ -547,7 +555,7 @@ export const spreadsheets: Record<SpreadsheetType, SpreadsheetSchema> = {
             './',
           ],
           [
-            'Licenses/Example.txt',
+            'License files/Example.txt',
             '[ldac:DataReuseLicense, File]',
             'Example Custom License',
             'This license explains who is allowed to use and possibly redistribute this data, and for what purpose.',

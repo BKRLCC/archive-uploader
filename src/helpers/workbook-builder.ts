@@ -71,7 +71,12 @@ function columnWidths(rows: string[][]): { wch: number }[] {
 // supported column for each entity (used by the donation starter packs).
 export function buildWorkbook(
   schemaKey: SpreadsheetType,
-  meta: { name: string; description: string },
+  meta: {
+    name: string
+    description: string
+    identifier?: string
+    isRef_license?: string
+  },
   fullHeaders = false,
 ): XLSX.WorkBook {
   const schema = spreadsheets[schemaKey]
@@ -83,6 +88,8 @@ export function buildWorkbook(
     ['@type', '[Dataset, RepositoryCollection]'],
     ['name', meta.name],
     ['description', meta.description],
+    ['identifier', meta.identifier ?? ''],
+    ['isRef_license', meta.isRef_license ?? ''],
   ]
   const rootDataset = XLSX.utils.aoa_to_sheet(rootDatasetRows)
   rootDataset['!cols'] = columnWidths(rootDatasetRows)

@@ -26,8 +26,9 @@ const FIELD_LABELS: Record<string, string> = {
   isRef_inLanguage: '🗣️ In Languages',
   isRef_hasPart: '📎 Files',
   isRef_geo: '🧭 Localities',
-  isRef_sameAs: '🔗 License Link',
+  isRef_sameAs: '🔗 Alternative license location',
   isRef_isPartOf: '🗂️ Collection',
+  isRef_license: '📜 License',
   width: '📏 Width (cm)',
   height: '📏 Height (cm)',
   depth: '📏 Depth (cm)',
@@ -45,7 +46,10 @@ const FIELD_LABEL_OVERRIDES: Partial<
   Record<EditableEntityType, Record<string, string>>
 > = {
   'ldac:DataReuseLicense': {
-    '@id': '📜 Licence (URL or file)',
+    '@id': '📜 License (URL or file)',
+  },
+  RepositoryCollection: {
+    identifier: '🔗 Persistent ID (DOI / URL)',
   },
 }
 
@@ -101,6 +105,8 @@ const FIELD_DESCRIPTIONS: Record<string, string> = {
     "The longitude of the item's location, in decimal degrees. The range of valid values is -180 to 180.",
   depiction:
     'A single image that represents this item in the archive. This is additional to any files attached to the item, and is used as a thumbnail in lists and search results.',
+  isRef_license:
+    'The license that governs how this collection may be reused. Choose one from the licenses defined in your archive.',
 }
 
 // Per-type overrides for field descriptions. When a field means something
@@ -112,10 +118,14 @@ const FIELD_DESCRIPTION_OVERRIDES: Partial<
 > = {
   'ldac:DataReuseLicense': {
     '@id':
-      'For a standard licence, use its URL (e.g. https://creativecommons.org/licenses/by/4.0/). For a custom licence, choose a file and the app will copy it into the Licenses folder and use its path here. This field becomes the @id of the licence entity in the archive.',
+      'For a standard license, use its URL (e.g. https://creativecommons.org/licenses/by/4.0/). For a custom license, choose a file and the app will copy it into the License files folder and use its path here. This field becomes the @id of the license entity in the archive.',
     '@type':
-      'The type of this licence. This is set automatically based on whether the licence is a URL or a file, and does not need to be edited manually.',
+      'The type of this license. This is set automatically based on whether the license is a URL or a file, and does not need to be edited manually.',
     description: 'A description of the license.',
+  },
+  RepositoryCollection: {
+    identifier:
+      'A persistent, managed unique ID in URL format for this collection, if you have one — for example a DOI. This is separate from the collection\u2019s location on disk, so it stays stable even if the folder moves.',
   },
 }
 

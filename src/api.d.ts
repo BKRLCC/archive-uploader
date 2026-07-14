@@ -82,7 +82,12 @@ export interface Api {
   ) => Promise<{ count: number }>
   createArchive: (
     folderPath: string,
-    meta: { name: string; description: string },
+    meta: {
+      name: string
+      description: string
+      identifier?: string
+      isRef_license?: string
+    },
   ) => Promise<{ path: string }>
   addSheetRow: (
     xlsxPath: string,

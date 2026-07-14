@@ -15,6 +15,8 @@ import { loadLocalitiesFromSpreadsheet } from '../ducks/localities-loader'
 import { setLocalities } from '../ducks/localities'
 import { loadTagVocabulariesFromFolder } from '../ducks/tags-loader'
 import { setTagVocabularies } from '../ducks/tags'
+import { loadLicensesFromSpreadsheet } from '../ducks/licenses-loader'
+import { setLicenses } from '../ducks/licenses'
 
 export default function HomePage() {
   const dispatch = useAppDispatch()
@@ -32,6 +34,7 @@ export default function HomePage() {
         places,
         localities,
         vocabularies,
+        licenses,
       ] = await Promise.all([
         loadPeopleFromSpreadsheet(),
         loadOrganizationsFromSpreadsheet(),
@@ -39,6 +42,7 @@ export default function HomePage() {
         loadPlacesFromSpreadsheet(),
         loadLocalitiesFromSpreadsheet(),
         loadTagVocabulariesFromFolder(),
+        loadLicensesFromSpreadsheet(),
       ])
       dispatch(setPeople(people))
       dispatch(setOrganizations(organizations))
@@ -46,6 +50,7 @@ export default function HomePage() {
       dispatch(setPlaces(places))
       dispatch(setLocalities(localities))
       dispatch(setTagVocabularies(vocabularies))
+      dispatch(setLicenses(licenses))
       setReloadFeedback('✓ Done')
     } catch {
       setReloadFeedback('✗ Failed')

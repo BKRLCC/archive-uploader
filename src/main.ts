@@ -578,7 +578,12 @@ ipcMain.handle(
   async (
     _event,
     folderPath: string,
-    meta: { name: string; description: string },
+    meta: {
+      name: string
+      description: string
+      identifier?: string
+      isRef_license?: string
+    },
   ) => {
     const xlsxPath = folderPath + '/metadata.xlsx'
     const workbook = buildWorkbook('RepositoryObject', meta)
@@ -683,6 +688,14 @@ ipcMain.handle(
       const key = String(row[0] ?? '')
       if (Object.prototype.hasOwnProperty.call(updates, key)) {
         row[1] = updates[key]
+      }
+    }
+    // Append any update keys that don't yet have a row (e.g. older archives
+    // created before a field like isRef_license existed).
+    const existingKeys = new Set(rows.map((row) => String(row[0] ?? '')))
+    for (const [key, value] of Object.entries(updates)) {
+      if (!existingKeys.has(key)) {
+        rows.push([key, value])
       }
     }
     workbook.Sheets[actualName] = XLSX.utils.aoa_to_sheet(rows)
@@ -907,19 +920,22 @@ ipcMain.handle(
     const { canceled, filePaths } = await dialog.showOpenDialog(win, {
       properties: ['openFile'],
       defaultPath: archiveFolderAbsolute,
-      title: 'Choose licence file',
+      title: 'Choose license file',
     })
     if (canceled || filePaths.length === 0) return null
 
     const selectedAbsolute = path.resolve(filePaths[0])
-    const licenseFolderName = spreadsheets['ldac:DataReuseLicense'].folderName
+    // Copied license files live in a subfolder of the Licenses crate. It is
+    // deliberately NOT named "Licenses" (that's the parent) to avoid a
+    // confusing Licenses/Licenses nesting. Spelt "License" (US) to match LDaCA.
+    const licenseFolderName = 'License files'
     const licenseFolderAbsolute = path.join(
       archiveFolderAbsolute,
       licenseFolderName,
     )
     await fs.promises.mkdir(licenseFolderAbsolute, { recursive: true })
 
-    // Choose a collision-safe destination filename inside the Licenses folder.
+    // Choose a collision-safe destination filename inside the License files folder.
     const originalName = path.basename(selectedAbsolute)
     const ext = path.extname(originalName)
     const stem = path.basename(originalName, ext)

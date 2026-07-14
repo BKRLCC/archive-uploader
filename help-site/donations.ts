@@ -41,8 +41,8 @@ function packFolder(schemaKey: SpreadsheetType): PackFolder {
 // The root Resources workbook (no dedicated folder — sits at the pack root).
 const ROOT_FOLDER = packFolder('RepositoryObject')
 
-// Folder name the app uses for licence records (single source of truth). Both
-// packs get a licence explainer here; the full pack also gets the spreadsheet.
+// Folder name the app uses for license records (single source of truth). Both
+// packs get a license explainer here; the full pack also gets the spreadsheet.
 const LICENSE_FOLDER = spreadsheets['ldac:DataReuseLicense'].folderName
 
 // Sub-folders included in the full pack, in a sensible reading order.
@@ -81,7 +81,7 @@ function buildReadme(kind: 'simple' | 'full'): string {
     lines.push('')
     lines.push('  metadata.xlsx   The main spreadsheet describing your items.')
     lines.push(
-      '  Licenses/       Add a licence describing how files may be used.',
+      '  Licenses/       Add a license describing how files may be used.',
     )
     lines.push('')
     lines.push(
@@ -103,7 +103,7 @@ function buildReadme(kind: 'simple' | 'full'): string {
     lines.push('  Places/         Places referred to by your items.')
     lines.push('  Localities/     Map localities (geographic areas).')
     lines.push('  Languages/      Languages spoken in your items.')
-    lines.push('  Licenses/       A licence describing how files may be used.')
+    lines.push('  Licenses/       A license describing how files may be used.')
     lines.push('')
     lines.push(
       'Start with metadata.xlsx. Fill in the other spreadsheets only if you',
@@ -128,23 +128,23 @@ function buildLicenceNote(kind: 'simple' | 'full'): string {
   lines.push('==============')
   lines.push('')
   lines.push(
-    'A licence is a short document that says what people are allowed to do',
+    'A license is a short document that says what people are allowed to do',
   )
   lines.push(
     'with the files you are donating — for example whether they can be',
   )
   lines.push('shared, published, or used by community members and researchers.')
   lines.push('')
-  lines.push('Please add a licence to this folder describing those terms.')
+  lines.push('Please add a license to this folder describing those terms.')
   if (kind === 'full') {
     lines.push('')
     lines.push(
       'This folder also contains metadata.xlsx, where you can record the',
     )
-    lines.push('licence details in a spreadsheet if you prefer.')
+    lines.push('license details in a spreadsheet if you prefer.')
   }
   lines.push('')
-  lines.push('If you are not sure what licence to use, we can help you choose.')
+  lines.push('If you are not sure what license to use, we can help you choose.')
   lines.push('')
   return lines.join('\n')
 }
@@ -173,9 +173,9 @@ async function buildPack(
     )
   }
 
-  // Both packs include a Licences folder explaining that a licence describing
+  // Both packs include a Licences folder explaining that a license describing
   // what people may do with the files should be added. The full pack also
-  // contains the licence spreadsheet (added via FULL_SUBFOLDERS above).
+  // contains the license spreadsheet (added via FULL_SUBFOLDERS above).
   zip.file(`${LICENSE_FOLDER}/ABOUT-LICENCES.txt`, buildLicenceNote(kind))
 
   zip.file('README.txt', buildReadme(kind))

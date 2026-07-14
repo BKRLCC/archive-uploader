@@ -1,8 +1,17 @@
 import React, { useState } from 'react'
+import Select from 'react-select'
 import type { SheetData } from '../api'
 import { getFieldDisplayLabel } from '../config/field-labels'
+import { useAppSelector } from '../ducks/hooks'
+import { selectLicenses } from '../ducks/licenses'
 
-const EDITABLE_ROWS = ['name', 'description']
+const EDITABLE_ROWS = ['name', 'description', 'identifier', 'isRef_license']
+const COLLECTION_TYPE = 'RepositoryCollection'
+
+interface LicenseOption {
+  value: string
+  label: string
+}
 
 interface Props {
   sheetData: SheetData
@@ -18,10 +27,24 @@ export default function EditRootDatasetForm({
   onClose,
 }: Props) {
   const valueIndex = sheetData.headers.indexOf('Value')
+  const licenses = useAppSelector(selectLicenses)
+
+  const licenseOptions: LicenseOption[] = licenses.map((license) => ({
+    value: license['@id'],
+    label: license.name || license['@id'],
+  }))
 
   const initialValues = Object.fromEntries(
     sheetData.rows.map((row) => [row[0] ?? '', row[valueIndex] ?? '']),
   )
+
+  // Ensure editable fields render even if the sheet predates them.
+  const displayKeys = [
+    ...sheetData.rows.map((row) => row[0] ?? ''),
+    ...EDITABLE_ROWS.filter(
+      (key) => !sheetData.rows.some((row) => (row[0] ?? '') === key),
+    ),
+  ]
 
   const [values, setValues] = useState<Record<string, string>>(initialValues)
   const [saving, setSaving] = useState(false)
@@ -48,18 +71,39 @@ export default function EditRootDatasetForm({
     <div className="drawer-inner">
       <h3>Edit collection</h3>
       <div className="edit-fields">
-        {sheetData.rows.map((row) => {
-          const key = row[0] ?? ''
+        {displayKeys.map((key) => {
           const isEditable = EDITABLE_ROWS.includes(key)
+          const selectedLicense =
+            licenseOptions.find((option) => option.value === values[key]) ??
+            null
           return (
             <label key={key} className="edit-field">
               <span className="edit-field-key">
-                {getFieldDisplayLabel(key)}
+                {getFieldDisplayLabel(key, COLLECTION_TYPE)}
               </span>
               {!isEditable ? (
                 <span className="edit-field-readonly">
                   {values[key] || '—'}
                 </span>
+              ) : key === 'isRef_license' ? (
+                <Select<LicenseOption>
+                  isClearable
+                  options={licenseOptions}
+                  value={selectedLicense}
+                  onChange={(option) =>
+                    setValues((prev) => ({
+                      ...prev,
+                      [key]: option?.value ?? '',
+                    }))
+                  }
+                  placeholder={
+                    licenseOptions.length === 0
+                      ? 'No licenses available'
+                      : 'Select a license…'
+                  }
+                  noOptionsMessage={() => 'No licenses available'}
+                  isDisabled={licenseOptions.length === 0}
+                />
               ) : key === 'description' ? (
                 <textarea
                   value={values[key] ?? ''}

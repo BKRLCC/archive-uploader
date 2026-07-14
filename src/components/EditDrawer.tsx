@@ -52,7 +52,7 @@ export default function EditDrawer({
       defaultType ?? getItemTypeForSheetName(sheetName),
     ) === 'ldac:DataReuseLicense'
 
-  // For a new licence the @type is no longer locked (the editor sets it), so
+  // For a new license the @type is no longer locked (the editor sets it), so
   // seed it into the initial row instead, defaulting to the URL variant.
   const initialRow = (() => {
     if (!isLicenseSheet) return row
@@ -105,7 +105,7 @@ export default function EditDrawer({
       if (isLicenseSheet) {
         id = (values[idIdx] ?? '').trim()
         if (!id) {
-          setFeedback('✗ A licence URL or file is required')
+          setFeedback('✗ A license URL or file is required')
           setSaving(false)
           return
         }

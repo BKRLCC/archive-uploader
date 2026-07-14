@@ -107,7 +107,12 @@ contextBridge.exposeInMainWorld('api', {
     ipcRenderer.invoke('populate-files-tab', folder, rootFolder),
   createArchive: (
     folderPath: string,
-    meta: { name: string; description: string },
+    meta: {
+      name: string
+      description: string
+      identifier?: string
+      isRef_license?: string
+    },
   ): Promise<{ path: string }> =>
     ipcRenderer.invoke('create-archive', folderPath, meta),
   addSheetRow: (

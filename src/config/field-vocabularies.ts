@@ -39,6 +39,7 @@ export const FIELD_VOCABULARIES: Record<string, ControlledVocabularySource> = {
   isRef_location: 'Places',
   isRef_geo: 'Localities',
   isRef_sameAs: 'Licenses',
+  isRef_license: 'Licenses',
   isRef_isPartOf: 'RepositoryCollection',
   isRef_holdingOrganisation: 'Organization',
 }

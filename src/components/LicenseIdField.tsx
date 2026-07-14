@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 
-// The @id of a licence works differently from every other @id in the system:
-// it is EITHER a URL that identifies a standard licence (e.g. a Creative
-// Commons deed) OR the path to a licence file stored inside the archive. The
+// The @id of a license works differently from every other @id in the system:
+// it is EITHER a URL that identifies a standard license (e.g. a Creative
+// Commons deed) OR the path to a license file stored inside the archive. The
 // two modes also drive the coupled @type value.
 export const LICENSE_URL_TYPE = 'ldac:DataReuseLicense'
 export const LICENSE_FILE_TYPE = '[ldac:DataReuseLicense, File]'
@@ -77,6 +77,8 @@ export default function LicenseIdField({
           />
           URL
         </label>
+        {/* https://api.elsewhere-staging.k8s.elsewhere.to/api/dreams/019f5eeb-ecc7-740f-9a45-ed2c317f81dd/interpretations */}
+        {/* https://api.elsewhere-staging.k8s.elsewhere.to/api/dreams/019f5eeb-ecc7-740f-9a45-ed2c317f81dd/interpretations */}
         <label className="license-id-mode-option">
           <input
             type="radio"

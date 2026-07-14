@@ -16,6 +16,8 @@ import { setLocalities, setLocalitiesLoading } from './ducks/localities'
 import { loadLocalitiesFromSpreadsheet } from './ducks/localities-loader'
 import { setLoading, setPeople } from './ducks/people'
 import { loadPeopleFromSpreadsheet } from './ducks/people-loader'
+import { setLicenses, setLicensesLoading } from './ducks/licenses'
+import { loadLicensesFromSpreadsheet } from './ducks/licenses-loader'
 import {
   setOrganizations,
   setOrganizationsLoading,
@@ -32,6 +34,7 @@ let hasBootstrappedPeople = false
 let hasBootstrappedOrganizations = false
 let hasBootstrappedPlaces = false
 let hasBootstrappedTags = false
+let hasBootstrappedLicenses = false
 
 function LanguagesBootstrap() {
   const dispatch = useAppDispatch()
@@ -180,6 +183,29 @@ function TagsBootstrap() {
   return null
 }
 
+function LicensesBootstrap() {
+  const dispatch = useAppDispatch()
+
+  React.useEffect(() => {
+    if (hasBootstrappedLicenses) return
+    hasBootstrappedLicenses = true
+
+    const run = async () => {
+      dispatch(setLicensesLoading(true))
+      try {
+        const licenses = await loadLicensesFromSpreadsheet()
+        dispatch(setLicenses(licenses))
+      } finally {
+        dispatch(setLicensesLoading(false))
+      }
+    }
+
+    void run()
+  }, [dispatch])
+
+  return null
+}
+
 function Layout() {
   return (
     <div className="app-layout">
@@ -202,6 +228,7 @@ root.render(
       <OrganizationsBootstrap />
       <PlacesBootstrap />
       <TagsBootstrap />
+      <LicensesBootstrap />
       <HashRouter>
         <Routes>
           <Route element={<Layout />}>
