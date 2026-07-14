@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import type { DirEntry, FileInfo } from '../api'
 import FilePreview, { type Selected } from '../components/FilePreview'
@@ -120,6 +120,21 @@ export default function BrowserPage() {
     window.api.listFolder(currentPath).then(setEntries)
   }, [currentPath, isFile, refreshKey])
 
+  // Pin the archive metadata workbook (⭐ Metadata) to the top of the list so
+  // it's easy to find in folders with many files. Everything else keeps the
+  // order provided by list-folder (directories first, then alphabetical).
+  const sortedEntries = useMemo(() => {
+    const isMetadata = (entry: DirEntry) =>
+      !entry.isDirectory &&
+      isArchiveEditableWorkbookPath(currentPath + '/' + entry.name, rootFolder)
+    return [...entries].sort((a, b) => {
+      const aMeta = isMetadata(a)
+      const bMeta = isMetadata(b)
+      if (aMeta !== bMeta) return aMeta ? -1 : 1
+      return 0
+    })
+  }, [entries, currentPath, rootFolder])
+
   const handleSelect = useCallback(
     async (entry: DirEntry, filePath: string) => {
       setSelected({ entry, filePath })
@@ -129,7 +144,6 @@ export default function BrowserPage() {
     },
     [],
   )
-
   const handleEntryClick = useCallback(
     (e: React.MouseEvent, entry: DirEntry, filePath: string) => {
       e.stopPropagation()
@@ -187,7 +201,7 @@ export default function BrowserPage() {
               {entries.length === 0 ? (
                 <li className="empty">This folder is empty.</li>
               ) : (
-                entries.map((entry) => {
+                sortedEntries.map((entry) => {
                   const filePath = currentPath + '/' + entry.name
                   const isSelected = selected?.filePath === filePath
                   const isArchiveEditable =
