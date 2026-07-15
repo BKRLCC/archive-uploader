@@ -39,6 +39,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const HELP_DIR = __dirname
 const OUT_DIR = join(HELP_DIR, 'out')
 const FONTS_SRC_DIR = join(HELP_DIR, '..', 'src', 'fonts')
+const FAVICON_SRC = join(HELP_DIR, 'assets', 'images', 'favicon.ico')
 const PLACEHOLDER = '<!--FIELD_REFERENCE-->'
 
 // Brand fonts copied into the output so the public site matches the app.
@@ -214,6 +215,7 @@ async function main(): Promise<void> {
   mkdirSync(OUT_DIR, { recursive: true })
   writeFileSync(join(OUT_DIR, 'index.html'), html, 'utf8')
   copyFileSync(stylesPath, join(OUT_DIR, 'styles.css'))
+  copyFileSync(FAVICON_SRC, join(OUT_DIR, 'favicon.ico'))
 
   for (const relPath of FONT_FILES) {
     const dest = join(OUT_DIR, 'fonts', relPath)
