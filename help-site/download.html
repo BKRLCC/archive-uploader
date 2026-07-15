@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Download the App</title>
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body>
+    <!--
+      This is the hand-editable download page. Edit the prose freely.
+      The version number and download links are filled in by the build script
+      (download.ts) from package.json — do not edit the placeholder tokens
+      below (<!==APP_VERSION==>, <!==MAC_URL==>, <!==WIN_URL==>).
+    -->
+    <header class="site-header">
+      <div class="wrap">
+        <nav class="site-nav"><a href="../">← Spreadsheet Guide</a></nav>
+        <h1>Download the App</h1>
+        <p class="tagline">
+          Get the latest version (v<!--APP_VERSION-->) of the archive app.
+        </p>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <section class="download-cards">
+        <article class="download-card">
+          <h3>macOS (Apple Silicon)</h3>
+          <p class="download-card-lead">
+            For Macs with an Apple Silicon chip (M1, M2, M3 or newer).
+          </p>
+          <a class="button-link" href="<!--MAC_URL-->">
+            Download for macOS (.zip)
+          </a>
+        </article>
+
+        <article class="download-card">
+          <h3>Windows</h3>
+          <p class="download-card-lead">For Windows 10 and 11.</p>
+          <a class="button-link" href="<!--WIN_URL-->">
+            Download for Windows (.exe)
+          </a>
+        </article>
+      </section>
+
+      <p class="reference-lead">
+        Looking for a different version or platform? See
+        <a href="https://github.com/BKRLCC/archive-uploader/releases/latest"
+          >all releases on GitHub</a
+        >.
+      </p>
+    </main>
+  </body>
+</html>

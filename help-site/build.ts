@@ -33,6 +33,7 @@ import {
   type ControlledVocabularySource,
 } from '../src/config/field-vocabularies'
 import { buildDonations } from './donations'
+import { buildDownload } from './download'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const HELP_DIR = __dirname
@@ -226,6 +227,7 @@ async function main(): Promise<void> {
   )
 
   await buildDonations(OUT_DIR, HELP_DIR)
+  buildDownload(OUT_DIR, HELP_DIR)
 }
 
 main().catch((err) => {
