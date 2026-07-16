@@ -38,11 +38,10 @@ export const SAMPLE_ROOT_DATASET = {
   'ldac:metadataIsPublic': 'TRUE',
 }
 
-// The Mona Lisa painting. `filePrefix` is '' for the flat simple pack (the image
-// sits beside metadata.xlsx) and 'files/' for the full pack (the image lives in
-// the files/ folder), so the file references match where the image is placed.
-function monaLisaObject(filePrefix: string): RepositoryObject {
-  const imagePath = `${filePrefix}${SAMPLE_IMAGE_FILENAME}`
+// The Mona Lisa painting. The bundled image always sits in the same folder as
+// the workbook that describes it (the pack root for the simple pack, the files/
+// folder for the full pack), so it is referenced by its bare filename.
+function monaLisaObject(): RepositoryObject {
   return {
     '@id': 'mona-lisa',
     '@type': 'RepositoryObject',
@@ -53,8 +52,8 @@ function monaLisaObject(filePrefix: string): RepositoryObject {
     isRef_creator: 'leonardo-da-vinci',
     isRef_mentions: 'lisa-del-giocondo',
     isRef_holdingOrganisation: 'musee-du-louvre',
-    isRef_hasPart: imagePath,
-    depiction: imagePath,
+    isRef_hasPart: SAMPLE_IMAGE_FILENAME,
+    depiction: SAMPLE_IMAGE_FILENAME,
     material: 'Oil on poplar panel',
     width: '53',
     height: '77',
@@ -121,15 +120,13 @@ const SAMPLE_LANGUAGES: Language[] = [
 ]
 
 // Returns the sample entities for a given sheet type, or [] for types without a
-// worked example (e.g. licences, which the schema already seeds). `filePrefix`
-// controls where the sample image is referenced from (see monaLisaObject).
+// worked example (e.g. licences, which the schema already seeds).
 export function getSampleEntitiesForType(
   type: ItemDataType,
-  filePrefix = '',
 ): Array<Record<string, unknown>> {
   switch (type) {
     case 'RepositoryObject':
-      return [monaLisaObject(filePrefix)]
+      return [monaLisaObject()]
     case 'Person':
       return SAMPLE_PEOPLE
     case 'Organization':

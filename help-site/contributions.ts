@@ -57,10 +57,7 @@ const FULL_SUBFOLDERS: PackFolder[] = [
   packFolder('ldac:DataReuseLicense'),
 ]
 
-function workbookBuffer(
-  schemaKey: SpreadsheetType,
-  filePrefix: string,
-): Buffer {
+function workbookBuffer(schemaKey: SpreadsheetType): Buffer {
   // Contribution packs include every supported column so institutions can see the
   // full range of information they can record, plus a worked Mona Lisa example.
   // Only the root workbook carries the example collection's RootDataset metadata.
@@ -68,20 +65,19 @@ function workbookBuffer(
     schemaKey === 'RepositoryObject'
       ? SAMPLE_ROOT_DATASET
       : { name: '', description: '' }
-  const workbook = buildWorkbook(schemaKey, meta, true, { filePrefix })
+  const workbook = buildWorkbook(schemaKey, meta, true, true)
   return XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' }) as Buffer
 }
 
-function addFolderToZip(
-  zip: JSZip,
-  folder: PackFolder,
-  filePrefix: string,
-): void {
+// Adds a folder's workbook to the zip. `zipPrefix` places the workbook inside
+// another folder (used to put the full pack's main workbook under files/); it is
+// empty for the flat simple pack and for the entity sub-folders.
+function addFolderToZip(zip: JSZip, folder: PackFolder, zipPrefix = ''): void {
   const schema = spreadsheets[folder.schemaKey]
   const prefix = schema.folderName ? `${schema.folderName}/` : ''
   zip.file(
-    `${prefix}${folder.workbookFileName}`,
-    workbookBuffer(folder.schemaKey, filePrefix),
+    `${zipPrefix}${prefix}${folder.workbookFileName}`,
+    workbookBuffer(folder.schemaKey),
   )
 }
 
@@ -110,8 +106,11 @@ function buildReadme(kind: 'simple' | 'full'): string {
   } else {
     lines.push('This is the full pack. It contains:')
     lines.push('')
-    lines.push('  metadata.xlsx   The main spreadsheet describing your items.')
     lines.push('  files/          Put the files you are donating in here.')
+    lines.push(
+      '                  It also holds metadata.xlsx, the main spreadsheet',
+    )
+    lines.push('                  describing your items.')
     lines.push('  People/         People referred to by your items.')
     lines.push('  Organisations/  Organisations referred to by your items.')
     lines.push('  Places/         Places referred to by your items.')
@@ -119,15 +118,15 @@ function buildReadme(kind: 'simple' | 'full'): string {
     lines.push('  Licenses/       A license describing how files may be used.')
     lines.push('')
     lines.push(
-      'Start with metadata.xlsx. Fill in the other spreadsheets only if you',
+      'Start with files/metadata.xlsx. Fill in the other spreadsheets only if',
     )
-    lines.push('need them — you do not have to use every folder.')
+    lines.push('you need them — you do not have to use every folder.')
     lines.push('')
-    lines.push('Put the files you are donating in the files/ folder. In the')
+    lines.push('Put the files you are donating in the files/ folder, alongside')
     lines.push(
-      'spreadsheet, write the path including that folder (for example:',
+      'metadata.xlsx. In the spreadsheet, just write the file name on its own',
     )
-    lines.push('files/photo.jpg).')
+    lines.push('(for example: photo.jpg) — no folder needed.')
   }
   lines.push('')
   lines.push(HELP_SITE_URL_HINT)
@@ -169,25 +168,25 @@ async function buildPack(
 ): Promise<Buffer> {
   const zip = new JSZip()
 
-  // The full pack keeps files in a dedicated files/ folder; the simple pack is
-  // flat, so its example image sits beside metadata.xlsx and is referenced by
-  // bare filename.
-  const filePrefix = kind === 'full' ? 'files/' : ''
+  // The full pack keeps everything for the main collection in a dedicated files/
+  // folder — both the donated files and the main metadata.xlsx that describes
+  // them. The simple pack stays flat, with the workbook and files at the root.
+  const rootPrefix = kind === 'full' ? 'files/' : ''
 
-  // Root Resources workbook.
-  addFolderToZip(zip, ROOT_FOLDER, filePrefix)
+  // Main Resources workbook (goes inside files/ for the full pack).
+  addFolderToZip(zip, ROOT_FOLDER, rootPrefix)
 
-  // Any sub-folders (full pack).
+  // Entity sub-folders (full pack) sit at the pack root, each in its own folder.
   for (const folder of folders) {
-    addFolderToZip(zip, folder, filePrefix)
+    addFolderToZip(zip, folder)
   }
 
-  // Bundle the worked-example image the sample rows point at.
-  zip.file(`${filePrefix}${SAMPLE_IMAGE_FILENAME}`, readFileSync(imageSrc))
+  // Bundle the worked-example image beside the workbook that references it.
+  zip.file(`${rootPrefix}${SAMPLE_IMAGE_FILENAME}`, readFileSync(imageSrc))
 
-  // The full pack keeps a dedicated files/ folder (alongside the example image,
-  // with a note pointing donors here for their own files). The simple pack stays
-  // flat: donors drop files beside metadata.xlsx and reference them by filename.
+  // The full pack's files/ folder also gets a note pointing donors here for
+  // their own files. The simple pack stays flat: donors drop files beside
+  // metadata.xlsx and reference them by bare filename.
   if (kind === 'full') {
     zip.file(
       'files/PUT-YOUR-FILES-HERE.txt',

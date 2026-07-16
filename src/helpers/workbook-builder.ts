@@ -10,14 +10,6 @@ import {
   type SpreadsheetType,
 } from '../types/types'
 
-// Options controlling injection of worked-example sample rows into a workbook.
-// Used by the downloadable contribution packs so donors see a coherent example.
-export interface SampleDataOptions {
-  // Path prefix for referenced sample files, e.g. 'files/' for the full pack or
-  // '' for the flat simple pack, so file references match where files are placed.
-  filePrefix?: string
-}
-
 // Converts a typed entity into a sheet row aligned to `headers`, looking each
 // column up by field name. Booleans serialise as TRUE/FALSE; missing fields
 // become empty cells.
@@ -108,7 +100,7 @@ export function buildWorkbook(
     'ldac:metadataIsPublic'?: string
   },
   fullHeaders = false,
-  sampleData?: SampleDataOptions,
+  includeSamples = false,
 ): XLSX.WorkBook {
   const schema = spreadsheets[schemaKey]
   const workbook = XLSX.utils.book_new()
@@ -141,9 +133,9 @@ export function buildWorkbook(
     const seedRows = (tab.seedRows ?? []).map((row) =>
       permutation.map((sourceIndex) => row[sourceIndex] ?? ''),
     )
-    const sampleRows = sampleData
-      ? getSampleEntitiesForType(tab.type, sampleData.filePrefix ?? '').map(
-          (entity) => entityToRow(entity, orderedHeaders),
+    const sampleRows = includeSamples
+      ? getSampleEntitiesForType(tab.type).map((entity) =>
+          entityToRow(entity, orderedHeaders),
         )
       : []
     const rows: string[][] = [orderedHeaders, ...seedRows, ...sampleRows]
