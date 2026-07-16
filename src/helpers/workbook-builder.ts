@@ -1,6 +1,7 @@
 import * as XLSX from 'xlsx'
 
 import { groupRenderedFields } from '../config/field-groups'
+import { getSampleEntitiesForType } from '../samples/sample-data'
 import {
   getEntityFieldModel,
   resolveEditableEntityType,
@@ -8,6 +9,29 @@ import {
   type SpreadsheetTab,
   type SpreadsheetType,
 } from '../types/types'
+
+// Options controlling injection of worked-example sample rows into a workbook.
+// Used by the downloadable contribution packs so donors see a coherent example.
+export interface SampleDataOptions {
+  // Path prefix for referenced sample files, e.g. 'files/' for the full pack or
+  // '' for the flat simple pack, so file references match where files are placed.
+  filePrefix?: string
+}
+
+// Converts a typed entity into a sheet row aligned to `headers`, looking each
+// column up by field name. Booleans serialise as TRUE/FALSE; missing fields
+// become empty cells.
+function entityToRow(
+  entity: Record<string, unknown>,
+  headers: string[],
+): string[] {
+  return headers.map((header) => {
+    const value = entity[header]
+    if (value === undefined || value === null) return ''
+    if (typeof value === 'boolean') return value ? 'TRUE' : 'FALSE'
+    return String(value)
+  })
+}
 
 // Resolves the header set for a tab. By default this is the tab's curated
 // header list. When `fullHeaders` is true, every field the entity supports
@@ -84,6 +108,7 @@ export function buildWorkbook(
     'ldac:metadataIsPublic'?: string
   },
   fullHeaders = false,
+  sampleData?: SampleDataOptions,
 ): XLSX.WorkBook {
   const schema = spreadsheets[schemaKey]
   const workbook = XLSX.utils.book_new()
@@ -116,7 +141,12 @@ export function buildWorkbook(
     const seedRows = (tab.seedRows ?? []).map((row) =>
       permutation.map((sourceIndex) => row[sourceIndex] ?? ''),
     )
-    const rows: string[][] = [orderedHeaders, ...seedRows]
+    const sampleRows = sampleData
+      ? getSampleEntitiesForType(tab.type, sampleData.filePrefix ?? '').map(
+          (entity) => entityToRow(entity, orderedHeaders),
+        )
+      : []
+    const rows: string[][] = [orderedHeaders, ...seedRows, ...sampleRows]
     const sheet = XLSX.utils.aoa_to_sheet(rows)
     sheet['!cols'] = columnWidths(rows)
     XLSX.utils.book_append_sheet(workbook, sheet, tab.name)

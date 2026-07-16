@@ -11,13 +11,17 @@
  *   contributions/downloads/archive-simple.zip
  *   contributions/downloads/archive-full.zip
  */
-import { copyFileSync, mkdirSync, writeFileSync } from 'node:fs'
+import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 import JSZip from 'jszip'
 import * as XLSX from 'xlsx'
 
 import { buildWorkbook } from '../src/helpers/workbook-builder'
+import {
+  SAMPLE_IMAGE_FILENAME,
+  SAMPLE_ROOT_DATASET,
+} from '../src/samples/sample-data'
 import { spreadsheets, type SpreadsheetType } from '../src/types/types'
 
 const HELP_SITE_URL_HINT =
@@ -53,19 +57,31 @@ const FULL_SUBFOLDERS: PackFolder[] = [
   packFolder('ldac:DataReuseLicense'),
 ]
 
-function workbookBuffer(schemaKey: SpreadsheetType): Buffer {
+function workbookBuffer(
+  schemaKey: SpreadsheetType,
+  filePrefix: string,
+): Buffer {
   // Contribution packs include every supported column so institutions can see the
-  // full range of information they can record.
-  const workbook = buildWorkbook(schemaKey, { name: '', description: '' }, true)
+  // full range of information they can record, plus a worked Mona Lisa example.
+  // Only the root workbook carries the example collection's RootDataset metadata.
+  const meta =
+    schemaKey === 'RepositoryObject'
+      ? SAMPLE_ROOT_DATASET
+      : { name: '', description: '' }
+  const workbook = buildWorkbook(schemaKey, meta, true, { filePrefix })
   return XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' }) as Buffer
 }
 
-function addFolderToZip(zip: JSZip, folder: PackFolder): void {
+function addFolderToZip(
+  zip: JSZip,
+  folder: PackFolder,
+  filePrefix: string,
+): void {
   const schema = spreadsheets[folder.schemaKey]
   const prefix = schema.folderName ? `${schema.folderName}/` : ''
   zip.file(
     `${prefix}${folder.workbookFileName}`,
-    workbookBuffer(folder.schemaKey),
+    workbookBuffer(folder.schemaKey, filePrefix),
   )
 }
 
@@ -149,20 +165,29 @@ function buildLicenceNote(kind: 'simple' | 'full'): string {
 async function buildPack(
   folders: PackFolder[],
   kind: 'simple' | 'full',
+  imageSrc: string,
 ): Promise<Buffer> {
   const zip = new JSZip()
 
+  // The full pack keeps files in a dedicated files/ folder; the simple pack is
+  // flat, so its example image sits beside metadata.xlsx and is referenced by
+  // bare filename.
+  const filePrefix = kind === 'full' ? 'files/' : ''
+
   // Root Resources workbook.
-  addFolderToZip(zip, ROOT_FOLDER)
+  addFolderToZip(zip, ROOT_FOLDER, filePrefix)
 
   // Any sub-folders (full pack).
   for (const folder of folders) {
-    addFolderToZip(zip, folder)
+    addFolderToZip(zip, folder, filePrefix)
   }
 
-  // The full pack keeps a dedicated files/ folder (with a placeholder so the
-  // otherwise-empty folder survives zipping). The simple pack stays flat:
-  // donors drop files beside metadata.xlsx and reference them by bare filename.
+  // Bundle the worked-example image the sample rows point at.
+  zip.file(`${filePrefix}${SAMPLE_IMAGE_FILENAME}`, readFileSync(imageSrc))
+
+  // The full pack keeps a dedicated files/ folder (alongside the example image,
+  // with a note pointing donors here for their own files). The simple pack stays
+  // flat: donors drop files beside metadata.xlsx and reference them by filename.
   if (kind === 'full') {
     zip.file(
       'files/PUT-YOUR-FILES-HERE.txt',
@@ -192,8 +217,18 @@ export async function buildContributions(
   const downloadsDir = join(contributionsDir, 'downloads')
   mkdirSync(downloadsDir, { recursive: true })
 
-  const simpleZip = await buildPack([], 'simple')
-  const fullZip = await buildPack(FULL_SUBFOLDERS, 'full')
+  // The bundled public-domain sample image lives in the app's samples folder.
+  const imageSrc = join(
+    helpDir,
+    '..',
+    'src',
+    'samples',
+    'files',
+    SAMPLE_IMAGE_FILENAME,
+  )
+
+  const simpleZip = await buildPack([], 'simple', imageSrc)
+  const fullZip = await buildPack(FULL_SUBFOLDERS, 'full', imageSrc)
 
   writeFileSync(join(downloadsDir, 'archive-simple.zip'), simpleZip)
   writeFileSync(join(downloadsDir, 'archive-full.zip'), fullZip)
