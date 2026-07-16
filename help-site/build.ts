@@ -32,7 +32,7 @@ import {
   isMultiSelectField,
   type ControlledVocabularySource,
 } from '../src/config/field-vocabularies'
-import { buildDonations } from './donations'
+import { buildContributions } from './contributions'
 import { buildDownload } from './download'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -228,7 +228,7 @@ async function main(): Promise<void> {
     `Help site built: ${count} sheets -> ${join(OUT_DIR, 'index.html')}`,
   )
 
-  await buildDonations(OUT_DIR, HELP_DIR)
+  await buildContributions(OUT_DIR, HELP_DIR)
   buildDownload(OUT_DIR, HELP_DIR)
 }
 

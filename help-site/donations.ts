@@ -1,5 +1,5 @@
 /**
- * Generates the downloadable donation packs for the help site.
+ * Generates the downloadable contribution packs for the help site.
  *
  * Produces two zip files of pre-made spreadsheets and folders so donating
  * institutions can start cataloguing. The workbooks are built with the same
@@ -7,9 +7,9 @@
  * archives created inside the app.
  *
  * Output (relative to the help-site out/ directory):
- *   donations/index.html            (copied from help-site/donations.html)
- *   donations/downloads/archive-simple.zip
- *   donations/downloads/archive-full.zip
+ *   contributions/index.html            (copied from help-site/contributions.html)
+ *   contributions/downloads/archive-simple.zip
+ *   contributions/downloads/archive-full.zip
  */
 import { copyFileSync, mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -56,7 +56,7 @@ const FULL_SUBFOLDERS: PackFolder[] = [
 ]
 
 function workbookBuffer(schemaKey: SpreadsheetType): Buffer {
-  // Donation packs include every supported column so institutions can see the
+  // Contribution packs include every supported column so institutions can see the
   // full range of information they can record.
   const workbook = buildWorkbook(schemaKey, { name: '', description: '' }, true)
   return XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' }) as Buffer
@@ -184,15 +184,15 @@ async function buildPack(
 }
 
 /**
- * Builds the donation packs and page into the given help-site out/ directory.
- * `helpDir` is the help-site source directory (where donations.html lives).
+ * Builds the contribution packs and page into the given help-site out/ directory.
+ * `helpDir` is the help-site source directory (where contributions.html lives).
  */
-export async function buildDonations(
+export async function buildContributions(
   outDir: string,
   helpDir: string,
 ): Promise<void> {
-  const donationsDir = join(outDir, 'donations')
-  const downloadsDir = join(donationsDir, 'downloads')
+  const contributionsDir = join(outDir, 'contributions')
+  const downloadsDir = join(contributionsDir, 'downloads')
   mkdirSync(downloadsDir, { recursive: true })
 
   const simpleZip = await buildPack([], 'simple')
@@ -202,11 +202,11 @@ export async function buildDonations(
   writeFileSync(join(downloadsDir, 'archive-full.zip'), fullZip)
 
   copyFileSync(
-    join(helpDir, 'donations.html'),
-    join(donationsDir, 'index.html'),
+    join(helpDir, 'contributions.html'),
+    join(contributionsDir, 'index.html'),
   )
 
   console.log(
-    `Donation packs built: archive-simple.zip, archive-full.zip -> ${downloadsDir}`,
+    `Contribution packs built: archive-simple.zip, archive-full.zip -> ${downloadsDir}`,
   )
 }

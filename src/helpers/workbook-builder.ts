@@ -13,7 +13,7 @@ import {
 // header list. When `fullHeaders` is true, every field the entity supports
 // (from ENTITY_FIELD_REGISTRY) is unioned in — the tab's own order is kept and
 // any additional registry fields are appended. Used to give the downloadable
-// donation packs a complete set of columns while keeping in-app archives lean.
+// contribution packs a complete set of columns while keeping in-app archives lean.
 function headersForTab(tab: SpreadsheetTab, fullHeaders: boolean): string[] {
   if (!fullHeaders) return tab.headers
 
@@ -66,9 +66,9 @@ function columnWidths(rows: string[][]): { wch: number }[] {
 }
 
 // Builds a metadata workbook for a given spreadsheet schema. Shared by the
-// Electron app (folder creation) and the help-site donation-pack generator so
+// Electron app (folder creation) and the help-site contribution-pack generator so
 // both produce identical archives. Pass `fullHeaders` to include every
-// supported column for each entity (used by the donation starter packs).
+// supported column for each entity (used by the contribution starter packs).
 export function buildWorkbook(
   schemaKey: SpreadsheetType,
   meta: {
