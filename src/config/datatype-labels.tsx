@@ -60,8 +60,8 @@ export const dataTypeLabels: Record<ItemDataType, LabelConfig> = {
   },
   Geometry: {
     icon: TypeIcons.Geometry,
-    label: 'Localities',
-    labelSingular: 'Locality',
+    label: 'Geometry',
+    labelSingular: 'Geometry',
   },
   Organization: {
     icon: TypeIcons.Organization,

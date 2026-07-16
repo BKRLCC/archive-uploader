@@ -27,7 +27,6 @@ const FIELD_LABELS: Record<string, string> = {
   'isRef_ldac:subjectLanguage': '🗣️ Subject Languages',
   'ldac:metadataIsPublic': '🌐 Public Metadata',
   isRef_hasPart: '📎 Files',
-  isRef_geo: '🧭 Localities',
   isRef_sameAs: '🔗 Alternative license location',
   isRef_isPartOf: '🗂️ Collection',
   isRef_license: '📜 License',

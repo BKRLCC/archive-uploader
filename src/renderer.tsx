@@ -12,8 +12,6 @@ import store from './ducks/store'
 import { useAppDispatch } from './ducks/hooks'
 import { loadLanguagesFromSpreadsheet } from './ducks/languages-loader'
 import { setLanguages, setLanguagesLoading } from './ducks/languages'
-import { setLocalities, setLocalitiesLoading } from './ducks/localities'
-import { loadLocalitiesFromSpreadsheet } from './ducks/localities-loader'
 import { setLoading, setPeople } from './ducks/people'
 import { loadPeopleFromSpreadsheet } from './ducks/people-loader'
 import { setLicenses, setLicensesLoading } from './ducks/licenses'
@@ -29,7 +27,6 @@ import { setTagVocabularies, setTagsError, setTagsLoading } from './ducks/tags'
 import { loadTagVocabulariesFromFolder } from './ducks/tags-loader'
 
 let hasBootstrappedLanguages = false
-let hasBootstrappedLocalities = false
 let hasBootstrappedPeople = false
 let hasBootstrappedOrganizations = false
 let hasBootstrappedPlaces = false
@@ -96,29 +93,6 @@ function PeopleBootstrap() {
         dispatch(setPeople(people))
       } finally {
         dispatch(setLoading(false))
-      }
-    }
-
-    void run()
-  }, [dispatch])
-
-  return null
-}
-
-function LocalitiesBootstrap() {
-  const dispatch = useAppDispatch()
-
-  React.useEffect(() => {
-    if (hasBootstrappedLocalities) return
-    hasBootstrappedLocalities = true
-
-    const run = async () => {
-      dispatch(setLocalitiesLoading(true))
-      try {
-        const localities = await loadLocalitiesFromSpreadsheet()
-        dispatch(setLocalities(localities))
-      } finally {
-        dispatch(setLocalitiesLoading(false))
       }
     }
 
@@ -223,7 +197,6 @@ root.render(
   <React.StrictMode>
     <Provider store={store}>
       <LanguagesBootstrap />
-      <LocalitiesBootstrap />
       <PeopleBootstrap />
       <OrganizationsBootstrap />
       <PlacesBootstrap />

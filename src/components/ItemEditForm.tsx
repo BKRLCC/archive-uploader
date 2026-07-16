@@ -24,7 +24,6 @@ import {
 } from '../config/depiction-config'
 import { useAppSelector } from '../ducks/hooks'
 import { selectLanguages } from '../ducks/languages'
-import { selectLocalities } from '../ducks/localities'
 import { selectPeople } from '../ducks/people'
 import { selectPlaces } from '../ducks/places'
 import { selectOrganizations } from '../ducks/organizations'
@@ -206,7 +205,6 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
 
     const people = useAppSelector(selectPeople)
     const places = useAppSelector(selectPlaces)
-    const localities = useAppSelector(selectLocalities)
     const languages = useAppSelector(selectLanguages)
     const organizations = useAppSelector(selectOrganizations)
     const tagVocabularies = useAppSelector(selectTagVocabularies)
@@ -294,25 +292,6 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
           folder: referenceFolders.Organisations,
         }
       },
-    )
-
-    const localitiesOptions: VocabOption[] = localities.map((locality) => {
-      const id = locality['@id']
-      const name = String(locality.name ?? '').trim()
-      const latitude = locality['.latitude']
-      const longitude = locality['.longitude']
-      const coordinateLabel =
-        latitude && longitude ? ` (${latitude}, ${longitude})` : ''
-      const label = name ? `${name} (${id})` : `${id}${coordinateLabel}`
-      return {
-        value: id,
-        label,
-        searchText:
-          `${name} ${id} ${latitude} ${longitude} ${locality.asWKT}`.toLowerCase(),
-      }
-    })
-    const localitiesOptionIds = new Set(
-      localitiesOptions.map((option) => option.value),
     )
 
     const isHiddenField = (fieldName: string): boolean => {
@@ -472,7 +451,6 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
           source !== 'People' &&
           source !== 'Languages' &&
           source !== 'Places' &&
-          source !== 'Localities' &&
           source !== 'Tags'
         ) {
           continue
@@ -519,19 +497,6 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
           for (const id of ids) {
             if (!placesOptionIds.has(id)) {
               return `✗ ${field} must be selected from Places`
-            }
-          }
-          continue
-        }
-
-        if (source === 'Localities') {
-          const ids = isMultiSelectField(field)
-            ? selectedValue.split(/,\s*/).filter(Boolean)
-            : [selectedValue]
-
-          for (const id of ids) {
-            if (!localitiesOptionIds.has(id)) {
-              return `✗ ${field} must be selected from Localities`
             }
           }
           continue
@@ -669,7 +634,6 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                   getControlledVocabularyForField(fieldName)
                 const isPeopleControlled = vocabularySource === 'People'
                 const isPlacesControlled = vocabularySource === 'Places'
-                const isLocalitiesControlled = vocabularySource === 'Localities'
                 const isLanguagesControlled = vocabularySource === 'Languages'
                 const isTagsControlled = vocabularySource === 'Tags'
                 const isOrganizationsControlled =
@@ -991,93 +955,6 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                           }),
                         }}
                       />
-                    ) : isLocalitiesControlled &&
-                      isMultiSelectField(fieldName) ? (
-                      <Select
-                        isMulti
-                        isDisabled={localitiesOptions.length === 0}
-                        options={localitiesOptions}
-                        value={currentValue
-                          .split(/,\s*/)
-                          .filter(Boolean)
-                          .map(
-                            (id) =>
-                              localitiesOptions.find(
-                                (option) => option.value === id,
-                              ) || {
-                                value: id,
-                                label: id,
-                                searchText: id,
-                              },
-                          )}
-                        onChange={(selected) => {
-                          const ids = (selected as VocabOption[]).map(
-                            (option) => option.value,
-                          )
-                          setFieldValue(fieldName, ids.join(', '))
-                        }}
-                        placeholder={
-                          localitiesOptions.length === 0
-                            ? 'Localities vocabulary unavailable'
-                            : 'Select localities…'
-                        }
-                        styles={{
-                          multiValue: (base) => ({
-                            ...base,
-                            background: 'rgba(166,43,43,0.15)',
-                          }),
-                          multiValueLabel: (base) => ({
-                            ...base,
-                            color: '#a62b2b',
-                          }),
-                          control: (base) => ({
-                            ...base,
-                            borderColor: '#a62b2b',
-                            minHeight: 34,
-                          }),
-                        }}
-                      />
-                    ) : isLocalitiesControlled ? (
-                      <>
-                        <Select
-                          isClearable
-                          isDisabled={localitiesOptions.length === 0}
-                          options={localitiesOptions}
-                          value={
-                            localitiesOptions.find(
-                              (option) => option.value === currentValue,
-                            ) ||
-                            (currentValue
-                              ? {
-                                  value: currentValue,
-                                  label: currentValue,
-                                  searchText: currentValue,
-                                }
-                              : null)
-                          }
-                          onChange={(selected) => {
-                            const option = selected as VocabOption | null
-                            setFieldValue(fieldName, option?.value ?? '')
-                          }}
-                          placeholder={
-                            localitiesOptions.length === 0
-                              ? 'Localities vocabulary unavailable'
-                              : 'Select locality…'
-                          }
-                          styles={{
-                            control: (base) => ({
-                              ...base,
-                              borderColor: '#a62b2b',
-                              minHeight: 34,
-                            }),
-                          }}
-                        />
-                        {localitiesOptions.length === 0 && (
-                          <span className="edit-field-readonly">
-                            Localities vocabulary is unavailable.
-                          </span>
-                        )}
-                      </>
                     ) : isPlacesControlled ? (
                       <>
                         <Select

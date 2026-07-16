@@ -24,7 +24,7 @@ const HELP_SITE_URL_HINT =
   'For full instructions, see the Archive Spreadsheet Guide (the page you downloaded this from).'
 
 // A folder to include in a pack: its schema key plus the workbook filename the
-// app uses for that folder (Localities is the only one that differs).
+// app uses for that folder.
 interface PackFolder {
   schemaKey: SpreadsheetType
   workbookFileName: string
@@ -33,8 +33,7 @@ interface PackFolder {
 function packFolder(schemaKey: SpreadsheetType): PackFolder {
   return {
     schemaKey,
-    workbookFileName:
-      schemaKey === 'Localities' ? 'localities.xlsx' : 'metadata.xlsx',
+    workbookFileName: 'metadata.xlsx',
   }
 }
 
@@ -50,7 +49,6 @@ const FULL_SUBFOLDERS: PackFolder[] = [
   packFolder('People'),
   packFolder('Organisations'),
   packFolder('Places'),
-  packFolder('Localities'),
   packFolder('Language'),
   packFolder('ldac:DataReuseLicense'),
 ]
@@ -101,7 +99,6 @@ function buildReadme(kind: 'simple' | 'full'): string {
     lines.push('  People/         People referred to by your items.')
     lines.push('  Organisations/  Organisations referred to by your items.')
     lines.push('  Places/         Places referred to by your items.')
-    lines.push('  Localities/     Map localities (geographic areas).')
     lines.push('  Languages/      Languages spoken in your items.')
     lines.push('  Licenses/       A license describing how files may be used.')
     lines.push('')

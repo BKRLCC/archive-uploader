@@ -75,7 +75,6 @@ const VOCAB_SHEET_LABEL: Record<ControlledVocabularySource, string> = {
   People: dataTypeLabels.Person.label,
   Languages: dataTypeLabels.Language.label,
   Places: dataTypeLabels.Place.label,
-  Localities: dataTypeLabels.Geometry.label,
   Licenses: dataTypeLabels['ldac:DataReuseLicense'].label,
   RepositoryCollection: dataTypeLabels.RepositoryCollection.label,
   Tags: dataTypeLabels.Tag.label,

@@ -11,8 +11,6 @@ import { loadLanguagesFromSpreadsheet } from '../ducks/languages-loader'
 import { setLanguages } from '../ducks/languages'
 import { loadPlacesFromSpreadsheet } from '../ducks/places-loader'
 import { setPlaces } from '../ducks/places'
-import { loadLocalitiesFromSpreadsheet } from '../ducks/localities-loader'
-import { setLocalities } from '../ducks/localities'
 import { loadTagVocabulariesFromFolder } from '../ducks/tags-loader'
 import { setTagVocabularies } from '../ducks/tags'
 import { loadLicensesFromSpreadsheet } from '../ducks/licenses-loader'
@@ -27,28 +25,19 @@ export default function HomePage() {
     setReloadBusy(true)
     setReloadFeedback('Reloading…')
     try {
-      const [
-        people,
-        organizations,
-        languages,
-        places,
-        localities,
-        vocabularies,
-        licenses,
-      ] = await Promise.all([
-        loadPeopleFromSpreadsheet(),
-        loadOrganizationsFromSpreadsheet(),
-        loadLanguagesFromSpreadsheet(),
-        loadPlacesFromSpreadsheet(),
-        loadLocalitiesFromSpreadsheet(),
-        loadTagVocabulariesFromFolder(),
-        loadLicensesFromSpreadsheet(),
-      ])
+      const [people, organizations, languages, places, vocabularies, licenses] =
+        await Promise.all([
+          loadPeopleFromSpreadsheet(),
+          loadOrganizationsFromSpreadsheet(),
+          loadLanguagesFromSpreadsheet(),
+          loadPlacesFromSpreadsheet(),
+          loadTagVocabulariesFromFolder(),
+          loadLicensesFromSpreadsheet(),
+        ])
       dispatch(setPeople(people))
       dispatch(setOrganizations(organizations))
       dispatch(setLanguages(languages))
       dispatch(setPlaces(places))
-      dispatch(setLocalities(localities))
       dispatch(setTagVocabularies(vocabularies))
       dispatch(setLicenses(licenses))
       setReloadFeedback('✓ Done')

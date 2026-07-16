@@ -112,7 +112,7 @@ export type Place = BaseItem & {
 export type Geometry = {
   '@id': string
   '@type': 'Geometry'
-  name?: string // Optional operator-friendly name for this locality geometry
+  name?: string // Optional operator-friendly name for this geometry
   description?: string
   '.latitude': string // Latitude in decimal degrees (WGS84)
   '.longitude': string // Longitude in decimal degrees (WGS84)
@@ -470,7 +470,6 @@ export type SpreadsheetType =
   | 'Organisations'
   | 'Language'
   | 'Places'
-  | 'Localities'
   | 'ldac:DataReuseLicense'
 
 export const spreadsheets: Record<SpreadsheetType, SpreadsheetSchema> = {
@@ -521,16 +520,6 @@ export const spreadsheets: Record<SpreadsheetType, SpreadsheetSchema> = {
         name: dataTypeLabels.Place.label,
         type: 'Place',
         headers: TypeColumns.Place,
-      },
-    ],
-  },
-  Localities: {
-    folderName: 'Localities',
-    tabs: [
-      {
-        name: dataTypeLabels.Geometry.label,
-        type: 'Geometry',
-        headers: TypeColumns.Geometry,
       },
     ],
   },

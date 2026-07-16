@@ -6,7 +6,6 @@ const SHEET_TYPE_MAP: Record<string, ItemDataType> = {
   Languages: 'Language',
   Tags: 'Tag',
   Places: 'Place',
-  Localities: 'Geometry',
   Licenses: 'ldac:DataReuseLicense',
 }
 

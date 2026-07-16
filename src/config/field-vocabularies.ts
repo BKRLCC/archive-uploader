@@ -2,7 +2,6 @@ export type ControlledVocabularySource =
   | 'People'
   | 'Languages'
   | 'Places'
-  | 'Localities'
   | 'Licenses'
   | 'RepositoryCollection'
   | 'Tags'
@@ -37,7 +36,6 @@ export const FIELD_VOCABULARIES: Record<string, ControlledVocabularySource> = {
   isRef_contentLocation: 'Places',
   isRef_locationCreated: 'Places',
   isRef_location: 'Places',
-  isRef_geo: 'Localities',
   isRef_sameAs: 'Licenses',
   isRef_license: 'Licenses',
   isRef_author: 'People',
@@ -56,7 +54,6 @@ export const MULTI_SELECT_FIELDS = new Set<string>([
   'isRef_contentLocation',
   'isRef_locationCreated',
   'isRef_location',
-  'isRef_geo',
   'isRef_ldac:subjectLanguage',
 ])
 

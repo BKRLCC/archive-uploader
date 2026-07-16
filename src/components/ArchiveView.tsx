@@ -21,7 +21,6 @@ import {
   selectOrganizations,
 } from '../ducks/organizations'
 import { selectPlaces } from '../ducks/places'
-import { selectLocalities } from '../ducks/localities'
 import { selectLanguages } from '../ducks/languages'
 import { loadTagVocabulariesFromFolder } from '../ducks/tags-loader'
 import { setTagVocabularies } from '../ducks/tags'
@@ -239,7 +238,6 @@ export default function ArchiveView({ xlsxPath }: Props) {
 
   const people = useAppSelector(selectPeople)
   const places = useAppSelector(selectPlaces)
-  const localities = useAppSelector(selectLocalities)
   const languages = useAppSelector(selectLanguages)
   const organizations = useAppSelector(selectOrganizations)
   const referenceLookups = useMemo(() => {
@@ -261,11 +259,10 @@ export default function ArchiveView({ xlsxPath }: Props) {
     return {
       People: build(people),
       Places: build(places),
-      Localities: build(localities),
       Languages: build(languages),
       Organization: build(organizations),
     } as Record<string, Map<string, ReferenceEntity>>
-  }, [people, places, localities, languages, organizations])
+  }, [people, places, languages, organizations])
 
   // Referenced entities are global metadata stored under fixed root subfolders;
   // their depiction/thumbnail paths are relative to those folders, not the archive.
@@ -274,7 +271,6 @@ export default function ArchiveView({ xlsxPath }: Props) {
     return {
       People: base ? `${base}/People` : null,
       Places: base ? `${base}/Places` : null,
-      Localities: base ? `${base}/Localities` : null,
       Languages: base ? `${base}/Languages` : null,
       Organization: base ? `${base}/Organisations` : null,
     }
