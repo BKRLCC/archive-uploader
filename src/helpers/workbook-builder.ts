@@ -56,7 +56,25 @@ function orderHeaders(headers: string[]): string[] {
   const claimed = new Set(grouped)
   const leftovers = rest.filter((h) => !claimed.has(h))
 
-  return [...pinned, ...grouped, ...leftovers]
+  const ordered = [...pinned, ...grouped, ...leftovers]
+
+  // Keep the human-readable approximate date beside its exact date. It is not in
+  // any field group (the edit form shows it inline under Date created), so it
+  // would otherwise land among the ungrouped leftovers at the end of the sheet.
+  return moveAfter(ordered, 'dateCreatedApproximate', 'dateCreated')
+}
+
+// Moves `field` to sit immediately after `anchor` in the list, if both are
+// present. Returns the list unchanged otherwise.
+function moveAfter(fields: string[], field: string, anchor: string): string[] {
+  const fieldIndex = fields.indexOf(field)
+  const anchorIndex = fields.indexOf(anchor)
+  if (fieldIndex < 0 || anchorIndex < 0) return fields
+
+  const without = fields.filter((_, index) => index !== fieldIndex)
+  const insertAt = without.indexOf(anchor) + 1
+  without.splice(insertAt, 0, field)
+  return without
 }
 
 // Computes sensible column widths (in characters) for a sheet by auto-fitting

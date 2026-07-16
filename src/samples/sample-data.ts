@@ -48,7 +48,8 @@ function monaLisaObject(): RepositoryObject {
     name: 'Mona Lisa',
     description:
       'Example item — a portrait painted by Leonardo da Vinci, held at the Louvre. Replace this row with one of your own items.',
-    dateCreated: 'c. 1503–1519',
+    dateCreated: '1503-01-01',
+    dateCreatedApproximate: 'c. 1503–1519',
     isRef_creator: 'leonardo-da-vinci',
     isRef_mentions: 'lisa-del-giocondo',
     isRef_holdingOrganisation: 'musee-du-louvre',
