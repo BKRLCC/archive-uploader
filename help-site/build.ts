@@ -40,6 +40,7 @@ const HELP_DIR = __dirname
 const OUT_DIR = join(HELP_DIR, 'out')
 const FONTS_SRC_DIR = join(HELP_DIR, '..', 'src', 'fonts')
 const FAVICON_SRC = join(HELP_DIR, 'assets', 'images', 'favicon.ico')
+const HOME_SRC = join(HELP_DIR, 'home.html')
 const PLACEHOLDER = '<!--FIELD_REFERENCE-->'
 
 // Brand fonts copied into the output so the public site matches the app.
@@ -199,13 +200,13 @@ function buildReference(): string {
 }
 
 async function main(): Promise<void> {
-  const templatePath = join(HELP_DIR, 'template.html')
+  const templatePath = join(HELP_DIR, 'guide.html')
   const stylesPath = join(HELP_DIR, 'styles.css')
 
   const template = readFileSync(templatePath, 'utf8')
   if (!template.includes(PLACEHOLDER)) {
     throw new Error(
-      `template.html is missing the ${PLACEHOLDER} placeholder — cannot inject the field reference.`,
+      `guide.html is missing the ${PLACEHOLDER} placeholder — cannot inject the field reference.`,
     )
   }
 
@@ -213,7 +214,10 @@ async function main(): Promise<void> {
 
   rmSync(OUT_DIR, { recursive: true, force: true })
   mkdirSync(OUT_DIR, { recursive: true })
-  writeFileSync(join(OUT_DIR, 'index.html'), html, 'utf8')
+  copyFileSync(HOME_SRC, join(OUT_DIR, 'index.html'))
+  const guideDir = join(OUT_DIR, 'guide')
+  mkdirSync(guideDir, { recursive: true })
+  writeFileSync(join(guideDir, 'index.html'), html, 'utf8')
   copyFileSync(stylesPath, join(OUT_DIR, 'styles.css'))
   copyFileSync(FAVICON_SRC, join(OUT_DIR, 'favicon.ico'))
 
@@ -225,7 +229,7 @@ async function main(): Promise<void> {
 
   const count = [...MAIN_ENTITY_ORDER, ...ADVANCED_ENTITY_ORDER].length
   console.log(
-    `Help site built: ${count} sheets -> ${join(OUT_DIR, 'index.html')}`,
+    `Help site built: ${count} sheets -> ${join(guideDir, 'index.html')}`,
   )
 
   await buildContributions(OUT_DIR, HELP_DIR)
