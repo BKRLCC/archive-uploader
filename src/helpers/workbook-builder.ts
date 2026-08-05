@@ -1,7 +1,10 @@
 import * as XLSX from 'xlsx'
 
 import { groupRenderedFields } from '../config/field-groups'
-import { getSampleEntitiesForType } from '../samples/sample-data'
+import {
+  getSampleEntitiesForType,
+  resolveSampleReferencesToNames,
+} from '../samples/sample-data'
 import {
   getEntityFieldModel,
   resolveEditableEntityType,
@@ -119,9 +122,20 @@ export function buildWorkbook(
   },
   fullHeaders = false,
   includeSamples = false,
+  referencesAsNames = false,
 ): XLSX.WorkBook {
   const schema = spreadsheets[schemaKey]
   const workbook = XLSX.utils.book_new()
+
+  // In the flat simple pack (no entity sheets), rewrite reference slugs to the
+  // sample entities' display names so the RootDataset reads sensibly. URLs and
+  // unknown ids (e.g. isRef_license) pass through unchanged.
+  const ref = (value: string | undefined): string => {
+    const resolved = value ?? ''
+    return referencesAsNames
+      ? resolveSampleReferencesToNames(resolved)
+      : resolved
+  }
 
   const rootDatasetRows: string[][] = [
     ['Name', 'Value'],
@@ -130,12 +144,12 @@ export function buildWorkbook(
     ['name', meta.name],
     ['description', meta.description],
     ['identifier', meta.identifier ?? ''],
-    ['isRef_license', meta.isRef_license ?? ''],
-    ['isRef_author', meta.isRef_author ?? ''],
-    ['isRef_publisher', meta.isRef_publisher ?? ''],
+    ['isRef_license', ref(meta.isRef_license)],
+    ['isRef_author', ref(meta.isRef_author)],
+    ['isRef_publisher', ref(meta.isRef_publisher)],
     ['datePublished', meta.datePublished ?? ''],
-    ['isRef_inLanguage', meta.isRef_inLanguage ?? ''],
-    ['isRef_ldac:subjectLanguage', meta['isRef_ldac:subjectLanguage'] ?? ''],
+    ['isRef_inLanguage', ref(meta.isRef_inLanguage)],
+    ['isRef_ldac:subjectLanguage', ref(meta['isRef_ldac:subjectLanguage'])],
     ['ldac:metadataIsPublic', meta['ldac:metadataIsPublic'] ?? 'FALSE'],
   ]
   const rootDataset = XLSX.utils.aoa_to_sheet(rootDatasetRows)
@@ -152,7 +166,7 @@ export function buildWorkbook(
       permutation.map((sourceIndex) => row[sourceIndex] ?? ''),
     )
     const sampleRows = includeSamples
-      ? getSampleEntitiesForType(tab.type).map((entity) =>
+      ? getSampleEntitiesForType(tab.type, referencesAsNames).map((entity) =>
           entityToRow(entity, orderedHeaders),
         )
       : []

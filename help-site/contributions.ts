@@ -57,7 +57,10 @@ const FULL_SUBFOLDERS: PackFolder[] = [
   packFolder('ldac:DataReuseLicense'),
 ]
 
-function workbookBuffer(schemaKey: SpreadsheetType): Buffer {
+function workbookBuffer(
+  schemaKey: SpreadsheetType,
+  referencesAsNames: boolean,
+): Buffer {
   // Contribution packs include every supported column so institutions can see the
   // full range of information they can record, plus a worked Mona Lisa example.
   // Only the root workbook carries the example collection's RootDataset metadata.
@@ -65,19 +68,24 @@ function workbookBuffer(schemaKey: SpreadsheetType): Buffer {
     schemaKey === 'RepositoryObject'
       ? SAMPLE_ROOT_DATASET
       : { name: '', description: '' }
-  const workbook = buildWorkbook(schemaKey, meta, true, true)
+  const workbook = buildWorkbook(schemaKey, meta, true, true, referencesAsNames)
   return XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' }) as Buffer
 }
 
 // Adds a folder's workbook to the zip. `zipPrefix` places the workbook inside
 // another folder (used to put the full pack's main workbook under files/); it is
 // empty for the flat simple pack and for the entity sub-folders.
-function addFolderToZip(zip: JSZip, folder: PackFolder, zipPrefix = ''): void {
+function addFolderToZip(
+  zip: JSZip,
+  folder: PackFolder,
+  zipPrefix = '',
+  referencesAsNames = false,
+): void {
   const schema = spreadsheets[folder.schemaKey]
   const prefix = schema.folderName ? `${schema.folderName}/` : ''
   zip.file(
     `${zipPrefix}${prefix}${folder.workbookFileName}`,
-    workbookBuffer(folder.schemaKey),
+    workbookBuffer(folder.schemaKey, referencesAsNames),
   )
 }
 
@@ -173,8 +181,15 @@ async function buildPack(
   // them. The simple pack stays flat, with the workbook and files at the root.
   const rootPrefix = kind === 'full' ? 'files/' : ''
 
+  // The simple pack ships without the People/Organisations/Places/Languages
+  // sheets, so its reference fields have nothing to point at. Render them as
+  // readable display names instead of slugs; these need reconciling into real
+  // entities before ingest. The full pack keeps slugs (its entity sheets
+  // resolve them).
+  const referencesAsNames = kind === 'simple'
+
   // Main Resources workbook (goes inside files/ for the full pack).
-  addFolderToZip(zip, ROOT_FOLDER, rootPrefix)
+  addFolderToZip(zip, ROOT_FOLDER, rootPrefix, referencesAsNames)
 
   // Entity sub-folders (full pack) sit at the pack root, each in its own folder.
   for (const folder of folders) {

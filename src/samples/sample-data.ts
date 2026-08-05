@@ -120,23 +120,74 @@ const SAMPLE_LANGUAGES: Language[] = [
   },
 ]
 
+// Map of every sample entity's @id slug to its human-readable display name,
+// derived from the sample entities themselves so it never drifts out of sync.
+export const SAMPLE_ENTITY_NAMES: Record<string, string> = Object.fromEntries(
+  [
+    ...SAMPLE_PEOPLE,
+    ...SAMPLE_ORGANIZATIONS,
+    ...SAMPLE_PLACES,
+    ...SAMPLE_LANGUAGES,
+  ].map((entity) => [entity['@id'], entity.name]),
+)
+
+// Rewrites a reference value (a single slug or a comma-separated list) so that
+// any token matching a known sample entity @id becomes that entity's display
+// name. Tokens with no match (file paths, external URLs, unknown ids) pass
+// through unchanged. Used to make the flat "simple" pack — which ships without
+// the People/Organisations/Places/Languages sheets — readable to a human, at
+// the cost of the references no longer resolving to real entities.
+export function resolveSampleReferencesToNames(value: string): string {
+  return value
+    .split(',')
+    .map((token) => {
+      const trimmed = token.trim()
+      return SAMPLE_ENTITY_NAMES[trimmed] ?? trimmed
+    })
+    .join(', ')
+}
+
+// Applies resolveSampleReferencesToNames to every isRef_* field of an entity,
+// leaving all other fields untouched.
+function withReferencesAsNames(
+  entity: Record<string, unknown>,
+): Record<string, unknown> {
+  const result: Record<string, unknown> = { ...entity }
+  for (const [key, val] of Object.entries(result)) {
+    if (key.startsWith('isRef_') && typeof val === 'string') {
+      result[key] = resolveSampleReferencesToNames(val)
+    }
+  }
+  return result
+}
+
 // Returns the sample entities for a given sheet type, or [] for types without a
-// worked example (e.g. licences, which the schema already seeds).
+// worked example (e.g. licences, which the schema already seeds). When
+// referencesAsNames is true, isRef_* values are rewritten from slugs to display
+// names (for the flat simple pack that lacks entity sheets to reference).
 export function getSampleEntitiesForType(
   type: ItemDataType,
+  referencesAsNames = false,
 ): Array<Record<string, unknown>> {
+  let entities: Array<Record<string, unknown>>
   switch (type) {
     case 'RepositoryObject':
-      return [monaLisaObject()]
+      entities = [monaLisaObject()]
+      break
     case 'Person':
-      return SAMPLE_PEOPLE
+      entities = SAMPLE_PEOPLE
+      break
     case 'Organization':
-      return SAMPLE_ORGANIZATIONS
+      entities = SAMPLE_ORGANIZATIONS
+      break
     case 'Place':
-      return SAMPLE_PLACES
+      entities = SAMPLE_PLACES
+      break
     case 'Language':
-      return SAMPLE_LANGUAGES
+      entities = SAMPLE_LANGUAGES
+      break
     default:
-      return []
+      entities = []
   }
+  return referencesAsNames ? entities.map(withReferencesAsNames) : entities
 }
