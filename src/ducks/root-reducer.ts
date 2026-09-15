@@ -1,4 +1,5 @@
 import { combineReducers } from '@reduxjs/toolkit'
+import collectionsReducer from './collections'
 import languagesReducer from './languages'
 import licensesReducer from './licenses'
 import organizationsReducer from './organizations'
@@ -7,6 +8,7 @@ import placesReducer from './places'
 import tagsReducer from './tags'
 
 const rootReducer = combineReducers({
+  collections: collectionsReducer,
   languages: languagesReducer,
   licenses: licensesReducer,
   organizations: organizationsReducer,

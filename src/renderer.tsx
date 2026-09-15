@@ -25,6 +25,8 @@ import { setPlaces, setPlacesLoading } from './ducks/places'
 import { loadPlacesFromSpreadsheet } from './ducks/places-loader'
 import { setTagVocabularies, setTagsError, setTagsLoading } from './ducks/tags'
 import { loadTagVocabulariesFromFolder } from './ducks/tags-loader'
+import { setCollections, setCollectionsLoading } from './ducks/collections'
+import { loadRootCollectionFromSpreadsheet } from './ducks/collections-loader'
 
 let hasBootstrappedLanguages = false
 let hasBootstrappedPeople = false
@@ -32,6 +34,7 @@ let hasBootstrappedOrganizations = false
 let hasBootstrappedPlaces = false
 let hasBootstrappedTags = false
 let hasBootstrappedLicenses = false
+let hasBootstrappedCollections = false
 
 function LanguagesBootstrap() {
   const dispatch = useAppDispatch()
@@ -180,6 +183,29 @@ function LicensesBootstrap() {
   return null
 }
 
+function CollectionsBootstrap() {
+  const dispatch = useAppDispatch()
+
+  React.useEffect(() => {
+    if (hasBootstrappedCollections) return
+    hasBootstrappedCollections = true
+
+    const run = async () => {
+      dispatch(setCollectionsLoading(true))
+      try {
+        const collections = await loadRootCollectionFromSpreadsheet()
+        dispatch(setCollections(collections))
+      } finally {
+        dispatch(setCollectionsLoading(false))
+      }
+    }
+
+    void run()
+  }, [dispatch])
+
+  return null
+}
+
 function Layout() {
   return (
     <div className="app-layout">
@@ -202,6 +228,7 @@ root.render(
       <PlacesBootstrap />
       <TagsBootstrap />
       <LicensesBootstrap />
+      <CollectionsBootstrap />
       <HashRouter>
         <Routes>
           <Route element={<Layout />}>

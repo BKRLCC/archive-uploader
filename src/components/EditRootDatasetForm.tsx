@@ -6,6 +6,7 @@ import { selectLicenses } from '../ducks/licenses'
 import { selectPeople } from '../ducks/people'
 import { selectOrganizations } from '../ducks/organizations'
 import { selectLanguages } from '../ducks/languages'
+import { selectCollections } from '../ducks/collections'
 import ReferenceSelect, { type ReferenceOption } from './ReferenceSelect'
 import MultiReferenceSelect from './MultiReferenceSelect'
 import DatePicker from './DatePicker'
@@ -13,7 +14,7 @@ import DatePicker from './DatePicker'
 const EDITABLE_ROWS = [
   'name',
   'description',
-  'identifier',
+  'isRef_isPartOf',
   'isRef_license',
   'isRef_author',
   'isRef_publisher',
@@ -42,6 +43,7 @@ export default function EditRootDatasetForm({
   const people = useAppSelector(selectPeople)
   const organizations = useAppSelector(selectOrganizations)
   const languages = useAppSelector(selectLanguages)
+  const collections = useAppSelector(selectCollections)
 
   const toOptions = (
     entries: { '@id': string; name: string }[],
@@ -51,12 +53,31 @@ export default function EditRootDatasetForm({
       label: entry.name || entry['@id'],
     }))
 
+  const initialValues = Object.fromEntries(
+    sheetData.rows.map((row) => [row[0] ?? '', row[valueIndex] ?? '']),
+  )
+
+  // The collection being edited, excluded from its own "part of" options so it
+  // cannot reference itself.
+  const currentIdentifier = initialValues['identifier'] ?? ''
+  const collectionOptions: ReferenceOption[] = collections
+    .filter((collection) => collection.identifier !== currentIdentifier)
+    .map((collection) => ({
+      value: collection.identifier,
+      label: collection.name || 'Master collection',
+    }))
+
   // Reference fields rendered as single-select dropdowns, each backed by its
   // own controlled vocabulary and an "empty" message.
   const referenceFields: Record<
     string,
     { options: ReferenceOption[]; placeholder: string; emptyLabel: string }
   > = {
+    isRef_isPartOf: {
+      options: collectionOptions,
+      placeholder: 'Select a collection…',
+      emptyLabel: 'No collections available',
+    },
     isRef_license: {
       options: toOptions(licenses),
       placeholder: 'Select a license…',
@@ -92,9 +113,12 @@ export default function EditRootDatasetForm({
     },
   }
 
-  const initialValues = Object.fromEntries(
-    sheetData.rows.map((row) => [row[0] ?? '', row[valueIndex] ?? '']),
-  )
+  // Default a blank membership to the sole/first available collection (the
+  // master) so existing collections adopt it when saved.
+  const defaultedInitialValues =
+    !initialValues['isRef_isPartOf'] && collectionOptions.length > 0
+      ? { ...initialValues, isRef_isPartOf: collectionOptions[0].value }
+      : initialValues
 
   // Ensure editable fields render even if the sheet predates them.
   const displayKeys = [
@@ -104,7 +128,9 @@ export default function EditRootDatasetForm({
     ),
   ]
 
-  const [values, setValues] = useState<Record<string, string>>(initialValues)
+  const [values, setValues] = useState<Record<string, string>>(
+    defaultedInitialValues,
+  )
   const [saving, setSaving] = useState(false)
   const [feedback, setFeedback] = useState('')
 

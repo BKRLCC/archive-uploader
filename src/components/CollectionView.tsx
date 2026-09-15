@@ -190,7 +190,7 @@ interface Props {
 const VIRTUAL_ROW_HEIGHT_PX = 72
 const VIRTUAL_OVERSCAN_ROWS = 10
 
-export default function ArchiveView({ xlsxPath }: Props) {
+export default function CollectionView({ xlsxPath }: Props) {
   const dispatch = useAppDispatch()
   const [sheetNames, setSheetNames] = useState<string[]>([])
   const [activeTab, setActiveTab] = useState<string>('RootDataset')

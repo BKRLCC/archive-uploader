@@ -15,6 +15,8 @@ import { loadTagVocabulariesFromFolder } from '../ducks/tags-loader'
 import { setTagVocabularies } from '../ducks/tags'
 import { loadLicensesFromSpreadsheet } from '../ducks/licenses-loader'
 import { setLicenses } from '../ducks/licenses'
+import { loadRootCollectionFromSpreadsheet } from '../ducks/collections-loader'
+import { setCollections } from '../ducks/collections'
 
 export default function HomePage() {
   const dispatch = useAppDispatch()
@@ -25,21 +27,30 @@ export default function HomePage() {
     setReloadBusy(true)
     setReloadFeedback('Reloading…')
     try {
-      const [people, organizations, languages, places, vocabularies, licenses] =
-        await Promise.all([
-          loadPeopleFromSpreadsheet(),
-          loadOrganizationsFromSpreadsheet(),
-          loadLanguagesFromSpreadsheet(),
-          loadPlacesFromSpreadsheet(),
-          loadTagVocabulariesFromFolder(),
-          loadLicensesFromSpreadsheet(),
-        ])
+      const [
+        people,
+        organizations,
+        languages,
+        places,
+        vocabularies,
+        licenses,
+        collections,
+      ] = await Promise.all([
+        loadPeopleFromSpreadsheet(),
+        loadOrganizationsFromSpreadsheet(),
+        loadLanguagesFromSpreadsheet(),
+        loadPlacesFromSpreadsheet(),
+        loadTagVocabulariesFromFolder(),
+        loadLicensesFromSpreadsheet(),
+        loadRootCollectionFromSpreadsheet(),
+      ])
       dispatch(setPeople(people))
       dispatch(setOrganizations(organizations))
       dispatch(setLanguages(languages))
       dispatch(setPlaces(places))
       dispatch(setTagVocabularies(vocabularies))
       dispatch(setLicenses(licenses))
+      dispatch(setCollections(collections))
       setReloadFeedback('✓ Done')
     } catch {
       setReloadFeedback('✗ Failed')

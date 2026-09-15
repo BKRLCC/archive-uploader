@@ -10,7 +10,7 @@ import {
 } from 'electron'
 import path from 'node:path'
 import fs from 'node:fs'
-import { createHash } from 'node:crypto'
+import { createHash, randomUUID } from 'node:crypto'
 import * as XLSX from 'xlsx'
 import started from 'electron-squirrel-startup'
 import { spreadsheets } from './types/types'
@@ -44,6 +44,113 @@ protocol.registerSchemesAsPrivileged([
 import Store from 'electron-store'
 
 const store = new Store()
+
+// Stable, location-independent identifier (RO-Crate arcp scheme) for a crate
+// with no registered PID.
+function newArcpIdentifier(): string {
+  return `arcp://uuid,${randomUUID()}/`
+}
+
+// Folder names reserved for archive-wide entity vocabularies, so they are never
+// treated as content collections.
+function reservedFolderNames(): Set<string> {
+  const names = new Set<string>()
+  for (const schema of Object.values(spreadsheets)) {
+    if (schema.folderName) names.add(schema.folderName)
+  }
+  names.add('Tags')
+  return names
+}
+
+// True when folderPath is a content collection under the archive root (not the
+// root itself and not an entity-vocabulary folder). Folder depth is irrelevant:
+// every such collection is a direct child of the root, keeping membership flat.
+function isChildCollectionFolder(
+  folderPath: string,
+  rootFolder: string,
+): boolean {
+  const resolvedRoot = path.resolve(rootFolder)
+  const resolved = path.resolve(folderPath)
+  if (resolved === resolvedRoot) return false
+  const relative = path.relative(resolvedRoot, resolved)
+  if (!relative || relative.startsWith('..') || path.isAbsolute(relative)) {
+    return false
+  }
+  const topSegment = relative.split(path.sep)[0]
+  return !reservedFolderNames().has(topSegment)
+}
+
+async function readRootDatasetValue(
+  xlsxPath: string,
+  key: string,
+): Promise<string> {
+  const buf = await fs.promises.readFile(xlsxPath)
+  const workbook = XLSX.read(buf)
+  const actualName = workbook.SheetNames.find(
+    (n) => n.toLowerCase() === 'rootdataset',
+  )
+  if (!actualName) return ''
+  const rows: string[][] = XLSX.utils.sheet_to_json(
+    workbook.Sheets[actualName],
+    { header: 1, defval: '' },
+  )
+  const match = rows.find((row) => String(row[0] ?? '') === key)
+  return match ? String(match[1] ?? '') : ''
+}
+
+async function setRootDatasetValue(
+  xlsxPath: string,
+  key: string,
+  value: string,
+): Promise<void> {
+  const buf = await fs.promises.readFile(xlsxPath)
+  const workbook = XLSX.read(buf)
+  const actualName = workbook.SheetNames.find(
+    (n) => n.toLowerCase() === 'rootdataset',
+  )
+  if (!actualName) throw new Error('No RootDataset sheet found')
+  const rows: string[][] = XLSX.utils.sheet_to_json(
+    workbook.Sheets[actualName],
+    { header: 1, defval: '' },
+  )
+  const existing = rows.find((row) => String(row[0] ?? '') === key)
+  if (existing) {
+    existing[1] = value
+  } else {
+    rows.push([key, value])
+  }
+  workbook.Sheets[actualName] = XLSX.utils.aoa_to_sheet(rows)
+  await fs.promises.writeFile(
+    xlsxPath,
+    XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' }),
+  )
+}
+
+// Guarantees the archive root has a top-level collection carrying a stable
+// identifier, returning it. Scaffolds a blank collection when none exists and
+// backfills a missing identifier onto an existing one; never overwrites other
+// fields.
+async function ensureTopLevelCollection(rootFolder: string): Promise<string> {
+  const rootMetaPath = path.join(rootFolder, 'metadata.xlsx')
+  if (!fs.existsSync(rootMetaPath)) {
+    const identifier = newArcpIdentifier()
+    const workbook = buildWorkbook('RepositoryObject', {
+      name: '',
+      description: '',
+      identifier,
+    })
+    await fs.promises.writeFile(
+      rootMetaPath,
+      XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' }),
+    )
+    return identifier
+  }
+  const existing = await readRootDatasetValue(rootMetaPath, 'identifier')
+  if (existing.trim()) return existing
+  const identifier = newArcpIdentifier()
+  await setRootDatasetValue(rootMetaPath, 'identifier', identifier)
+  return identifier
+}
 
 // Load local env files in development so runtime-only keys (e.g. MAPBOX_ACCESS_TOKEN)
 // are available to the Electron main process.
@@ -591,12 +698,25 @@ ipcMain.handle(
       'ldac:metadataIsPublic'?: string
     },
   ) => {
+    const identifier = meta.identifier?.trim()
+      ? meta.identifier
+      : newArcpIdentifier()
+    const rootFolder = store.get('rootFolder', null) as string | null
+    const isChild = rootFolder
+      ? isChildCollectionFolder(folderPath, rootFolder)
+      : false
+    const isPartOf =
+      isChild && rootFolder ? await ensureTopLevelCollection(rootFolder) : ''
     const xlsxPath = folderPath + '/metadata.xlsx'
-    const workbook = buildWorkbook('RepositoryObject', meta)
+    const workbook = buildWorkbook('RepositoryObject', { ...meta, identifier })
     await fs.promises.writeFile(
       xlsxPath,
       XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' }),
     )
+    // Child collections carry a system-managed link to the top-level collection.
+    if (isPartOf) {
+      await setRootDatasetValue(xlsxPath, 'isRef_isPartOf', isPartOf)
+    }
     return { path: xlsxPath }
   },
 )
@@ -779,8 +899,14 @@ ipcMain.handle(
   },
 )
 
-ipcMain.handle('get-root-folder', () => {
-  return store.get('rootFolder', null)
+ipcMain.handle('get-root-folder', async () => {
+  const rootFolder = store.get('rootFolder', null) as string | null
+  // Guarantee a top-level collection for archives whose root was set in a
+  // previous session (set/choose-root-folder only fire on active selection).
+  if (rootFolder) {
+    await ensureTopLevelCollection(rootFolder)
+  }
+  return rootFolder
 })
 
 ipcMain.handle('choose-root-folder', async (event) => {
@@ -792,11 +918,13 @@ ipcMain.handle('choose-root-folder', async (event) => {
   })
   if (canceled || filePaths.length === 0) return null
   store.set('rootFolder', filePaths[0])
+  await ensureTopLevelCollection(filePaths[0])
   return filePaths[0]
 })
 
-ipcMain.handle('set-root-folder', (_, folderPath: string) => {
+ipcMain.handle('set-root-folder', async (_, folderPath: string) => {
   store.set('rootFolder', folderPath)
+  await ensureTopLevelCollection(folderPath)
   return folderPath
 })
 

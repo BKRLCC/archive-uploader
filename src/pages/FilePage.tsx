@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import ArchiveView from '../components/ArchiveView'
+import CollectionView from '../components/CollectionView'
 import type { FileInfo } from '../api'
 import {
   isArchiveEditableWorkbookPath,
@@ -37,7 +37,7 @@ export default function FilePage() {
   }
 
   if (isArchiveEditable) {
-    return <ArchiveView key={filePath} xlsxPath={filePath} />
+    return <CollectionView key={filePath} xlsxPath={filePath} />
   }
 
   const name = filePath.split(/[/\\]/).pop() ?? filePath

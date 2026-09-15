@@ -92,6 +92,13 @@ export type License = BaseItem & {
   isRef_isPartOf?: string
 }
 
+// Lightweight reference to a collection, used to populate the "part of"
+// dropdown. `identifier` is the stable value stored in isRef_isPartOf.
+export type CollectionSummary = {
+  identifier: string
+  name: string
+}
+
 // A collection described by a metadata.xlsx RootDataset tab.
 export type RepositoryCollection = BaseItem & {
   identifier?: string // Persistent, managed unique ID in URL format (e.g. a DOI) for the collection (schema:identifier)

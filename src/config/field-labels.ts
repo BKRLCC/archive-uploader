@@ -28,7 +28,7 @@ const FIELD_LABELS: Record<string, string> = {
   'ldac:metadataIsPublic': '🌐 Public Metadata',
   isRef_hasPart: '📎 Files',
   isRef_sameAs: '🔗 Alternative license location',
-  isRef_isPartOf: '🗂️ Collection',
+  isRef_isPartOf: '🗂️ Part of Collection',
   isRef_license: '📜 License',
   isRef_author: '👤 Author',
   isRef_publisher: '🏛️ Publisher',
