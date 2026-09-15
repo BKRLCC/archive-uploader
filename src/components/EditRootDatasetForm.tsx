@@ -10,10 +10,13 @@ import { selectCollections } from '../ducks/collections'
 import ReferenceSelect, { type ReferenceOption } from './ReferenceSelect'
 import MultiReferenceSelect from './MultiReferenceSelect'
 import DatePicker from './DatePicker'
+import GeneratableTextField from './GeneratableTextField'
+import { newArcpIdentifier } from '../helpers/identifiers'
 
 const EDITABLE_ROWS = [
   'name',
   'description',
+  'identifier',
   'isRef_isPartOf',
   'isRef_license',
   'isRef_author',
@@ -213,6 +216,17 @@ export default function EditRootDatasetForm({
                   onChange={(e) =>
                     setValues((prev) => ({ ...prev, [key]: e.target.value }))
                   }
+                />
+              ) : key === 'identifier' ? (
+                <GeneratableTextField
+                  value={values[key] ?? ''}
+                  onChange={(value) =>
+                    setValues((prev) => ({ ...prev, [key]: value }))
+                  }
+                  onGenerate={newArcpIdentifier}
+                  lockWhenSet
+                  placeholder="Paste a DOI/URL, or generate an arcp id"
+                  buttonTitle="Generate an arcp identifier"
                 />
               ) : (
                 <input

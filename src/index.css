@@ -727,6 +727,28 @@ textarea {
   resize: vertical;
 }
 
+.generatable-field {
+  display: flex;
+  gap: 0.4em;
+  align-items: center;
+}
+
+.generatable-field input {
+  flex: 1;
+}
+
+.generatable-field-button {
+  flex: none;
+  cursor: pointer;
+  padding: 0.2em 0.4em;
+  line-height: 1;
+}
+
+.generatable-field-locked {
+  color: #aaa;
+  cursor: default;
+}
+
 .depiction-actions {
   margin-top: 0.4em;
   display: flex;
