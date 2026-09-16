@@ -125,7 +125,9 @@ export default function EditRootDatasetForm({
 
   // Ensure editable fields render even if the sheet predates them.
   const displayKeys = [
-    ...sheetData.rows.map((row) => row[0] ?? ''),
+    ...sheetData.rows
+      .map((row) => row[0] ?? '')
+      .filter((key) => key.trim() !== ''),
     ...EDITABLE_ROWS.filter(
       (key) => !sheetData.rows.some((row) => (row[0] ?? '') === key),
     ),

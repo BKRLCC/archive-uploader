@@ -442,6 +442,10 @@ function trimTrailingEmptyRows(rows: string[][]): string[][] {
   return rows.slice(0, lastNonEmptyRowIndex + 1)
 }
 
+function isEmptyRow(row: string[]): boolean {
+  return !(row ?? []).some((cell) => String(cell ?? '').trim() !== '')
+}
+
 // ── IPC handlers ─────────────────────────────────────────────────────────────
 
 ipcMain.handle('list-folder', async (_event, folderPath: string) => {
@@ -806,10 +810,13 @@ ipcMain.handle(
     )
     if (!actualName) throw new Error('No RootDataset sheet found')
     const sheet = workbook.Sheets[actualName]
-    const rows: string[][] = XLSX.utils.sheet_to_json(sheet, {
+    const rawRows: string[][] = XLSX.utils.sheet_to_json(sheet, {
       header: 1,
       defval: '',
     })
+    // Drop fully-empty rows so appended fields never land after a blank gap
+    // (external editors can pad the sheet's range with blank rows).
+    const rows = rawRows.filter((row) => !isEmptyRow(row))
     for (const row of rows) {
       const key = String(row[0] ?? '')
       if (Object.prototype.hasOwnProperty.call(updates, key)) {
