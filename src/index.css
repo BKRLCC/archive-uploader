@@ -713,6 +713,10 @@ textarea {
   font-style: italic;
 }
 
+.edit-field-required {
+  color: #b00;
+}
+
 .edit-field input,
 .edit-field textarea,
 .edit-field select {

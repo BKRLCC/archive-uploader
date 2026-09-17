@@ -26,6 +26,8 @@ const EDITABLE_ROWS = [
   'isRef_ldac:subjectLanguage',
   'ldac:metadataIsPublic',
 ]
+// Required by the RO-Crate spec for the Root Data Entity.
+const REQUIRED_ROWS = ['name', 'description', 'datePublished']
 const COLLECTION_TYPE = 'RepositoryCollection'
 
 interface Props {
@@ -140,6 +142,14 @@ export default function EditRootDatasetForm({
   const [feedback, setFeedback] = useState('')
 
   async function handleSave() {
+    const missing = REQUIRED_ROWS.filter((key) => !(values[key] ?? '').trim())
+    if (missing.length > 0) {
+      const labels = missing.map((key) =>
+        getFieldDisplayLabel(key, COLLECTION_TYPE),
+      )
+      setFeedback(`✗ Required: ${labels.join(', ')}`)
+      return
+    }
     setSaving(true)
     setFeedback('Saving…')
     const updates: Record<string, string> = {}
@@ -168,6 +178,12 @@ export default function EditRootDatasetForm({
             <label key={key} className="edit-field">
               <span className="edit-field-key">
                 {getFieldDisplayLabel(key, COLLECTION_TYPE)}
+                {REQUIRED_ROWS.includes(key) && (
+                  <span className="edit-field-required" title="Required">
+                    {' '}
+                    *
+                  </span>
+                )}
               </span>
               {!isEditable ? (
                 <span className="edit-field-readonly">
