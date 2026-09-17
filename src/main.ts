@@ -816,19 +816,37 @@ ipcMain.handle(
     })
     // Drop fully-empty rows so appended fields never land after a blank gap
     // (external editors can pad the sheet's range with blank rows).
-    const rows = rawRows.filter((row) => !isEmptyRow(row))
-    for (const row of rows) {
+    const filtered = rawRows.filter((row) => !isEmptyRow(row))
+    // isRef_ values serialise as one row per @id (ro-crate-excel reads repeats
+    // as multiple refs); other fields stay a single row.
+    const expandRows = (key: string, value: string): string[][] => {
+      if (!key.startsWith('isRef_')) return [[key, value]]
+      const ids = value
+        .split(',')
+        .map((id) => id.trim())
+        .filter(Boolean)
+      return ids.length > 0 ? ids.map((id) => [key, id]) : [[key, '']]
+    }
+    const emitted = new Set<string>()
+    const rows: string[][] = []
+    for (const row of filtered) {
       const key = String(row[0] ?? '')
       if (Object.prototype.hasOwnProperty.call(updates, key)) {
-        row[1] = updates[key]
+        // Replace the whole key at its first row; drop later duplicate rows.
+        if (!emitted.has(key)) {
+          rows.push(...expandRows(key, updates[key]))
+          emitted.add(key)
+        }
+      } else {
+        rows.push(row)
       }
     }
     // Append any update keys that don't yet have a row (e.g. older archives
     // created before a field like isRef_license existed).
-    const existingKeys = new Set(rows.map((row) => String(row[0] ?? '')))
     for (const [key, value] of Object.entries(updates)) {
-      if (!existingKeys.has(key)) {
-        rows.push([key, value])
+      if (!emitted.has(key)) {
+        rows.push(...expandRows(key, value))
+        emitted.add(key)
       }
     }
     workbook.Sheets[actualName] = XLSX.utils.aoa_to_sheet(rows)

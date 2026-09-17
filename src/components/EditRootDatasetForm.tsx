@@ -58,8 +58,23 @@ export default function EditRootDatasetForm({
       label: entry.name || entry['@id'],
     }))
 
-  const initialValues = Object.fromEntries(
-    sheetData.rows.map((row) => [row[0] ?? '', row[valueIndex] ?? '']),
+  // isRef_ fields serialise as one row per @id; aggregate repeated rows into a
+  // single comma-joined value for the multi-select. Other keys take the last row.
+  const initialValues = sheetData.rows.reduce<Record<string, string>>(
+    (acc, row) => {
+      const key = row[0] ?? ''
+      const value = row[valueIndex] ?? ''
+      if (key.startsWith('isRef_')) {
+        const ids = acc[key] ? acc[key].split(',') : []
+        const trimmed = value.trim()
+        if (trimmed && !ids.includes(trimmed)) ids.push(trimmed)
+        acc[key] = ids.join(',')
+      } else {
+        acc[key] = value
+      }
+      return acc
+    },
+    {},
   )
 
   // The collection being edited, excluded from its own "part of" options so it
@@ -125,11 +140,14 @@ export default function EditRootDatasetForm({
       ? { ...initialValues, isRef_isPartOf: collectionOptions[0].value }
       : initialValues
 
-  // Ensure editable fields render even if the sheet predates them.
+  // Ensure editable fields render even if the sheet predates them. Dedupe keys
+  // since isRef_ fields appear on multiple rows (one per @id).
   const displayKeys = [
-    ...sheetData.rows
-      .map((row) => row[0] ?? '')
-      .filter((key) => key.trim() !== ''),
+    ...new Set(
+      sheetData.rows
+        .map((row) => row[0] ?? '')
+        .filter((key) => key.trim() !== ''),
+    ),
     ...EDITABLE_ROWS.filter(
       (key) => !sheetData.rows.some((row) => (row[0] ?? '') === key),
     ),
