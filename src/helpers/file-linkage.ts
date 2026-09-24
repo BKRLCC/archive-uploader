@@ -26,20 +26,13 @@ export function parseHasPartPaths(rawValue: string): string[] {
   return Array.from(unique)
 }
 
-function buildBaseFileId(relativePath: string): string {
-  const normalized = normalizeRelativePath(relativePath)
-  const slug = normalized
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '')
-  return `#File_${slug || 'path'}`
-}
-
+// The File @id is the collection-relative path, matching the value objects carry
+// in isRef_hasPart, so ro-crate-excel can resolve object → file links.
 export function deriveFileRowsFromItems(
   rows: Array<{ itemId: string; hasPart: string }>,
 ): DerivedFileRow[] {
-  const derived: DerivedFileRow[] = []
-  const idCounts = new Map<string, number>()
+  const byPath = new Map<string, DerivedFileRow>()
+  const order: string[] = []
 
   for (const row of rows) {
     const itemId = String(row.itemId ?? '').trim()
@@ -54,20 +47,30 @@ export function deriveFileRowsFromItems(
       if (!filename) continue
       const folder = parts.length > 1 ? parts.slice(0, -1).join('/') : '.'
 
-      const baseId = buildBaseFileId(relativePath)
-      const seen = idCounts.get(baseId) ?? 0
-      idCounts.set(baseId, seen + 1)
-      const fileId = seen === 0 ? baseId : `${baseId}_${seen + 1}`
+      const existing = byPath.get(relativePath)
+      if (existing) {
+        // A file shared by several objects keeps one row with all owners listed.
+        const owners = new Set(
+          existing.isRef_isPartOf
+            .split(',')
+            .map((id) => id.trim())
+            .filter(Boolean),
+        )
+        owners.add(itemId)
+        existing.isRef_isPartOf = Array.from(owners).join(', ')
+        continue
+      }
 
-      derived.push({
-        '@id': fileId,
+      byPath.set(relativePath, {
+        '@id': relativePath,
         '@type': 'File',
         '.folder': folder,
         '.filename': filename,
         isRef_isPartOf: itemId,
       })
+      order.push(relativePath)
     }
   }
 
-  return derived
+  return order.map((path) => byPath.get(path) as DerivedFileRow)
 }
