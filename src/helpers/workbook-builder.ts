@@ -9,6 +9,7 @@ import {
   getEntityFieldModel,
   resolveEditableEntityType,
   spreadsheets,
+  TypeColumns,
   type SpreadsheetTab,
   type SpreadsheetType,
 } from '../types/types'
@@ -180,6 +181,15 @@ export function buildWorkbook(
     const sheet = XLSX.utils.aoa_to_sheet(extra.rows)
     sheet['!cols'] = columnWidths(extra.rows)
     XLSX.utils.book_append_sheet(workbook, sheet, extra.name)
+  }
+
+  // Content collections carry a Files sheet of RO-Crate File entities derived
+  // from item hasPart linkages. Created empty here; populated at upload time.
+  if (schemaKey === 'RepositoryObject') {
+    const filesHeaders = [...TypeColumns.File] as string[]
+    const filesSheet = XLSX.utils.aoa_to_sheet([filesHeaders])
+    filesSheet['!cols'] = columnWidths([filesHeaders])
+    XLSX.utils.book_append_sheet(workbook, filesSheet, 'Files')
   }
 
   return workbook

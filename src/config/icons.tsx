@@ -17,4 +17,5 @@ export const UiIcons = {
   info: 'ℹ️',
   camera: '📷',
   search: '🔍',
+  upload: '📤',
 }

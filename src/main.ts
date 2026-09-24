@@ -13,7 +13,7 @@ import fs from 'node:fs'
 import { createHash, randomUUID } from 'node:crypto'
 import * as XLSX from 'xlsx'
 import started from 'electron-squirrel-startup'
-import { spreadsheets } from './types/types'
+import { spreadsheets, TypeColumns } from './types/types'
 import { buildWorkbook } from './helpers/workbook-builder'
 import { deriveFileRowsFromItems } from './helpers/file-linkage'
 import { deriveWKTFromRawCoordinates } from './helpers/geometry-utils'
@@ -646,43 +646,157 @@ ipcMain.handle(
   },
 )
 
-ipcMain.handle(
-  'populate-files-tab',
-  async (_event, folder: string, rootFolder: string) => {
-    const dirents = await fs.promises.readdir(folder, { withFileTypes: true })
-    const files = dirents.filter(
-      (d) =>
-        !d.isDirectory() && !d.name.startsWith('.') && !d.name.startsWith('~$'),
-    )
-    const fileRows = await Promise.all(
-      files.map(async (d) => {
-        const filePath = path.join(folder, d.name)
-        const stat = await fs.promises.stat(filePath)
-        const rel = filePath.slice(rootFolder.length).replace(/^[\\/]/, '')
-        return [d.name, rel, stat.size, stat.mtime.toISOString()]
-      }),
-    )
-    const sheetData = [['Filename', 'Path', 'Size', 'Modified'], ...fileRows]
-    let workbook: XLSX.WorkBook
-    try {
-      const buf = await fs.promises.readFile(folder + '/metadata.xlsx')
-      workbook = XLSX.read(buf)
-    } catch {
-      workbook = XLSX.utils.book_new()
+const FILES_SHEET_NAME = 'Files'
+
+// Locates the content sheet describing items (has both @id and isRef_hasPart),
+// from which File rows are derived. Skips RootDataset/@context/Files.
+function findItemsSheetName(workbook: XLSX.WorkBook): string | null {
+  for (const name of workbook.SheetNames) {
+    const lower = name.toLowerCase()
+    if (
+      lower === 'rootdataset' ||
+      lower === '@context' ||
+      lower === FILES_SHEET_NAME.toLowerCase()
+    ) {
+      continue
     }
-    const sheet = XLSX.utils.aoa_to_sheet(sheetData)
-    if (workbook.SheetNames.includes('Files')) {
-      workbook.Sheets['Files'] = sheet
-    } else {
-      XLSX.utils.book_append_sheet(workbook, sheet, 'Files')
+    const rows: string[][] = XLSX.utils.sheet_to_json(workbook.Sheets[name], {
+      header: 1,
+      defval: '',
+    })
+    const headers = (rows[0] ?? []).map((h) => String(h ?? ''))
+    if (headers.includes('@id') && headers.includes('isRef_hasPart')) {
+      return name
     }
-    await fs.promises.writeFile(
-      folder + '/metadata.xlsx',
-      XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' }),
-    )
-    return { count: files.length }
-  },
-)
+  }
+  return null
+}
+
+// Regenerates a collection's Files sheet from item hasPart linkages. Fully
+// derived: existing rows are overwritten. A workbook with no items sheet (e.g.
+// an entity-vocabulary workbook lacking an isRef_hasPart column) is not a
+// content collection, so its file is left untouched and `written` is false.
+async function reconcileFilesTab(
+  xlsxPath: string,
+): Promise<{ written: boolean; files: number }> {
+  const buf = await fs.promises.readFile(xlsxPath)
+  const workbook = XLSX.read(buf)
+
+  const itemsSheetName = findItemsSheetName(workbook)
+  if (!itemsSheetName) return { written: false, files: 0 }
+
+  const headers = [...TypeColumns.File] as string[]
+  const rows: string[][] = XLSX.utils.sheet_to_json(
+    workbook.Sheets[itemsSheetName],
+    { header: 1, defval: '' },
+  )
+  const itemHeaders = (rows[0] ?? []).map((h) => String(h ?? ''))
+  const idIndex = itemHeaders.indexOf('@id')
+  const hasPartIndex = itemHeaders.indexOf('isRef_hasPart')
+  const derived = deriveFileRowsFromItems(
+    rows.slice(1).map((row) => ({
+      itemId: String(row[idIndex] ?? ''),
+      hasPart: String(row[hasPartIndex] ?? ''),
+    })),
+  )
+  const derivedRows = derived.map((row) =>
+    headers.map((header) =>
+      String((row as Record<string, string>)[header] ?? ''),
+    ),
+  )
+
+  const filesSheet = XLSX.utils.aoa_to_sheet([headers, ...derivedRows])
+  const actualFilesName = workbook.SheetNames.find(
+    (n) => n.toLowerCase() === FILES_SHEET_NAME.toLowerCase(),
+  )
+  if (actualFilesName) {
+    workbook.Sheets[actualFilesName] = filesSheet
+  } else {
+    XLSX.utils.book_append_sheet(workbook, filesSheet, FILES_SHEET_NAME)
+  }
+
+  await fs.promises.writeFile(
+    xlsxPath,
+    XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' }),
+  )
+  return { written: true, files: derivedRows.length }
+}
+
+// Ensures a content collection carries an empty Files sheet (header row only)
+// without deriving any rows. Non-content workbooks (no isRef_hasPart items
+// sheet) and workbooks that already have a Files sheet are left untouched.
+async function ensureFilesTab(xlsxPath: string): Promise<boolean> {
+  const buf = await fs.promises.readFile(xlsxPath)
+  const workbook = XLSX.read(buf)
+
+  const alreadyPresent = workbook.SheetNames.some(
+    (n) => n.toLowerCase() === FILES_SHEET_NAME.toLowerCase(),
+  )
+  if (alreadyPresent) return false
+  if (!findItemsSheetName(workbook)) return false
+
+  const headers = [...TypeColumns.File] as string[]
+  XLSX.utils.book_append_sheet(
+    workbook,
+    XLSX.utils.aoa_to_sheet([headers]),
+    FILES_SHEET_NAME,
+  )
+  await fs.promises.writeFile(
+    xlsxPath,
+    XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' }),
+  )
+  return true
+}
+
+// Recursively collects every metadata.xlsx under a folder. A collection is any
+// folder holding a metadata.xlsx at any depth (the app browses folders freely),
+// so a flat scan is not enough. Non-content workbooks are filtered downstream by
+// reconcileFilesTab, not here.
+async function collectMetadataFiles(rootFolder: string): Promise<string[]> {
+  const found: string[] = []
+  const walk = async (dir: string): Promise<void> => {
+    const dirents = await fs.promises.readdir(dir, { withFileTypes: true })
+    for (const dirent of dirents) {
+      if (dirent.name.startsWith('.') || dirent.name.startsWith('~$')) continue
+      const entryPath = path.join(dir, dirent.name)
+      if (dirent.isDirectory()) {
+        await walk(entryPath)
+      } else if (dirent.name.toLowerCase() === 'metadata.xlsx') {
+        found.push(entryPath)
+      }
+    }
+  }
+  await walk(rootFolder)
+  return found
+}
+
+ipcMain.handle('populate-files-tab', async (_event, folder: string) => {
+  const { files } = await reconcileFilesTab(path.join(folder, 'metadata.xlsx'))
+  return { count: files }
+})
+
+ipcMain.handle('ensure-files-tab', async (_event, folder: string) => {
+  const created = await ensureFilesTab(path.join(folder, 'metadata.xlsx'))
+  return { created }
+})
+
+// Regenerates the Files sheet for every content collection under the archive
+// root. Used by the upload flow. `collections` counts only content collections
+// that received a Files sheet; entity-vocabulary workbooks self-exclude.
+ipcMain.handle('reconcile-files-tabs', async (_event, rootFolder: string) => {
+  const metadataFiles = await collectMetadataFiles(rootFolder)
+
+  let collections = 0
+  let files = 0
+  for (const xlsxPath of metadataFiles) {
+    const result = await reconcileFilesTab(xlsxPath)
+    if (result.written) {
+      collections += 1
+      files += result.files
+    }
+  }
+  return { collections, files }
+})
 
 ipcMain.handle(
   'create-archive',

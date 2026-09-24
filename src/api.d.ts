@@ -80,6 +80,10 @@ export interface Api {
     folder: string,
     rootFolder: string,
   ) => Promise<{ count: number }>
+  ensureFilesTab: (folder: string) => Promise<{ created: boolean }>
+  reconcileFilesTabs: (
+    rootFolder: string,
+  ) => Promise<{ collections: number; files: number }>
   createArchive: (
     folderPath: string,
     meta: {

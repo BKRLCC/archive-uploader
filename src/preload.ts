@@ -105,6 +105,12 @@ contextBridge.exposeInMainWorld('api', {
     rootFolder: string,
   ): Promise<{ count: number }> =>
     ipcRenderer.invoke('populate-files-tab', folder, rootFolder),
+  ensureFilesTab: (folder: string): Promise<{ created: boolean }> =>
+    ipcRenderer.invoke('ensure-files-tab', folder),
+  reconcileFilesTabs: (
+    rootFolder: string,
+  ): Promise<{ collections: number; files: number }> =>
+    ipcRenderer.invoke('reconcile-files-tabs', rootFolder),
   createArchive: (
     folderPath: string,
     meta: {

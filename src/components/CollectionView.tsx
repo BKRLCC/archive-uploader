@@ -6,6 +6,7 @@ import BulkEditDrawer from './BulkEditDrawer'
 import EditDrawer from './EditDrawer'
 import EditRootDatasetForm from './EditRootDatasetForm'
 import Drawer from './Drawer'
+import OverflowMenu from './OverflowMenu'
 import ClickableImagePreview from './ClickableImagePreview'
 import InfoButtonWithTooltip from './InfoButtonWithTooltip'
 import ReferenceCell, {
@@ -357,11 +358,17 @@ export default function CollectionView({ xlsxPath }: Props) {
 
   const loadAll = useCallback(async () => {
     const requestId = ++loadRequestRef.current
+    // Content collections carry a Files sheet; ensure its header row exists so
+    // the tab is viewable. Rows are populated on demand via "Update Files tab".
+    await window.api.ensureFilesTab(folder)
     const names = await window.api.getSheetNames(xlsxPath)
     if (requestId !== loadRequestRef.current) return
     setSheetNames(names)
     const firstVisible = names.find(
-      (n) => n !== 'RootDataset' && n.toLowerCase() !== '@context',
+      (n) =>
+        n !== 'RootDataset' &&
+        n.toLowerCase() !== '@context' &&
+        n.toLowerCase() !== 'files',
     )
     if (firstVisible) setActiveTab(firstVisible)
     const results = await Promise.all(
@@ -372,7 +379,7 @@ export default function CollectionView({ xlsxPath }: Props) {
     )
     if (requestId !== loadRequestRef.current) return
     setSheets(Object.fromEntries(results))
-  }, [xlsxPath])
+  }, [folder, xlsxPath])
 
   useEffect(() => {
     loadRequestRef.current += 1
@@ -827,6 +834,18 @@ export default function CollectionView({ xlsxPath }: Props) {
             >
               ↗️
             </button>
+            <OverflowMenu
+              items={[
+                {
+                  label: 'View Files tab',
+                  onSelect: () => {
+                    if (!confirmDiscard()) return
+                    closeDrawer()
+                    setActiveTab('Files')
+                  },
+                },
+              ]}
+            />
           </div>
         </div>
 
@@ -834,7 +853,9 @@ export default function CollectionView({ xlsxPath }: Props) {
           {sheetNames
             .filter(
               (tab) =>
-                tab !== 'RootDataset' && tab.toLowerCase() !== '@context',
+                tab !== 'RootDataset' &&
+                tab.toLowerCase() !== '@context' &&
+                tab.toLowerCase() !== 'files',
             )
             .map((tab) => (
               <button
@@ -870,7 +891,14 @@ export default function CollectionView({ xlsxPath }: Props) {
                 <span className="populate-feedback">{populateFeedback}</span>
               </div>
             </div>
-            {renderGenericTable(sheets['Files'] ?? null, 'Files tab is empty.')}
+            {renderGenericTable(
+              sheetNames.includes('Files')
+                ? (sheets['Files'] ?? null)
+                : sheetNames.length > 0
+                  ? 'empty'
+                  : null,
+              'Files tab is empty.',
+            )}
           </section>
         )}
 
