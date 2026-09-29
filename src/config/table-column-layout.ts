@@ -7,7 +7,12 @@ export interface TableColumnLayout {
   wrapMode: WrapMode
 }
 
-export const HIDDEN_TABLE_COLUMNS = ['@id', '@type', 'asWKT'] as const
+export const HIDDEN_TABLE_COLUMNS = [
+  '@id',
+  '@type',
+  'asWKT',
+  'isRef_pcdm:memberOf',
+] as const
 
 const DEFAULT_LAYOUT: TableColumnLayout = {
   widthClassName: null,

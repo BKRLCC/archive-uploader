@@ -13,10 +13,15 @@ import fs from 'node:fs'
 import { createHash, randomUUID } from 'node:crypto'
 import * as XLSX from 'xlsx'
 import started from 'electron-squirrel-startup'
-import { spreadsheets, TypeColumns } from './types/types'
+import {
+  spreadsheets,
+  TypeColumns,
+  resolveEditableEntityType,
+} from './types/types'
 import { buildWorkbook } from './helpers/workbook-builder'
 import { deriveFileRowsFromItems } from './helpers/file-linkage'
-import { deriveWKTFromRawCoordinates } from './helpers/geometry-utils'
+import { isMultiSelectField } from './config/field-vocabularies'
+import { applyFieldRules } from './config/field-rules'
 import {
   DEPICTION_IMAGE_EXTENSIONS,
   DEPICTION_FIELD_NAME,
@@ -563,27 +568,7 @@ ipcMain.handle(
       if (col !== -1) rows[dataRowIndex][col] = value
     }
 
-    const typeColumn = headers.indexOf('@type')
-    const latitudeColumn = headers.indexOf('.latitude')
-    const longitudeColumn = headers.indexOf('.longitude')
-    const wktColumn = headers.indexOf('asWKT')
-    const rowType =
-      typeColumn >= 0 ? String(rows[dataRowIndex][typeColumn] ?? '').trim() : ''
-    const isGeometryRow = rowType === 'Geometry'
-
-    if (
-      isGeometryRow &&
-      latitudeColumn >= 0 &&
-      longitudeColumn >= 0 &&
-      wktColumn >= 0
-    ) {
-      const latitudeRaw = String(rows[dataRowIndex][latitudeColumn] ?? '')
-      const longitudeRaw = String(rows[dataRowIndex][longitudeColumn] ?? '')
-      rows[dataRowIndex][wktColumn] = deriveWKTFromRawCoordinates(
-        latitudeRaw,
-        longitudeRaw,
-      )
-    }
+    applyFieldRules(headers, rows[dataRowIndex], 'update')
 
     const depictionColumn = headers.indexOf(DEPICTION_FIELD_NAME)
     if (depictionColumn >= 0) {
@@ -648,6 +633,42 @@ ipcMain.handle(
 
 const FILES_SHEET_NAME = 'Files'
 
+// Every RepositoryObject must declare membership in its collection root for the
+// RO-Crate converter; the column is hidden from the UI and enforced at upload.
+const MEMBER_OF_COLUMN = 'isRef_pcdm:memberOf'
+const MEMBER_OF_VALUE = './'
+
+// Ensures the items sheet carries the isRef_pcdm:memberOf column and fills "./"
+// for each RepositoryObject row (blank cells only). Mutates `rows` in place and
+// returns true if anything changed.
+function ensureMemberOfColumn(rows: string[][]): boolean {
+  const headers = (rows[0] ?? []).map((h) => String(h ?? ''))
+  const typeIndex = headers.indexOf('@type')
+  let changed = false
+
+  let memberIndex = headers.indexOf(MEMBER_OF_COLUMN)
+  if (memberIndex < 0) {
+    headers.push(MEMBER_OF_COLUMN)
+    rows[0] = headers
+    memberIndex = headers.length - 1
+    changed = true
+  }
+
+  for (let i = 1; i < rows.length; i += 1) {
+    const row = rows[i]
+    if (!row || row.every((cell) => String(cell ?? '').trim() === '')) continue
+    const rowType = typeIndex >= 0 ? String(row[typeIndex] ?? '') : ''
+    if (resolveEditableEntityType(rowType) !== 'RepositoryObject') continue
+    while (row.length <= memberIndex) row.push('')
+    if (String(row[memberIndex] ?? '').trim() === '') {
+      row[memberIndex] = MEMBER_OF_VALUE
+      changed = true
+    }
+  }
+
+  return changed
+}
+
 // Locates the content sheet describing items (has both @id and isRef_hasPart),
 // from which File rows are derived. Skips RootDataset/@context/Files.
 function findItemsSheetName(workbook: XLSX.WorkBook): string | null {
@@ -704,6 +725,13 @@ async function reconcileFilesTab(
       String((row as Record<string, string>)[header] ?? ''),
     ),
   )
+
+  // Enforce the collection-membership invariant on the source items sheet too.
+  if (ensureMemberOfColumn(rows)) {
+    workbook.Sheets[itemsSheetName] = XLSX.utils.aoa_to_sheet(
+      trimTrailingEmptyRows(rows),
+    )
+  }
 
   const filesSheet = XLSX.utils.aoa_to_sheet([headers, ...derivedRows])
   const actualFilesName = workbook.SheetNames.find(
@@ -872,24 +900,7 @@ ipcMain.handle(
     }
     const newRow = headers.map((h) => values[h] ?? '')
 
-    const typeColumn = headers.indexOf('@type')
-    const latitudeColumn = headers.indexOf('.latitude')
-    const longitudeColumn = headers.indexOf('.longitude')
-    const wktColumn = headers.indexOf('asWKT')
-    const rowType =
-      typeColumn >= 0 ? String(newRow[typeColumn] ?? '').trim() : ''
-    const isGeometryRow = rowType === 'Geometry'
-
-    if (
-      isGeometryRow &&
-      latitudeColumn >= 0 &&
-      longitudeColumn >= 0 &&
-      wktColumn >= 0
-    ) {
-      const latitudeRaw = String(newRow[latitudeColumn] ?? '')
-      const longitudeRaw = String(newRow[longitudeColumn] ?? '')
-      newRow[wktColumn] = deriveWKTFromRawCoordinates(latitudeRaw, longitudeRaw)
-    }
+    applyFieldRules(headers, newRow, 'create')
 
     const depictionColumn = headers.indexOf(DEPICTION_FIELD_NAME)
     if (depictionColumn >= 0) {
@@ -932,9 +943,10 @@ ipcMain.handle(
     // (external editors can pad the sheet's range with blank rows).
     const filtered = rawRows.filter((row) => !isEmptyRow(row))
     // isRef_ values serialise as one row per @id (ro-crate-excel reads repeats
-    // as multiple refs); other fields stay a single row.
+    // as multiple refs); only multi-select fields split on comma, so single
+    // references keep commas that are part of the id itself (e.g. arcp URIs).
     const expandRows = (key: string, value: string): string[][] => {
-      if (!key.startsWith('isRef_')) return [[key, value]]
+      if (!isMultiSelectField(key)) return [[key, value]]
       const ids = value
         .split(',')
         .map((id) => id.trim())

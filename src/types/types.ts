@@ -71,6 +71,7 @@ export type RepositoryObject = BaseItem & {
   isRef_creator?: string
   isRef_contributor?: string
   isRef_hasPart?: string
+  'isRef_pcdm:memberOf'?: string // Always "./": object is a member of its collection (pcdm:memberOf); hidden from the UI
   /**
    * People referenced or depicted in this resource (schema:mentions)
    */
@@ -379,6 +380,7 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     'isRef_contributor',
     'isRef_hasPart',
     'isRef_mentions',
+    'isRef_pcdm:memberOf',
   ],
   Language: [
     '@id',

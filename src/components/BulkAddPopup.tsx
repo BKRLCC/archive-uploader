@@ -41,10 +41,6 @@ function getFileExtension(filePath: string): string {
   return fileName.slice(dotIndex + 1).toLowerCase()
 }
 
-function getTodayIsoDate(): string {
-  return new Date().toISOString().slice(0, 10)
-}
-
 export default function BulkAddPopup({
   isOpen,
   xlsxPath,
@@ -151,12 +147,6 @@ export default function BulkAddPopup({
           '@type': 'RepositoryObject',
           name: fileStem,
           isRef_hasPart: relativePath,
-        }
-        if (!String(rowValues.dateAdded ?? '').trim()) {
-          rowValues.dateAdded = getTodayIsoDate()
-        }
-        if (!String(rowValues.isPublishable ?? '').trim()) {
-          rowValues.isPublishable = 'FALSE'
         }
 
         if (isImagePreviewExtension(getFileExtension(relativePath))) {
