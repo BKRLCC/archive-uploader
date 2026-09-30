@@ -17,7 +17,7 @@ const EDITABLE_ROWS = [
   'name',
   'description',
   'identifier',
-  'isRef_isPartOf',
+  'isRef_pcdm:memberOf',
   'isRef_license',
   'isRef_author',
   'isRef_publisher',
@@ -93,7 +93,7 @@ export default function EditRootDatasetForm({
     string,
     { options: ReferenceOption[]; placeholder: string; emptyLabel: string }
   > = {
-    isRef_isPartOf: {
+    'isRef_pcdm:memberOf': {
       options: collectionOptions,
       placeholder: 'Select a collection…',
       emptyLabel: 'No collections available',
@@ -136,8 +136,8 @@ export default function EditRootDatasetForm({
   // Default a blank membership to the sole/first available collection (the
   // master) so existing collections adopt it when saved.
   const defaultedInitialValues =
-    !initialValues['isRef_isPartOf'] && collectionOptions.length > 0
-      ? { ...initialValues, isRef_isPartOf: collectionOptions[0].value }
+    !initialValues['isRef_pcdm:memberOf'] && collectionOptions.length > 0
+      ? { ...initialValues, 'isRef_pcdm:memberOf': collectionOptions[0].value }
       : initialValues
 
   // Ensure editable fields render even if the sheet predates them. Dedupe keys

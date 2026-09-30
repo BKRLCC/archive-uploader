@@ -861,7 +861,7 @@ ipcMain.handle(
     )
     // Child collections carry a system-managed link to the top-level collection.
     if (isPartOf) {
-      await setRootDatasetValue(xlsxPath, 'isRef_isPartOf', isPartOf)
+      await setRootDatasetValue(xlsxPath, 'isRef_pcdm:memberOf', isPartOf)
     }
     return { path: xlsxPath }
   },

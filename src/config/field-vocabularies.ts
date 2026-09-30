@@ -41,6 +41,7 @@ export const FIELD_VOCABULARIES: Record<string, ControlledVocabularySource> = {
   isRef_author: 'People',
   isRef_publisher: 'Organization',
   isRef_isPartOf: 'RepositoryCollection',
+  'isRef_pcdm:memberOf': 'RepositoryCollection',
   isRef_holdingOrganisation: 'Organization',
   'isRef_ldac:subjectLanguage': 'Languages',
 }

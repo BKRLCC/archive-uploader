@@ -94,7 +94,7 @@ export type License = BaseItem & {
 }
 
 // Lightweight reference to a collection, used to populate the "part of"
-// dropdown. `identifier` is the stable value stored in isRef_isPartOf.
+// dropdown. `identifier` is the stable value stored in isRef_pcdm:memberOf.
 export type CollectionSummary = {
   identifier: string
   name: string
