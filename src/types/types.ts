@@ -473,6 +473,18 @@ export type SpreadsheetSchema = {
   extraSheets?: ExtraSheet[]
 }
 
+// Fixed RO-Crate/ro-crate-excel prefix map. Non-editable in the app (the UI
+// hides @context tabs); shipped in every workbook that gets converted to a crate.
+export const CONTEXT_SHEET: ExtraSheet = {
+  name: '@context',
+  rows: [
+    ['name', '@id'],
+    ['ldac', 'https://w3id.org/ldac/terms#'],
+    ['csvw', 'http://www.w3.org/ns/csvw#'],
+    ['custom', 'arcp://name,custom/terms#'],
+  ],
+}
+
 export type SpreadsheetType =
   | 'RepositoryObject'
   | 'People'
@@ -491,6 +503,7 @@ export const spreadsheets: Record<SpreadsheetType, SpreadsheetSchema> = {
         headers: TypeColumns.RepositoryObject,
       },
     ],
+    extraSheets: [CONTEXT_SHEET],
   },
   People: {
     folderName: 'People',
@@ -591,16 +604,6 @@ export const spreadsheets: Record<SpreadsheetType, SpreadsheetSchema> = {
         ],
       },
     ],
-    extraSheets: [
-      {
-        name: '@context',
-        rows: [
-          ['name', '@id'],
-          ['ldac', 'https://w3id.org/ldac/terms#'],
-          ['csvw', 'http://www.w3.org/ns/csvw#'],
-          ['custom', 'arcp://name,custom/terms#'],
-        ],
-      },
-    ],
+    extraSheets: [CONTEXT_SHEET],
   },
 }

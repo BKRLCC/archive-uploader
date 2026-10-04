@@ -14,6 +14,7 @@ import { createHash, randomUUID } from 'node:crypto'
 import * as XLSX from 'xlsx'
 import started from 'electron-squirrel-startup'
 import {
+  CONTEXT_SHEET,
   spreadsheets,
   TypeColumns,
   resolveEditableEntityType,
@@ -633,6 +634,22 @@ ipcMain.handle(
 
 const FILES_SHEET_NAME = 'Files'
 
+// Backfills the fixed @context prefix map onto a workbook that lacks it, so
+// archives created before @context shipped still convert with ro-crate-excel.
+// Returns true if the sheet was added.
+function ensureContextSheet(workbook: XLSX.WorkBook): boolean {
+  const present = workbook.SheetNames.some(
+    (n) => n.toLowerCase() === CONTEXT_SHEET.name.toLowerCase(),
+  )
+  if (present) return false
+  XLSX.utils.book_append_sheet(
+    workbook,
+    XLSX.utils.aoa_to_sheet(CONTEXT_SHEET.rows),
+    CONTEXT_SHEET.name,
+  )
+  return true
+}
+
 // Every RepositoryObject must declare membership in its collection root for the
 // RO-Crate converter; the column is hidden from the UI and enforced at upload.
 const MEMBER_OF_COLUMN = 'isRef_pcdm:memberOf'
@@ -742,6 +759,8 @@ async function reconcileFilesTab(
   } else {
     XLSX.utils.book_append_sheet(workbook, filesSheet, FILES_SHEET_NAME)
   }
+
+  ensureContextSheet(workbook)
 
   await fs.promises.writeFile(
     xlsxPath,
