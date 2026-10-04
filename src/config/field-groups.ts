@@ -65,7 +65,12 @@ const physicalGroup: FieldGroupDef = {
 const externalGroup: FieldGroupDef = {
   id: 'external',
   label: 'External record',
-  fields: ['sameAs', 'isRef_holdingOrganisation', 'identifier', 'provenance'],
+  fields: [
+    'sameAs',
+    'isRef_holdingOrganisation',
+    'identifier',
+    'dcterms:provenance',
+  ],
   defaultOpen: false,
 }
 

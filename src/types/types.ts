@@ -84,7 +84,7 @@ export type RepositoryObject = BaseItem & {
   isRef_holdingOrganisation?: string // Organisation that holds/owns the object
   identifier?: string // External catalogue or accession number (schema:identifier)
   sameAs?: string // External identifying URL, e.g. a museum collection page (schema:sameAs)
-  provenance?: string // History of ownership and custody (dcterms:provenance)
+  'dcterms:provenance'?: string // History of ownership and custody (dcterms:provenance)
 }
 
 export type License = BaseItem & {
@@ -196,7 +196,7 @@ export const ENTITY_FIELD_REGISTRY: {
     'isRef_holdingOrganisation',
     'identifier',
     'sameAs',
-    'provenance',
+    'dcterms:provenance',
   ]),
   Organization: defineEntityFields<Organization>()([
     '@id',
@@ -481,6 +481,8 @@ export const CONTEXT_SHEET: ExtraSheet = {
     ['name', '@id'],
     ['ldac', 'https://w3id.org/ldac/terms#'],
     ['csvw', 'http://www.w3.org/ns/csvw#'],
+    ['pcdm', 'https://pcdm.org/models#'],
+    ['dcterms', 'http://purl.org/dc/terms/'],
     ['custom', 'arcp://name,custom/terms#'],
   ],
 }

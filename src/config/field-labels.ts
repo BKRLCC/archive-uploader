@@ -1,45 +1,59 @@
 import { TAG_FIELD_PREFIX } from './field-vocabularies'
 import type { EditableEntityType } from '../types/types'
 
+// Vocabulary sourcing per field. ro-crate-excel treats a bare term as schema.org
+// by default; prefixed terms resolve through the workbook @context sheet. Tags:
+//   schema.org  — default; bare term (see URL)
+//   LDaCA       — ldac: prefix → https://w3id.org/ldac/terms#  (mapped in @context)
+//   PCDM        — pcdm: prefix → https://pcdm.org/models#       (mapped in @context)
+//   Dublin Core — dcterms: → http://purl.org/dc/terms/          (mapped in @context)
+//   custom      — our own term; would resolve via the custom: prefix in @context
+// @id/@type are JSON-LD keywords (RO-Crate core), not vocabulary terms. The
+// isRef_ prefix is an app-side marker for a reference field, not part of the term.
 const FIELD_LABELS: Record<string, string> = {
-  '@id': '🆔 Identifier',
-  '@type': '🧩 Type',
-  name: '📝 Name',
-  description: '📄 Description',
-  dateCreated: '📅 Date Created',
-  dateCreatedApproximate: '📅 Approximate Date',
-  dateAdded: '🗓️ Date Added',
-  isRef_enteredBy: '✍️ Entered By',
-  isPublishable: '🌐 Publish',
-  depiction: '🖼️ Img',
-  latitude: '📐 Latitude',
-  longitude: '📐 Longitude',
-  languageCode: '🔤 Language Code',
-  sameAs: '🔗 Identifying URL',
-  url: '🌐 Website',
-  isRef_creator: '👤 Creators',
-  isRef_contributor: '👥 Contributors',
-  isRef_mentions: '🧑‍🧑‍🧒‍🧒 Depicted / Mentioned',
-  isRef_contentLocation: '📍 Content Location',
-  isRef_locationCreated: '🖌️ Created At',
-  isRef_location: '📍 Location',
-  isRef_inLanguage: '🗣️ In Languages',
-  'isRef_ldac:subjectLanguage': '🗣️ Subject Languages',
-  'ldac:metadataIsPublic': '🌐 Public Metadata',
-  isRef_hasPart: '📎 Files',
-  isRef_sameAs: '🔗 Alternative license location',
-  'isRef_pcdm:memberOf': '🗂️ Part of Collection',
-  isRef_license: '📜 License',
-  isRef_author: '👤 Author',
-  isRef_publisher: '🏛️ Publisher',
-  datePublished: '📅 Date Published',
-  width: '📏 Width (cm)',
-  height: '📏 Height (cm)',
-  depth: '📏 Depth (cm)',
-  material: '🧵 Material',
-  isRef_holdingOrganisation: '🏛️ Holding Organisation',
-  identifier: '🔢 External ID',
-  provenance: '📜 Provenance',
+  '@id': '🆔 Identifier', // JSON-LD keyword
+  '@type': '🧩 Type', // JSON-LD keyword
+  // SCHEMA.ORG FIELDS
+  name: '📝 Name', // schema.org — https://schema.org/name
+  description: '📄 Description', // schema.org — https://schema.org/description
+  dateCreated: '📅 Date Created', // schema.org — https://schema.org/dateCreated
+  latitude: '📐 Latitude', // schema.org — https://schema.org/latitude
+  longitude: '📐 Longitude', // schema.org — https://schema.org/longitude
+  sameAs: '🔗 Identifying URL', // schema.org — https://schema.org/sameAs
+  url: '🌐 Website', // schema.org — https://schema.org/url
+  isRef_creator: '👤 Creators', // schema.org — https://schema.org/creator
+  isRef_contributor: '👥 Contributors', // schema.org — https://schema.org/contributor
+  isRef_mentions: '🧑‍🧑‍🧒‍🧒 Depicted / Mentioned', // schema.org — https://schema.org/mentions
+  isRef_contentLocation: '📍 Content Location', // schema.org — https://schema.org/contentLocation
+  isRef_locationCreated: '🖌️ Created At', // schema.org — https://schema.org/locationCreated
+  isRef_location: '📍 Location', // schema.org — https://schema.org/location
+  isRef_inLanguage: '🗣️ In Languages', // schema.org — https://schema.org/inLanguage
+  isRef_hasPart: '📎 Files', // schema.org — https://schema.org/hasPart
+  isRef_sameAs: '🔗 Alternative license location', // schema.org — https://schema.org/sameAs
+  isRef_license: '📜 License', // schema.org — https://schema.org/license
+  isRef_author: '👤 Author', // schema.org — https://schema.org/author
+  isRef_publisher: '🏛️ Publisher', // schema.org — https://schema.org/publisher
+  width: '📏 Width (cm)', // schema.org — https://schema.org/width
+  height: '📏 Height (cm)', // schema.org — https://schema.org/height
+  depth: '📏 Depth (cm)', // schema.org — https://schema.org/depth
+  material: '🧵 Material', // schema.org — https://schema.org/material
+  datePublished: '📅 Date Published', // schema.org — https://schema.org/datePublished
+  identifier: '🔢 External ID', // schema.org — https://schema.org/identifier
+  // LDaCA FIELDS
+  'isRef_ldac:subjectLanguage': '🗣️ Subject Languages', // LDaCA — https://w3id.org/ldac/terms#subjectLanguage
+  'ldac:metadataIsPublic': '🌐 Public Metadata', // LDaCA — https://w3id.org/ldac/terms#metadataIsPublic
+  // CUSTOM FIELDS
+  dateCreatedApproximate: '📅 Approximate Date', // custom — human-readable approximate date; no standard term
+  dateAdded: '🗓️ Date Added', // custom — no schema.org equivalent (cf. https://schema.org/dateCreated)
+  isRef_enteredBy: '✍️ Entered By', // custom — data-entry attribution; no schema.org equivalent
+  isPublishable: '🌐 Publish', // custom — app publishing flag
+  depiction: '🖼️ Img', // schema.org with change → use https://schema.org/image (currently foaf:depiction)
+  languageCode: '🔤 Language Code', // custom — no schema.org equivalent (cf. https://schema.org/Language)
+  isRef_holdingOrganisation: '🏛️ Holding Organisation', // custom — no schema.org equivalent
+  // PCDM FIELDS
+  'isRef_pcdm:memberOf': '🗂️ Part of Collection', // PCDM — https://pcdm.org/models#memberOf
+  // DUBLIN CORE FIELDS
+  'dcterms:provenance': '📜 Provenance', // Dublin Core — http://purl.org/dc/terms/provenance
 }
 
 // Per-type overrides for field labels. A field can mean something different for
@@ -101,7 +115,7 @@ const FIELD_DESCRIPTIONS: Record<string, string> = {
   identifier:
     'A catalogue or accession number assigned to this item by the external institution above, e.g. a museum collection number.',
   // Corresponds to Dublin Core's dcterms:provenance.
-  provenance:
+  'dcterms:provenance':
     'The history of ownership and custody of this item — how it came to be in this archive. ',
   latitude:
     "The latitude of the item's location, in decimal degrees. The range of valid values is -90 to 90. ",

@@ -622,7 +622,7 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                 const isDateAddedField = fieldName === 'dateAdded'
                 const isBooleanField = fieldName === 'isPublishable'
                 const isDescriptionField = fieldName === 'description'
-                const isProvenanceField = fieldName === 'provenance'
+                const isProvenanceField = fieldName === 'dcterms:provenance'
                 const isLatitudeField =
                   fieldName === '.latitude' || fieldName === 'latitude'
                 const isLongitudeField =

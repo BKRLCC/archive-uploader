@@ -1,4 +1,6 @@
 name,@id,,,
 ldac,https://w3id.org/ldac/terms#,,,
 csvw,http://www.w3.org/ns/csvw#,,,
+pcdm,https://pcdm.org/models#,,,
+dcterms,http://purl.org/dc/terms/,,,
 custom,"arcp://name,custom/terms#",,,
