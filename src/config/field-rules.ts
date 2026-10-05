@@ -27,12 +27,12 @@ const blankToConstant =
 
 export const FIELD_RULES: FieldRule[] = [
   {
-    field: 'dateAdded',
+    field: 'custom:dateAdded',
     when: 'create',
     derive: (current) => (current.trim() ? null : todayIso()),
   },
   {
-    field: 'isPublishable',
+    field: 'custom:isPublishable',
     when: 'create',
     derive: blankToConstant('FALSE'),
   },

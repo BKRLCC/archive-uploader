@@ -65,7 +65,7 @@ export default function BulkEditDrawer({
     const updatedValues: Record<string, string> = {}
 
     headers.forEach((header, index) => {
-      if (header === '@id' || header === 'dateAdded') return
+      if (header === '@id' || header === 'custom:dateAdded') return
       const value = String(values[index] ?? '')
       if (value.trim()) {
         updatedValues[header] = value

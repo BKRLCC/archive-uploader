@@ -49,10 +49,10 @@ function monaLisaObject(): RepositoryObject {
     description:
       'Example item — a portrait painted by Leonardo da Vinci, held at the Louvre. Replace this row with one of your own items.',
     dateCreated: '1503-01-01',
-    dateCreatedApproximate: 'c. 1503–1519',
+    'custom:dateCreatedApproximate': 'c. 1503–1519',
     isRef_creator: 'leonardo-da-vinci',
     isRef_mentions: 'lisa-del-giocondo',
-    isRef_holdingOrganisation: 'musee-du-louvre',
+    'isRef_custom:holdingOrganisation': 'musee-du-louvre',
     isRef_hasPart: SAMPLE_IMAGE_FILENAME,
     isRef_image: SAMPLE_IMAGE_FILENAME,
     material: 'Oil on poplar panel',
@@ -60,7 +60,7 @@ function monaLisaObject(): RepositoryObject {
     height: '77',
     identifier: 'INV. 779',
     sameAs: 'https://en.wikipedia.org/wiki/Mona_Lisa',
-    isPublishable: true,
+    'custom:isPublishable': true,
   }
 }
 
@@ -115,7 +115,7 @@ const SAMPLE_LANGUAGES: Language[] = [
     name: 'Italian',
     description:
       'Example language — replace with a language spoken in or relevant to your own items.',
-    languageCode: 'ita',
+    'custom:languageCode': 'ita',
     sameAs: 'https://glottolog.org/resource/languoid/id/ital1282',
   },
 ]

@@ -31,7 +31,7 @@ export const FIELD_VOCABULARIES: Record<string, ControlledVocabularySource> = {
   isRef_inLanguage: 'Languages',
   isRef_creator: 'People',
   isRef_contributor: 'People',
-  isRef_enteredBy: 'People',
+  'isRef_custom:enteredBy': 'People',
   isRef_mentions: 'People', // People referenced or depicted (schema:mentions)
   isRef_contentLocation: 'Places',
   isRef_locationCreated: 'Places',
@@ -42,7 +42,7 @@ export const FIELD_VOCABULARIES: Record<string, ControlledVocabularySource> = {
   isRef_publisher: 'Organization',
   isRef_isPartOf: 'RepositoryCollection',
   'isRef_pcdm:memberOf': 'RepositoryCollection',
-  isRef_holdingOrganisation: 'Organization',
+  'isRef_custom:holdingOrganisation': 'Organization',
   'isRef_ldac:subjectLanguage': 'Languages',
 }
 

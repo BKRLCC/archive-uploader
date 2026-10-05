@@ -40,16 +40,17 @@ const FIELD_LABELS: Record<string, string> = {
   datePublished: '📅 Date Published', // schema.org — https://schema.org/datePublished
   identifier: '🔢 External ID', // schema.org — https://schema.org/identifier
   isRef_image: '🖼️ Img', // schema.org — https://schema.org/image (isRef_ → reference to an ImageObject/File)
+  birthDate: '🎂 Birth Date', // schema.org — https://schema.org/birthDate
   // LDaCA FIELDS
   'isRef_ldac:subjectLanguage': '🗣️ Subject Languages', // LDaCA — https://w3id.org/ldac/terms#subjectLanguage
   'ldac:metadataIsPublic': '🌐 Public Metadata', // LDaCA — https://w3id.org/ldac/terms#metadataIsPublic
   // CUSTOM FIELDS
-  dateCreatedApproximate: '📅 Approximate Date', // custom — human-readable approximate date; no standard term
-  dateAdded: '🗓️ Date Added', // custom — no schema.org equivalent (cf. https://schema.org/dateCreated)
-  isRef_enteredBy: '✍️ Entered By', // custom — data-entry attribution; no schema.org equivalent
-  isPublishable: '🌐 Publish', // custom — app publishing flag
-  languageCode: '🔤 Language Code', // custom — no schema.org equivalent (cf. https://schema.org/Language)
-  isRef_holdingOrganisation: '🏛️ Holding Organisation', // custom — no schema.org equivalent
+  'custom:dateCreatedApproximate': '📅 Approximate Date', // custom — human-readable approximate date; no standard term
+  'custom:dateAdded': '📅 Date Added', // custom — no schema.org equivalent (cf. https://schema.org/dateCreated)
+  'isRef_custom:enteredBy': '✍️ Entered By', // custom — data-entry attribution; no schema.org equivalent
+  'custom:isPublishable': '🌐 Publish', // custom — app publishing flag
+  'custom:languageCode': '🔤 Language Code', // custom — no schema.org equivalent (cf. https://schema.org/Language)
+  'isRef_custom:holdingOrganisation': '🏛️ Holding Organisation', // custom — no schema.org equivalent
   // PCDM FIELDS
   'isRef_pcdm:memberOf': '🗂️ Part of Collection', // PCDM — https://pcdm.org/models#memberOf (prefix not yet in @context)
   // DUBLIN CORE FIELDS
@@ -85,23 +86,23 @@ const FIELD_DESCRIPTIONS: Record<string, string> = {
     'The location depicted in the item, e.g. the setting of a video or the country depicted in a painting.',
   isRef_locationCreated:
     'The location where the item was created. You only need to fill this in if it is different from the content location.',
-  isPublishable:
+  'custom:isPublishable':
     'If checked, the item will be included in the public-facing website. If unchecked, it will be hidden from public view.',
   isRef_inLanguage:
     'The language(s) spoken in the item, e.g. the language of a video or audio recording.',
-  dateAdded:
+  'custom:dateAdded':
     'The date the item was added to this archive. This is automatically set when you create a new item, it cannot be changed manually.',
   dateCreated:
     'The date the original item was created (not the date added to the archive). If you do not know the exact date, add a date here anyway for the system, then tick the "Approximate?" checkbox to add a human-readable label (e.g. "Before 1957").',
-  dateCreatedApproximate:
+  'custom:dateCreatedApproximate':
     'A human-readable label for the date created, e.g. "Before 1957". This is optional, but can be useful if you do not know the exact date.',
-  isRef_enteredBy:
+  'isRef_custom:enteredBy':
     'The person who entered the item into this archive. Add yourself to the people list if you are not already listed.',
   isRef_hasPart:
     'All the files associated with this item. Often there is only one, but there could be multiple, e.g. a video and its transcript, or multiple images of the same artwork.',
   sameAs:
     'A URL that identifies this item in another system. For example, a link to the item in a museum collection or a link to a Wikipedia page about the item.',
-  languageCode:
+  'custom:languageCode':
     "For Aboriginal languages, use the AIATSIS code. For other languages, use the ISO 639-3 code (two letters, e.g. 'en'). If you do not know the code, leave this field blank.",
   isRef_mentions:
     'People who are "in" the item, e.g. people depicted in a photo or mentioned in a text.',
@@ -110,7 +111,7 @@ const FIELD_DESCRIPTIONS: Record<string, string> = {
   depth: 'The depth of the physical object, in centimetres.',
   material:
     'The primary material(s) the object is made from, e.g. "oil on canvas" or "bark, ochre".',
-  isRef_holdingOrganisation:
+  'isRef_custom:holdingOrganisation':
     'The organisation that currently holds this object or record. Add it to the Organisations list first if it is not already there.',
   identifier:
     'A catalogue or accession number assigned to this item by the external institution above, e.g. a museum collection number.',

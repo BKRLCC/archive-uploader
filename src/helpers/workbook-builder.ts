@@ -65,7 +65,7 @@ function orderHeaders(headers: string[]): string[] {
   // Keep the human-readable approximate date beside its exact date. It is not in
   // any field group (the edit form shows it inline under Date created), so it
   // would otherwise land among the ungrouped leftovers at the end of the sheet.
-  return moveAfter(ordered, 'dateCreatedApproximate', 'dateCreated')
+  return moveAfter(ordered, 'custom:dateCreatedApproximate', 'dateCreated')
 }
 
 // Moves `field` to sit immediately after `anchor` in the list, if both are

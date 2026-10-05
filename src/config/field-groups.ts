@@ -27,10 +27,11 @@ const detailsGroup: FieldGroupDef = {
     'isRef_hasPart',
     'latitude',
     'longitude',
-    'languageCode',
+    'birthDate',
+    'custom:languageCode',
     'isRef_inLanguage',
     'url',
-    'isRef_enteredBy',
+    'isRef_custom:enteredBy',
   ],
 }
 
@@ -67,7 +68,7 @@ const externalGroup: FieldGroupDef = {
   label: 'External record',
   fields: [
     'sameAs',
-    'isRef_holdingOrganisation',
+    'isRef_custom:holdingOrganisation',
     'identifier',
     'dcterms:provenance',
   ],
@@ -77,14 +78,14 @@ const externalGroup: FieldGroupDef = {
 const metadataGroup: FieldGroupDef = {
   id: 'metadata',
   label: 'System metadata',
-  fields: ['@id', '@type', 'dateAdded'],
+  fields: ['@id', '@type', 'custom:dateAdded'],
   defaultOpen: false,
 }
 
 const publishingGroup: FieldGroupDef = {
   id: 'publishing',
   label: 'Publishing',
-  fields: ['isPublishable'],
+  fields: ['custom:isPublishable'],
   defaultOpen: true,
 }
 

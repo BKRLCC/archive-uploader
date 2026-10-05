@@ -22,8 +22,8 @@ export type BaseItem = {
   '@type': ItemDataType
   name: string
   description?: string
-  dateAdded?: string
-  isRef_enteredBy?: string
+  'custom:dateAdded'?: string
+  'isRef_custom:enteredBy'?: string
   // Image path; header `isRef_image` → emitted as a schema.org/image reference. CSS/thumbnail code keeps the "depiction" name.
   isRef_image?: string
 }
@@ -50,7 +50,7 @@ export type Person = BaseItem & {
 
 // Language
 export type Language = BaseItem & {
-  languageCode?: string // Language code, e.g. ISO 639-3 ("eng") or BCP-47 ("en-AU")
+  'custom:languageCode'?: string // Language code, e.g. ISO 639-3 ("eng") or BCP-47 ("en-AU")
   sameAs?: string // External identifying URL, e.g. https://aiatsis.gov.au/austlang/language/N173 (schema:sameAs)
 }
 
@@ -64,7 +64,7 @@ export type Organization = BaseItem & {
 // https://www.ldaca.edu.au/resources/user-guides/crate-o/convert-spreadsheet/#objects
 export type RepositoryObject = BaseItem & {
   dateCreated?: string
-  isPublishable?: boolean
+  'custom:isPublishable'?: boolean
   isRef_contentLocation?: string
   isRef_locationCreated?: string
   isRef_inLanguage?: string
@@ -76,12 +76,12 @@ export type RepositoryObject = BaseItem & {
    * People referenced or depicted in this resource (schema:mentions)
    */
   isRef_mentions?: string
-  dateCreatedApproximate?: string // Human-readable approximate date, e.g. "Before 1957"
+  'custom:dateCreatedApproximate'?: string // Human-readable approximate date, e.g. "Before 1957"
   width?: string // Width of the physical object, in cm
   height?: string // Height of the physical object, in cm
   depth?: string // Depth of the physical object, in cm
   material?: string // Primary material(s) the object is made from
-  isRef_holdingOrganisation?: string // Organisation that holds/owns the object
+  'isRef_custom:holdingOrganisation'?: string // Organisation that holds/owns the object
   identifier?: string // External catalogue or accession number (schema:identifier)
   sameAs?: string // External identifying URL, e.g. a museum collection page (schema:sameAs)
   'dcterms:provenance'?: string // History of ownership and custody (dcterms:provenance)
@@ -165,8 +165,8 @@ export const ENTITY_FIELD_REGISTRY: {
     '@type',
     'name',
     'description',
-    'dateAdded',
-    'isRef_enteredBy',
+    'custom:dateAdded',
+    'isRef_custom:enteredBy',
     'isRef_image',
     'gender',
     'birthDate',
@@ -177,9 +177,9 @@ export const ENTITY_FIELD_REGISTRY: {
     'name',
     'description',
     'dateCreated',
-    'dateAdded',
-    'isRef_enteredBy',
-    'isPublishable',
+    'custom:dateAdded',
+    'isRef_custom:enteredBy',
+    'custom:isPublishable',
     'isRef_image',
     'isRef_contentLocation',
     'isRef_locationCreated',
@@ -188,12 +188,12 @@ export const ENTITY_FIELD_REGISTRY: {
     'isRef_contributor',
     'isRef_hasPart',
     'isRef_mentions',
-    'dateCreatedApproximate',
+    'custom:dateCreatedApproximate',
     'width',
     'height',
     'depth',
     'material',
-    'isRef_holdingOrganisation',
+    'isRef_custom:holdingOrganisation',
     'identifier',
     'sameAs',
     'dcterms:provenance',
@@ -203,8 +203,8 @@ export const ENTITY_FIELD_REGISTRY: {
     '@type',
     'name',
     'description',
-    'dateAdded',
-    'isRef_enteredBy',
+    'custom:dateAdded',
+    'isRef_custom:enteredBy',
     'isRef_image',
     'isRef_location',
     'url',
@@ -215,10 +215,10 @@ export const ENTITY_FIELD_REGISTRY: {
     '@type',
     'name',
     'description',
-    'dateAdded',
-    'isRef_enteredBy',
+    'custom:dateAdded',
+    'isRef_custom:enteredBy',
     'isRef_image',
-    'languageCode',
+    'custom:languageCode',
     'sameAs',
   ]),
   Dataset: defineEntityFields<BaseItem>()([
@@ -226,8 +226,8 @@ export const ENTITY_FIELD_REGISTRY: {
     '@type',
     'name',
     'description',
-    'dateAdded',
-    'isRef_enteredBy',
+    'custom:dateAdded',
+    'isRef_custom:enteredBy',
     'isRef_image',
   ]),
   Tag: defineEntityFields<BaseItem>()([
@@ -235,8 +235,8 @@ export const ENTITY_FIELD_REGISTRY: {
     '@type',
     'name',
     'description',
-    'dateAdded',
-    'isRef_enteredBy',
+    'custom:dateAdded',
+    'isRef_custom:enteredBy',
     'isRef_image',
   ]),
   RepositoryCollection: defineEntityFields<RepositoryCollection>()([
@@ -244,8 +244,8 @@ export const ENTITY_FIELD_REGISTRY: {
     '@type',
     'name',
     'description',
-    'dateAdded',
-    'isRef_enteredBy',
+    'custom:dateAdded',
+    'isRef_custom:enteredBy',
     'isRef_image',
     'identifier',
     'isRef_license',
@@ -261,8 +261,8 @@ export const ENTITY_FIELD_REGISTRY: {
     '@type',
     'name',
     'description',
-    'dateAdded',
-    'isRef_enteredBy',
+    'custom:dateAdded',
+    'isRef_custom:enteredBy',
     'isRef_image',
     'ldac:allowTextIndex',
     'isRef_sameAs',
@@ -273,8 +273,8 @@ export const ENTITY_FIELD_REGISTRY: {
     '@type',
     'name',
     'description',
-    'dateAdded',
-    'isRef_enteredBy',
+    'custom:dateAdded',
+    'isRef_custom:enteredBy',
     'isRef_image',
     'latitude',
     'longitude',
@@ -300,8 +300,8 @@ export const ENTITY_FIELD_REGISTRY: {
     '@type',
     'name',
     'description',
-    'dateAdded',
-    'isRef_enteredBy',
+    'custom:dateAdded',
+    'isRef_custom:enteredBy',
     'isRef_image',
   ]),
 }
@@ -345,8 +345,8 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     '@type',
     'name',
     'description',
-    'dateAdded',
-    'isRef_enteredBy',
+    'custom:dateAdded',
+    'isRef_custom:enteredBy',
     'isRef_image',
     'gender',
     'birthDate',
@@ -356,8 +356,8 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     '@type',
     'name',
     'description',
-    'dateAdded',
-    'isRef_enteredBy',
+    'custom:dateAdded',
+    'isRef_custom:enteredBy',
     'isRef_image',
     'isRef_location',
     'url',
@@ -369,9 +369,9 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     'name',
     'description',
     'dateCreated',
-    'dateAdded',
-    'isRef_enteredBy',
-    'isPublishable',
+    'custom:dateAdded',
+    'isRef_custom:enteredBy',
+    'custom:isPublishable',
     'isRef_image',
     'isRef_contentLocation',
     'isRef_locationCreated',
@@ -387,10 +387,10 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     '@type',
     'name',
     'description',
-    'dateAdded',
-    'isRef_enteredBy',
+    'custom:dateAdded',
+    'isRef_custom:enteredBy',
     'isRef_image',
-    'languageCode',
+    'custom:languageCode',
     'sameAs',
   ],
   Tag: [
@@ -398,8 +398,8 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     '@type',
     'name',
     'description',
-    'dateAdded',
-    'isRef_enteredBy',
+    'custom:dateAdded',
+    'isRef_custom:enteredBy',
     'isRef_image',
   ],
   Dataset: [
@@ -407,8 +407,8 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     '@type',
     'name',
     'description',
-    'dateAdded',
-    'isRef_enteredBy',
+    'custom:dateAdded',
+    'isRef_custom:enteredBy',
     'isRef_image',
   ],
   RepositoryCollection: [
@@ -416,8 +416,8 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     '@type',
     'name',
     'description',
-    'dateAdded',
-    'isRef_enteredBy',
+    'custom:dateAdded',
+    'isRef_custom:enteredBy',
     'isRef_image',
   ],
   'ldac:DataReuseLicense': [
@@ -425,8 +425,8 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     '@type',
     'name',
     'description',
-    'dateAdded',
-    'isRef_enteredBy',
+    'custom:dateAdded',
+    'isRef_custom:enteredBy',
     'isRef_image',
     'ldac:allowTextIndex',
     'isRef_sameAs',
@@ -437,8 +437,8 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     '@type',
     'name',
     'description',
-    'dateAdded',
-    'isRef_enteredBy',
+    'custom:dateAdded',
+    'isRef_custom:enteredBy',
     'isRef_image',
     'latitude',
     'longitude',

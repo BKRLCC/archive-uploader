@@ -26,15 +26,18 @@ const HEADER_LAYOUTS: Record<string, TableColumnLayout> = {
     wrapMode: 'clamp-2',
   },
   datecreated: { widthClassName: 'col-width-date', wrapMode: 'nowrap' },
-  dateadded: { widthClassName: 'col-width-date', wrapMode: 'nowrap' },
-  ispublishable: { widthClassName: 'col-width-xs', wrapMode: 'nowrap' },
+  'custom:dateadded': { widthClassName: 'col-width-date', wrapMode: 'nowrap' },
+  'custom:ispublishable': {
+    widthClassName: 'col-width-xs',
+    wrapMode: 'nowrap',
+  },
   isref_image: { widthClassName: 'col-width-depiction', wrapMode: 'clamp-2' },
   isref_haspart: { widthClassName: 'col-width-files', wrapMode: 'clamp-2' },
   isref_creator: {
     widthClassName: 'col-width-people',
     wrapMode: 'clamp-2',
   },
-  isref_enteredby: {
+  'isref_custom:enteredby': {
     widthClassName: 'col-width-people',
     wrapMode: 'clamp-2',
   },

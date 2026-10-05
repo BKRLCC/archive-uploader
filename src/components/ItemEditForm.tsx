@@ -40,6 +40,7 @@ import MapPickerModal from './MapPickerModal'
 import InfoButtonWithTooltip from './InfoButtonWithTooltip'
 import ImageSelectBox from './ImageSelectBox'
 import ApproximateDateField from './ApproximateDateField'
+import DatePicker from './DatePicker'
 import LicenseIdField from './LicenseIdField'
 
 interface VocabOption {
@@ -414,7 +415,7 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
           continue
         }
 
-        if (field === 'dateCreated' || field === 'dateAdded') {
+        if (field === 'dateCreated' || field === 'custom:dateAdded') {
           if (!selectedValue) continue
           if (!isIsoDateString(selectedValue)) {
             return `✗ ${field} must be a full date in YYYY-MM-DD format`
@@ -619,8 +620,9 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                   resolvedEntityType === 'ldac:DataReuseLicense'
                 const isTypeField = fieldName === '@type'
                 const isDateCreatedField = fieldName === 'dateCreated'
-                const isDateAddedField = fieldName === 'dateAdded'
-                const isBooleanField = fieldName === 'isPublishable'
+                const isBirthDateField = fieldName === 'birthDate'
+                const isDateAddedField = fieldName === 'custom:dateAdded'
+                const isBooleanField = fieldName === 'custom:isPublishable'
                 const isDescriptionField = fieldName === 'description'
                 const isProvenanceField = fieldName === 'dcterms:provenance'
                 const isLatitudeField =
@@ -706,13 +708,23 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
                       <ApproximateDateField
                         dateValue={currentValue}
                         approximateValue={getFieldValue(
-                          'dateCreatedApproximate',
+                          'custom:dateCreatedApproximate',
                         )}
                         onDateChange={(nextValue) => {
                           setFieldValue(fieldName, nextValue)
                         }}
                         onApproximateChange={(nextValue) => {
-                          setFieldValue('dateCreatedApproximate', nextValue)
+                          setFieldValue(
+                            'custom:dateCreatedApproximate',
+                            nextValue,
+                          )
+                        }}
+                      />
+                    ) : isBirthDateField ? (
+                      <DatePicker
+                        value={currentValue}
+                        onChange={(nextValue) => {
+                          setFieldValue(fieldName, nextValue)
                         }}
                       />
                     ) : isDescriptionField ? (
