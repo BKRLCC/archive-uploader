@@ -634,19 +634,48 @@ ipcMain.handle(
 
 const FILES_SHEET_NAME = 'Files'
 
-// Backfills the fixed @context prefix map onto a workbook that lacks it, so
-// archives created before @context shipped still convert with ro-crate-excel.
-// Returns true if the sheet was added.
+// Ensures the workbook carries the fixed @context prefix map: adds the sheet when
+// absent, and appends any canonical prefix rows missing from an existing sheet
+// (existing rows are preserved, never overwritten). Returns true if changed.
 function ensureContextSheet(workbook: XLSX.WorkBook): boolean {
-  const present = workbook.SheetNames.some(
+  const actualName = workbook.SheetNames.find(
     (n) => n.toLowerCase() === CONTEXT_SHEET.name.toLowerCase(),
   )
-  if (present) return false
-  XLSX.utils.book_append_sheet(
-    workbook,
-    XLSX.utils.aoa_to_sheet(CONTEXT_SHEET.rows),
-    CONTEXT_SHEET.name,
+  if (!actualName) {
+    XLSX.utils.book_append_sheet(
+      workbook,
+      XLSX.utils.aoa_to_sheet(CONTEXT_SHEET.rows),
+      CONTEXT_SHEET.name,
+    )
+    return true
+  }
+
+  const rows: string[][] = XLSX.utils.sheet_to_json(
+    workbook.Sheets[actualName],
+    {
+      header: 1,
+      defval: '',
+    },
   )
+  const existingPrefixes = new Set(
+    rows.map((row) =>
+      String(row[0] ?? '')
+        .trim()
+        .toLowerCase(),
+    ),
+  )
+  // Skip the canonical header row; append only prefixes not already present.
+  const missing = CONTEXT_SHEET.rows.slice(1).filter(
+    (row) =>
+      !existingPrefixes.has(
+        String(row[0] ?? '')
+          .trim()
+          .toLowerCase(),
+      ),
+  )
+  if (missing.length === 0) return false
+
+  workbook.Sheets[actualName] = XLSX.utils.aoa_to_sheet([...rows, ...missing])
   return true
 }
 
@@ -731,10 +760,12 @@ async function reconcileFilesTab(
   const itemHeaders = (rows[0] ?? []).map((h) => String(h ?? ''))
   const idIndex = itemHeaders.indexOf('@id')
   const hasPartIndex = itemHeaders.indexOf('isRef_hasPart')
+  const imageIndex = itemHeaders.indexOf(DEPICTION_FIELD_NAME)
   const derived = deriveFileRowsFromItems(
     rows.slice(1).map((row) => ({
       itemId: String(row[idIndex] ?? ''),
       hasPart: String(row[hasPartIndex] ?? ''),
+      image: imageIndex >= 0 ? String(row[imageIndex] ?? '') : '',
     })),
   )
   const derivedRows = derived.map((row) =>
@@ -1041,6 +1072,9 @@ ipcMain.handle(
     const hasPartIndex = headers.findIndex(
       (header) => header === 'isRef_hasPart',
     )
+    const imageIndex = headers.findIndex(
+      (header) => header === DEPICTION_FIELD_NAME,
+    )
 
     if (idIndex < 0 || hasPartIndex < 0) {
       return {
@@ -1053,6 +1087,7 @@ ipcMain.handle(
       rows.slice(1).map((row) => ({
         itemId: String(row[idIndex] ?? ''),
         hasPart: String(row[hasPartIndex] ?? ''),
+        image: imageIndex >= 0 ? String(row[imageIndex] ?? '') : '',
       })),
     )
 

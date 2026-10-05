@@ -72,12 +72,12 @@ const mapRowsToPlaces = (sheet: SheetData): Place[] => {
     }
 
     const description = getCell(row, indexMap, 'description')
-    const depiction = getCell(row, indexMap, 'depiction')
+    const depiction = getCell(row, indexMap, 'isRef_image')
     const latitude = getCell(row, indexMap, 'latitude')
     const longitude = getCell(row, indexMap, 'longitude')
 
     if (description) place.description = description
-    if (depiction) place.depiction = depiction
+    if (depiction) place.isRef_image = depiction
     if (latitude) place.latitude = latitude
     if (longitude) place.longitude = longitude
 

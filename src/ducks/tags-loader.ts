@@ -59,7 +59,7 @@ const mapRowsToVocabulary = (
     const name = getCell(row, indexMap, 'name')
     const rawType = getCell(row, indexMap, '@type')
     const description = getCell(row, indexMap, 'description')
-    const depiction = getCell(row, indexMap, 'depiction')
+    const depiction = getCell(row, indexMap, 'isRef_image')
 
     if (!id || !name) return
 
@@ -75,7 +75,7 @@ const mapRowsToVocabulary = (
       name,
     }
     if (description) term.description = description
-    if (depiction) term.depiction = depiction
+    if (depiction) term.isRef_image = depiction
 
     termsById.set(id, term)
 

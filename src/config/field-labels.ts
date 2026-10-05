@@ -5,8 +5,8 @@ import type { EditableEntityType } from '../types/types'
 // by default; prefixed terms resolve through the workbook @context sheet. Tags:
 //   schema.org  — default; bare term (see URL)
 //   LDaCA       — ldac: prefix → https://w3id.org/ldac/terms#  (mapped in @context)
-//   PCDM        — pcdm: prefix → https://pcdm.org/models#       (mapped in @context)
-//   Dublin Core — dcterms: → http://purl.org/dc/terms/          (mapped in @context)
+//   PCDM        — pcdm: prefix → https://pcdm.org/models#       (NOT yet in @context)
+//   Dublin Core — dcterms: → http://purl.org/dc/terms/          (NOT yet in @context)
 //   custom      — our own term; would resolve via the custom: prefix in @context
 // @id/@type are JSON-LD keywords (RO-Crate core), not vocabulary terms. The
 // isRef_ prefix is an app-side marker for a reference field, not part of the term.
@@ -47,11 +47,11 @@ const FIELD_LABELS: Record<string, string> = {
   dateAdded: '🗓️ Date Added', // custom — no schema.org equivalent (cf. https://schema.org/dateCreated)
   isRef_enteredBy: '✍️ Entered By', // custom — data-entry attribution; no schema.org equivalent
   isPublishable: '🌐 Publish', // custom — app publishing flag
-  depiction: '🖼️ Img', // schema.org with change → use https://schema.org/image (currently foaf:depiction)
+  isRef_image: '🖼️ Img', // schema.org — https://schema.org/image (isRef_ → reference to an ImageObject/File)
   languageCode: '🔤 Language Code', // custom — no schema.org equivalent (cf. https://schema.org/Language)
   isRef_holdingOrganisation: '🏛️ Holding Organisation', // custom — no schema.org equivalent
   // PCDM FIELDS
-  'isRef_pcdm:memberOf': '🗂️ Part of Collection', // PCDM — https://pcdm.org/models#memberOf
+  'isRef_pcdm:memberOf': '🗂️ Part of Collection', // PCDM — https://pcdm.org/models#memberOf (prefix not yet in @context)
   // DUBLIN CORE FIELDS
   'dcterms:provenance': '📜 Provenance', // Dublin Core — http://purl.org/dc/terms/provenance
 }
@@ -121,7 +121,7 @@ const FIELD_DESCRIPTIONS: Record<string, string> = {
     "The latitude of the item's location, in decimal degrees. The range of valid values is -90 to 90. ",
   longitude:
     "The longitude of the item's location, in decimal degrees. The range of valid values is -180 to 180.",
-  depiction:
+  isRef_image:
     'A single image that represents this item in the archive. This is additional to any files attached to the item, and is used as a thumbnail in lists and search results.',
   isRef_license:
     'The license that governs how this collection may be reused. Choose one from the licenses defined in your archive.',

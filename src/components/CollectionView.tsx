@@ -158,7 +158,7 @@ function mapRowToOrganization(
   }
 
   const descriptionIndex = getHeaderIndex(headers, 'description')
-  const depictionIndex = getHeaderIndex(headers, 'depiction')
+  const depictionIndex = getHeaderIndex(headers, 'isRef_image')
   const urlIndex = getHeaderIndex(headers, 'url')
   const sameAsIndex = getHeaderIndex(headers, 'sameAs')
 
@@ -170,7 +170,7 @@ function mapRowToOrganization(
   const sameAs = sameAsIndex >= 0 ? String(row[sameAsIndex] ?? '').trim() : ''
 
   if (description) organization.description = description
-  if (depiction) organization.depiction = depiction
+  if (depiction) organization.isRef_image = depiction
   if (url) organization.url = url
   if (sameAs) organization.sameAs = sameAs
 
@@ -243,7 +243,7 @@ export default function CollectionView({ xlsxPath }: Props) {
   const organizations = useAppSelector(selectOrganizations)
   const referenceLookups = useMemo(() => {
     const build = (
-      items: Array<{ '@id': string; name?: string; depiction?: string }>,
+      items: Array<{ '@id': string; name?: string; isRef_image?: string }>,
     ): Map<string, ReferenceEntity> => {
       const map = new Map<string, ReferenceEntity>()
       for (const item of items) {
@@ -252,7 +252,7 @@ export default function CollectionView({ xlsxPath }: Props) {
         map.set(normalizeReferenceId(id), {
           id,
           name: String(item.name ?? ''),
-          depiction: item.depiction,
+          depiction: item.isRef_image,
         })
       }
       return map
@@ -546,7 +546,7 @@ export default function CollectionView({ xlsxPath }: Props) {
       getItemTypeForSheetName(sheetName),
     )
 
-    const depictionIndex = sheet.headers.indexOf('depiction')
+    const depictionIndex = sheet.headers.indexOf('isRef_image')
     const hasDepiction = depictionIndex !== -1
     const idIndex = sheet.headers.findIndex((header) => header === '@id')
     const visibleRows = sheet.rows
@@ -574,10 +574,10 @@ export default function CollectionView({ xlsxPath }: Props) {
 
     const visibleIndices = sheet.headers
       .map((h, i) => ({ h, i }))
-      .filter(({ h }) => !isHiddenTableColumn(h) && h !== 'depiction')
+      .filter(({ h }) => !isHiddenTableColumn(h) && h !== 'isRef_image')
       .map(({ i }) => i)
     const depictionLayout = hasDepiction
-      ? getTableColumnLayout('depiction')
+      ? getTableColumnLayout('isRef_image')
       : null
 
     const visibleCount = Math.ceil(tableViewportHeight / VIRTUAL_ROW_HEIGHT_PX)
@@ -628,7 +628,7 @@ export default function CollectionView({ xlsxPath }: Props) {
                     .filter(Boolean)
                     .join(' ')}
                 >
-                  {getFieldDisplayLabel('depiction', resolvedSheetType)}
+                  {getFieldDisplayLabel('isRef_image', resolvedSheetType)}
                 </th>
               )}
               {visibleIndices.map((i) => {

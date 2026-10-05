@@ -150,14 +150,14 @@ export default function BulkAddPopup({
         }
 
         if (isImagePreviewExtension(getFileExtension(relativePath))) {
-          rowValues.depiction = relativePath
+          rowValues['isRef_image'] = relativePath
         } else if (isVideoPreviewExtension(getFileExtension(relativePath))) {
           try {
             const generated = await window.api.generateVideoDepiction(
               archiveFolderPath,
               relativePath,
             )
-            rowValues.depiction = generated.depictionPath
+            rowValues['isRef_image'] = generated.depictionPath
           } catch {
             depictionWarningFiles.push(relativePath)
           }
@@ -205,7 +205,7 @@ export default function BulkAddPopup({
               initialValues={headers.map(() => '')}
               xlsxPath={xlsxPath}
               sheetName={sheetName}
-              hiddenFields={['@id', 'name', 'depiction', 'isRef_hasPart']}
+              hiddenFields={['@id', 'name', 'isRef_image', 'isRef_hasPart']}
               lockedFieldValues={{
                 '@type': getItemTypeForSheetName(sheetName),
               }}

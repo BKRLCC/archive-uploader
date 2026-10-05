@@ -72,12 +72,12 @@ const mapRowsToPeople = (sheet: SheetData): Person[] => {
     }
 
     const description = getCell(row, indexMap, 'description')
-    const depiction = getCell(row, indexMap, 'depiction')
+    const depiction = getCell(row, indexMap, 'isRef_image')
     const gender = getCell(row, indexMap, 'gender')
     const birthDate = getCell(row, indexMap, 'birthDate')
 
     if (description) person.description = description
-    if (depiction) person.depiction = depiction
+    if (depiction) person.isRef_image = depiction
     if (gender) person.gender = gender
     if (birthDate) person.birthDate = birthDate
 

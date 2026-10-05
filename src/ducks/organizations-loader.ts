@@ -72,12 +72,12 @@ const mapRowsToOrganizations = (sheet: SheetData): Organization[] => {
     }
 
     const description = getCell(row, indexMap, 'description')
-    const depiction = getCell(row, indexMap, 'depiction')
+    const depiction = getCell(row, indexMap, 'isRef_image')
     const url = getCell(row, indexMap, 'url')
     const sameAs = getCell(row, indexMap, 'sameAs')
 
     if (description) organization.description = description
-    if (depiction) organization.depiction = depiction
+    if (depiction) organization.isRef_image = depiction
     if (url) organization.url = url
     if (sameAs) organization.sameAs = sameAs
 

@@ -72,11 +72,11 @@ const mapRowsToLanguages = (sheet: SheetData): Language[] => {
     }
 
     const description = getCell(row, indexMap, 'description')
-    const depiction = getCell(row, indexMap, 'depiction')
+    const depiction = getCell(row, indexMap, 'isRef_image')
     const languageCode = getCell(row, indexMap, 'languageCode')
     const sameAs = getCell(row, indexMap, 'sameAs')
     if (description) language.description = description
-    if (depiction) language.depiction = depiction
+    if (depiction) language.isRef_image = depiction
     if (languageCode) language.languageCode = languageCode
     if (sameAs) language.sameAs = sameAs
 

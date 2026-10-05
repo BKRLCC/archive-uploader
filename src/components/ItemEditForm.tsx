@@ -240,7 +240,7 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
         label,
         searchText: `${name} ${id}`.toLowerCase(),
         name,
-        depiction: language.depiction,
+        depiction: language.isRef_image,
         folder: referenceFolders.Languages,
       }
     })
@@ -257,7 +257,7 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
         label,
         searchText: `${name} ${id}`.toLowerCase(),
         name,
-        depiction: person.depiction,
+        depiction: person.isRef_image,
         folder: referenceFolders.People,
       }
     })
@@ -272,7 +272,7 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
         label,
         searchText: `${name} ${id}`.toLowerCase(),
         name,
-        depiction: place.depiction,
+        depiction: place.isRef_image,
         folder: referenceFolders.Places,
       }
     })
@@ -288,7 +288,7 @@ const ItemEditForm = forwardRef<ItemEditFormHandle, ItemEditFormProps>(
           label,
           searchText: `${name} ${id}`.toLowerCase(),
           name,
-          depiction: organization.depiction,
+          depiction: organization.isRef_image,
           folder: referenceFolders.Organisations,
         }
       },

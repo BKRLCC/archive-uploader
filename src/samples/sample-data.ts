@@ -54,7 +54,7 @@ function monaLisaObject(): RepositoryObject {
     isRef_mentions: 'lisa-del-giocondo',
     isRef_holdingOrganisation: 'musee-du-louvre',
     isRef_hasPart: SAMPLE_IMAGE_FILENAME,
-    depiction: SAMPLE_IMAGE_FILENAME,
+    isRef_image: SAMPLE_IMAGE_FILENAME,
     material: 'Oil on poplar panel',
     width: '53',
     height: '77',

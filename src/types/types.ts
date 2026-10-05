@@ -24,8 +24,8 @@ export type BaseItem = {
   description?: string
   dateAdded?: string
   isRef_enteredBy?: string
-  // Relative path to an identifying image under the archive folder (future LD mapping: foaf:depiction).
-  depiction?: string
+  // Image path; header `isRef_image` → emitted as a schema.org/image reference. CSS/thumbnail code keeps the "depiction" name.
+  isRef_image?: string
 }
 
 export type DefinedTermType = 'DefinedTerm'
@@ -167,7 +167,7 @@ export const ENTITY_FIELD_REGISTRY: {
     'description',
     'dateAdded',
     'isRef_enteredBy',
-    'depiction',
+    'isRef_image',
     'gender',
     'birthDate',
   ]),
@@ -180,7 +180,7 @@ export const ENTITY_FIELD_REGISTRY: {
     'dateAdded',
     'isRef_enteredBy',
     'isPublishable',
-    'depiction',
+    'isRef_image',
     'isRef_contentLocation',
     'isRef_locationCreated',
     'isRef_inLanguage',
@@ -205,7 +205,7 @@ export const ENTITY_FIELD_REGISTRY: {
     'description',
     'dateAdded',
     'isRef_enteredBy',
-    'depiction',
+    'isRef_image',
     'isRef_location',
     'url',
     'sameAs',
@@ -217,7 +217,7 @@ export const ENTITY_FIELD_REGISTRY: {
     'description',
     'dateAdded',
     'isRef_enteredBy',
-    'depiction',
+    'isRef_image',
     'languageCode',
     'sameAs',
   ]),
@@ -228,7 +228,7 @@ export const ENTITY_FIELD_REGISTRY: {
     'description',
     'dateAdded',
     'isRef_enteredBy',
-    'depiction',
+    'isRef_image',
   ]),
   Tag: defineEntityFields<BaseItem>()([
     '@id',
@@ -237,7 +237,7 @@ export const ENTITY_FIELD_REGISTRY: {
     'description',
     'dateAdded',
     'isRef_enteredBy',
-    'depiction',
+    'isRef_image',
   ]),
   RepositoryCollection: defineEntityFields<RepositoryCollection>()([
     '@id',
@@ -246,7 +246,7 @@ export const ENTITY_FIELD_REGISTRY: {
     'description',
     'dateAdded',
     'isRef_enteredBy',
-    'depiction',
+    'isRef_image',
     'identifier',
     'isRef_license',
     'isRef_author',
@@ -263,7 +263,7 @@ export const ENTITY_FIELD_REGISTRY: {
     'description',
     'dateAdded',
     'isRef_enteredBy',
-    'depiction',
+    'isRef_image',
     'ldac:allowTextIndex',
     'isRef_sameAs',
     'isRef_isPartOf',
@@ -275,7 +275,7 @@ export const ENTITY_FIELD_REGISTRY: {
     'description',
     'dateAdded',
     'isRef_enteredBy',
-    'depiction',
+    'isRef_image',
     'latitude',
     'longitude',
   ]),
@@ -302,7 +302,7 @@ export const ENTITY_FIELD_REGISTRY: {
     'description',
     'dateAdded',
     'isRef_enteredBy',
-    'depiction',
+    'isRef_image',
   ]),
 }
 
@@ -347,7 +347,7 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     'description',
     'dateAdded',
     'isRef_enteredBy',
-    'depiction',
+    'isRef_image',
     'gender',
     'birthDate',
   ],
@@ -358,7 +358,7 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     'description',
     'dateAdded',
     'isRef_enteredBy',
-    'depiction',
+    'isRef_image',
     'isRef_location',
     'url',
     'sameAs',
@@ -372,7 +372,7 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     'dateAdded',
     'isRef_enteredBy',
     'isPublishable',
-    'depiction',
+    'isRef_image',
     'isRef_contentLocation',
     'isRef_locationCreated',
     'isRef_inLanguage',
@@ -389,7 +389,7 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     'description',
     'dateAdded',
     'isRef_enteredBy',
-    'depiction',
+    'isRef_image',
     'languageCode',
     'sameAs',
   ],
@@ -400,7 +400,7 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     'description',
     'dateAdded',
     'isRef_enteredBy',
-    'depiction',
+    'isRef_image',
   ],
   Dataset: [
     '@id',
@@ -409,7 +409,7 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     'description',
     'dateAdded',
     'isRef_enteredBy',
-    'depiction',
+    'isRef_image',
   ],
   RepositoryCollection: [
     '@id',
@@ -418,7 +418,7 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     'description',
     'dateAdded',
     'isRef_enteredBy',
-    'depiction',
+    'isRef_image',
   ],
   'ldac:DataReuseLicense': [
     '@id',
@@ -427,7 +427,7 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     'description',
     'dateAdded',
     'isRef_enteredBy',
-    'depiction',
+    'isRef_image',
     'ldac:allowTextIndex',
     'isRef_sameAs',
     'isRef_isPartOf',
@@ -439,7 +439,7 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     'description',
     'dateAdded',
     'isRef_enteredBy',
-    'depiction',
+    'isRef_image',
     'latitude',
     'longitude',
   ],
