@@ -183,14 +183,13 @@ export function buildWorkbook(
     XLSX.utils.book_append_sheet(workbook, sheet, extra.name)
   }
 
-  // Content collections carry a Files sheet of RO-Crate File entities derived
-  // from item hasPart linkages. Created empty here; populated at upload time.
-  if (schemaKey === 'RepositoryObject') {
-    const filesHeaders = [...TypeColumns.File] as string[]
-    const filesSheet = XLSX.utils.aoa_to_sheet([filesHeaders])
-    filesSheet['!cols'] = columnWidths([filesHeaders])
-    XLSX.utils.book_append_sheet(workbook, filesSheet, 'Files')
-  }
+  // Every converted workbook carries a Files sheet of RO-Crate File entities,
+  // derived at upload time from its entities' file links (item hasPart paths and
+  // depiction images). Created empty here.
+  const filesHeaders = [...TypeColumns.File] as string[]
+  const filesSheet = XLSX.utils.aoa_to_sheet([filesHeaders])
+  filesSheet['!cols'] = columnWidths([filesHeaders])
+  XLSX.utils.book_append_sheet(workbook, filesSheet, 'Files')
 
   return workbook
 }

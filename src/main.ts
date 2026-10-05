@@ -715,8 +715,10 @@ function ensureMemberOfColumn(rows: string[][]): boolean {
   return changed
 }
 
-// Locates the content sheet describing items (has both @id and isRef_hasPart),
-// from which File rows are derived. Skips RootDataset/@context/Files.
+// Locates the sheet describing entities that own files — any sheet with @id and
+// at least one file-linking column (isRef_hasPart or isRef_image). Content
+// collections link via hasPart; entity-vocabulary workbooks link their depiction
+// via isRef_image. Skips RootDataset/@context/Files.
 function findItemsSheetName(workbook: XLSX.WorkBook): string | null {
   for (const name of workbook.SheetNames) {
     const lower = name.toLowerCase()
@@ -732,17 +734,21 @@ function findItemsSheetName(workbook: XLSX.WorkBook): string | null {
       defval: '',
     })
     const headers = (rows[0] ?? []).map((h) => String(h ?? ''))
-    if (headers.includes('@id') && headers.includes('isRef_hasPart')) {
+    if (
+      headers.includes('@id') &&
+      (headers.includes('isRef_hasPart') ||
+        headers.includes(DEPICTION_FIELD_NAME))
+    ) {
       return name
     }
   }
   return null
 }
 
-// Regenerates a collection's Files sheet from item hasPart linkages. Fully
-// derived: existing rows are overwritten. A workbook with no items sheet (e.g.
-// an entity-vocabulary workbook lacking an isRef_hasPart column) is not a
-// content collection, so its file is left untouched and `written` is false.
+// Regenerates a workbook's Files sheet from its entities' file links — item
+// hasPart paths and/or depiction images. Fully derived: existing rows are
+// overwritten. A workbook with no file-bearing entity sheet (no isRef_hasPart
+// and no isRef_image) is left untouched and `written` is false.
 async function reconcileFilesTab(
   xlsxPath: string,
 ): Promise<{ written: boolean; files: number }> {
@@ -1076,7 +1082,7 @@ ipcMain.handle(
       (header) => header === DEPICTION_FIELD_NAME,
     )
 
-    if (idIndex < 0 || hasPartIndex < 0) {
+    if (idIndex < 0 || (hasPartIndex < 0 && imageIndex < 0)) {
       return {
         headers: ['@id', '@type', '.folder', '.filename', 'isRef_isPartOf'],
         rows: [] as string[][],

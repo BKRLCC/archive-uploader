@@ -516,6 +516,7 @@ export const spreadsheets: Record<SpreadsheetType, SpreadsheetSchema> = {
         headers: TypeColumns.Person,
       },
     ],
+    extraSheets: [CONTEXT_SHEET],
   },
   Organisations: {
     folderName: 'Organisations',
@@ -526,6 +527,7 @@ export const spreadsheets: Record<SpreadsheetType, SpreadsheetSchema> = {
         headers: TypeColumns.Organization,
       },
     ],
+    extraSheets: [CONTEXT_SHEET],
   },
   Language: {
     folderName: 'Languages',
@@ -536,6 +538,7 @@ export const spreadsheets: Record<SpreadsheetType, SpreadsheetSchema> = {
         headers: TypeColumns.Language,
       },
     ],
+    extraSheets: [CONTEXT_SHEET],
   },
   Places: {
     folderName: 'Places',
@@ -546,6 +549,7 @@ export const spreadsheets: Record<SpreadsheetType, SpreadsheetSchema> = {
         headers: TypeColumns.Place,
       },
     ],
+    extraSheets: [CONTEXT_SHEET],
   },
   'ldac:DataReuseLicense': {
     folderName: 'Licenses',
