@@ -39,6 +39,7 @@ const FIELD_LABELS: Record<string, string> = {
   material: '🧵 Material', // schema.org — https://schema.org/material
   datePublished: '📅 Date Published', // schema.org — https://schema.org/datePublished
   identifier: '🔢 External ID', // schema.org — https://schema.org/identifier
+  isRef_image: '🖼️ Img', // schema.org — https://schema.org/image (isRef_ → reference to an ImageObject/File)
   // LDaCA FIELDS
   'isRef_ldac:subjectLanguage': '🗣️ Subject Languages', // LDaCA — https://w3id.org/ldac/terms#subjectLanguage
   'ldac:metadataIsPublic': '🌐 Public Metadata', // LDaCA — https://w3id.org/ldac/terms#metadataIsPublic
@@ -47,7 +48,6 @@ const FIELD_LABELS: Record<string, string> = {
   dateAdded: '🗓️ Date Added', // custom — no schema.org equivalent (cf. https://schema.org/dateCreated)
   isRef_enteredBy: '✍️ Entered By', // custom — data-entry attribution; no schema.org equivalent
   isPublishable: '🌐 Publish', // custom — app publishing flag
-  isRef_image: '🖼️ Img', // schema.org — https://schema.org/image (isRef_ → reference to an ImageObject/File)
   languageCode: '🔤 Language Code', // custom — no schema.org equivalent (cf. https://schema.org/Language)
   isRef_holdingOrganisation: '🏛️ Holding Organisation', // custom — no schema.org equivalent
   // PCDM FIELDS
