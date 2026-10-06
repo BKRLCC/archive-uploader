@@ -38,6 +38,7 @@ export interface PublishBuildResult {
   derivativesWritten: number
   failures: { path: string; error: string }[]
   derivativesDir: string
+  publicCratePath: string
   hasDepositUrl: boolean
 }
 
@@ -147,10 +148,7 @@ export interface Api {
   openFile: (filePath: string) => Promise<string>
   showInFinder: (filePath: string) => Promise<void>
   deleteFile: (filePath: string) => Promise<void>
-  planPublish: (
-    rootFolder: string,
-    archiveId: string,
-  ) => Promise<PublishPlan>
+  planPublish: (rootFolder: string, archiveId: string) => Promise<PublishPlan>
   getPublishSettings: () => Promise<PublishSettings>
   setPublishSettings: (settings: {
     depositBaseUrl: string

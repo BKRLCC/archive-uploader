@@ -8,34 +8,6 @@ export default function AppHeader() {
   const navigate = useNavigate()
   const isHome = location.pathname === '/'
 
-  async function handleUpload() {
-    const rootFolder = await window.api.getRootFolder()
-    if (!rootFolder) {
-      window.alert('Set an archive root folder before uploading.')
-      return
-    }
-    if (
-      !window.confirm(
-        'Upload this archive? This refreshes the Files tab in every collection, then builds the RO-Crate.',
-      )
-    ) {
-      return
-    }
-    try {
-      await window.api.reconcileFilesTabs(rootFolder)
-      const { fileCount, entityCount, warningCount } =
-        await window.api.uploadArchive(rootFolder)
-      window.alert(
-        `Uploaded ${fileCount} workbook${fileCount === 1 ? '' : 's'} → ` +
-          `${entityCount} entit${entityCount === 1 ? 'y' : 'ies'}, ` +
-          `${warningCount} warning${warningCount === 1 ? '' : 's'}.\n` +
-          'Saved ro-crate-metadata.json and ro-crate-warnings.json to the archive root.',
-      )
-    } catch (err) {
-      window.alert(`Upload failed: ${(err as Error).message}`)
-    }
-  }
-
   async function handlePublish() {
     const rootFolder = await window.api.getRootFolder()
     if (!rootFolder) {
@@ -44,38 +16,48 @@ export default function AppHeader() {
     }
     const settings = await window.api.getPublishSettings()
     if (!settings.archiveId) {
-      window.alert('Set an Archive ID in Settings → Publishing before publishing.')
+      window.alert(
+        'Set an Archive ID in Settings → Publishing before publishing.',
+      )
       return
     }
-    let plan
+    if (
+      !window.confirm(
+        'Publish this archive? This refreshes the Files tab in every collection, ' +
+          'builds the RO-Crate, then compresses images into the hidden .publish folder.',
+      )
+    ) {
+      return
+    }
+    // Upload must run first: it writes ro-crate-metadata.json, which the publish
+    // step reads to build .publish.
+    let crateSummary: string
     try {
-      plan = await window.api.planPublish(rootFolder, settings.archiveId)
+      await window.api.reconcileFilesTabs(rootFolder)
+      const { fileCount, entityCount, warningCount } =
+        await window.api.uploadArchive(rootFolder)
+      crateSummary =
+        `Built the RO-Crate from ${fileCount} workbook${fileCount === 1 ? '' : 's'} → ` +
+        `${entityCount} entit${entityCount === 1 ? 'y' : 'ies'}, ` +
+        `${warningCount} warning${warningCount === 1 ? '' : 's'}.`
     } catch (err) {
-      window.alert(`Could not prepare publish: ${(err as Error).message}`)
+      window.alert(`Build failed: ${(err as Error).message}`)
       return
     }
-    const t = plan.totals
-    const toCompress = t.imagesAdded + t.imagesChanged
-    const summary =
-      `Publish preview for "${settings.archiveId}":\n\n` +
-      `• ${t.imagesAdded} new image${t.imagesAdded === 1 ? '' : 's'}\n` +
-      `• ${t.imagesChanged} changed\n` +
-      `• ${t.imagesRemoved} removed\n` +
-      `• ${t.imagesUnchanged} unchanged (skipped)\n` +
-      `• ${t.nonImageCount} non-image file${t.nonImageCount === 1 ? '' : 's'} (metadata only)\n` +
-      (t.missingCount
-        ? `• ${t.missingCount} missing/unreadable image${t.missingCount === 1 ? '' : 's'}\n`
-        : '') +
-      `\nCompress ${toCompress} image${toCompress === 1 ? '' : 's'} into .publish/derivatives/ now?`
-    if (!window.confirm(summary)) return
     try {
       const result = await window.api.buildPublishDerivatives(
         rootFolder,
         settings.archiveId,
       )
-      let msg = `Wrote ${result.derivativesWritten} derivative${
-        result.derivativesWritten === 1 ? '' : 's'
-      } to .publish/derivatives/.`
+      const t = result.plan.totals
+      let msg =
+        `${crateSummary}\n\n` +
+        `Wrote ${result.derivativesWritten} derivative${
+          result.derivativesWritten === 1 ? '' : 's'
+        } to .publish/derivatives/ ` +
+        `(${t.imagesAdded} new, ${t.imagesChanged} changed, ${t.imagesUnchanged} unchanged, ` +
+        `${t.nonImageCount} non-image metadata-only).\n` +
+        'Wrote the public crate to .publish/ro-crate-metadata.json.'
       if (result.failures.length) {
         const names = result.failures
           .slice(0, 5)
@@ -85,10 +67,9 @@ export default function AppHeader() {
           result.failures.length > 5 ? '…' : ''
         }`
       }
-      if (!result.hasDepositUrl) {
-        msg +=
-          '\n\n⚠️ No deposit URL set in Settings → Publishing. Images were compressed locally but nothing was uploaded.'
-      }
+      msg += result.hasDepositUrl
+        ? '\n\n⚠️ Uploading is not wired up yet. .publish is ready to deposit, but nothing was sent to the server.'
+        : '\n\n⚠️ No deposit URL set in Settings → Publishing. Images were compressed locally but nothing was uploaded.'
       window.alert(msg)
     } catch (err) {
       window.alert(`Publish failed: ${(err as Error).message}`)
@@ -114,15 +95,8 @@ export default function AppHeader() {
       <div className="app-header-nav no-drag">
         <button
           className="header-nav-btn"
-          onClick={() => void handleUpload()}
-          title="Upload archive"
-        >
-          {UiIcons.upload}
-        </button>
-        <button
-          className="header-nav-btn"
           onClick={() => void handlePublish()}
-          title="Publish (compress images into .publish)"
+          title="Publish archive"
         >
           {UiIcons.publish}
         </button>

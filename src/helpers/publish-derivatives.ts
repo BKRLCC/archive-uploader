@@ -44,14 +44,24 @@ export function derivativeExtension(format: DerivativeFormat): string {
   return format === 'jpeg' ? 'jpg' : 'webp'
 }
 
+// The server-side object key for a derivative (no .publish/ cache prefix),
+// mirroring the original's relative path with the derivative extension.
+export function derivativeKey(
+  originalRelativePath: string,
+  format: DerivativeFormat,
+): string {
+  const relative = originalRelativePath.replace(/^\.\//, '')
+  const withoutExtension = relative.replace(/\.[^./\\]+$/, '')
+  return `${DERIVATIVES_DIR_NAME}/${withoutExtension}.${derivativeExtension(format)}`
+}
+
 // Maps an original archive-relative path to its derivative's archive-relative
 // path under .publish/derivatives/, swapping the extension for the format's.
 export function derivativeRelativePath(
   originalRelativePath: string,
   format: DerivativeFormat,
 ): string {
-  const withoutExtension = originalRelativePath.replace(/\.[^./\\]+$/, '')
-  return `${PUBLISH_DIR_NAME}/${DERIVATIVES_DIR_NAME}/${withoutExtension}.${derivativeExtension(format)}`
+  return `${PUBLISH_DIR_NAME}/${derivativeKey(originalRelativePath, format)}`
 }
 
 // Compresses each image into .publish/derivatives/ and returns manifest entries
@@ -69,7 +79,10 @@ export async function materializeDerivatives({
     const relative = image.path.replace(/^\.\//, '')
     const sourceAbsolute = path.resolve(rootFolder, relative)
     if (!isPathWithin(rootFolder, sourceAbsolute)) {
-      failures.push({ path: image.path, error: 'Source path escapes archive root' })
+      failures.push({
+        path: image.path,
+        error: 'Source path escapes archive root',
+      })
       continue
     }
     const destAbsolute = path.resolve(

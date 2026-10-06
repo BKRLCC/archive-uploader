@@ -4,7 +4,11 @@
 // and diffs them against the last-published manifest. It produces a plan of what
 // would change — nothing is derived, uploaded or written to disk here. Hashing
 // reads file bytes; the manifest load is the only other I/O.
-import { buildPublicationView, type Crate } from './publication-view'
+import {
+  buildPublicationView,
+  type Crate,
+  type CrateNode,
+} from './publication-view'
 import { classifyFiles } from './file-classification'
 import { hashCrateFiles } from './file-hashing'
 import {
@@ -12,6 +16,7 @@ import {
   getArchiveManifest,
   loadUploadState,
   type CurrentFile,
+  type ManifestEntry,
   type PublishDiff,
 } from './publish-manifest'
 
@@ -47,18 +52,32 @@ export type PlanPublishInput = {
   archiveId: string
 }
 
+// The shared result of inspecting a crate against its last-published manifest:
+// the hashed public view plus the image/non-image split, the diff and the prior
+// manifest. Both the preview (summarizePlan) and the local build reuse this so
+// the pipeline runs once.
+export type PublishAnalysis = {
+  hashedView: Crate
+  images: CrateNode[]
+  nonImages: CrateNode[]
+  diff: PublishDiff
+  prior: Record<string, ManifestEntry>
+  missing: string[]
+  sizeByPath: Map<string, number>
+}
+
 const asString = (value: unknown): string =>
   typeof value === 'string' ? value : ''
 
-// Computes what a publish would do without performing it.
-export async function planPublish({
+// Runs the full local inspection pipeline (view → hash → classify → diff) once.
+export async function analyzePublish({
   crate,
   rootFolder,
   archiveId,
-}: PlanPublishInput): Promise<PublishPlan> {
+}: PlanPublishInput): Promise<PublishAnalysis> {
   const view = buildPublicationView(crate)
-  const { crate: hashedCrate } = await hashCrateFiles(view, rootFolder)
-  const { images, nonImages } = classifyFiles(hashedCrate)
+  const { crate: hashedView } = await hashCrateFiles(view, rootFolder)
+  const { images, nonImages } = classifyFiles(hashedView)
 
   const state = await loadUploadState(rootFolder)
   const prior = getArchiveManifest(state, archiveId)
@@ -77,6 +96,16 @@ export async function planPublish({
   }
 
   const diff = diffFiles(current, prior)
+
+  return { hashedView, images, nonImages, diff, prior, missing, sizeByPath }
+}
+
+// Projects an analysis into the preview-friendly plan (counts + summaries).
+export function summarizePlan(
+  analysis: PublishAnalysis,
+  archiveId: string,
+): PublishPlan {
+  const { diff, nonImages, missing, sizeByPath } = analysis
 
   const nonImageSummaries: NonImageSummary[] = nonImages.map((node) => ({
     path: asString(node['@id']),
@@ -105,4 +134,12 @@ export async function planPublish({
       bytesToProcess,
     },
   }
+}
+
+// Computes what a publish would do without performing it.
+export async function planPublish(
+  input: PlanPublishInput,
+): Promise<PublishPlan> {
+  const analysis = await analyzePublish(input)
+  return summarizePlan(analysis, input.archiveId)
 }

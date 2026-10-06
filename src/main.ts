@@ -22,8 +22,13 @@ import {
 } from './types/types'
 import { buildWorkbook } from './helpers/workbook-builder'
 import { deriveFileRowsFromItems } from './helpers/file-linkage'
-import { planPublish } from './helpers/publish-planner'
+import {
+  analyzePublish,
+  planPublish,
+  summarizePlan,
+} from './helpers/publish-planner'
 import { materializeDerivatives } from './helpers/publish-derivatives'
+import { buildPublicCrate } from './helpers/public-crate'
 import type { Crate } from './helpers/publication-view'
 import { isMultiSelectField } from './config/field-vocabularies'
 import { applyFieldRules } from './config/field-rules'
@@ -1013,7 +1018,9 @@ ipcMain.handle(
 // is handled separately and never returned to the renderer (only `hasToken`).
 ipcMain.handle('get-publish-settings', async () => {
   return {
-    depositBaseUrl: String(settingsStore.get('publish.depositBaseUrl', '') ?? ''),
+    depositBaseUrl: String(
+      settingsStore.get('publish.depositBaseUrl', '') ?? '',
+    ),
     archiveId: String(settingsStore.get('publish.archiveId', '') ?? ''),
     hasToken: getStoredPublishToken() !== '',
   }
@@ -1053,23 +1060,47 @@ ipcMain.handle(
       )
     }
     const crate = JSON.parse(raw) as Crate
-    const plan = await planPublish({ crate, rootFolder, archiveId })
-    const images = [...plan.diff.added, ...plan.diff.changed].map((entry) => ({
-      path: entry.path,
-      originalSha512: entry.sha512,
-    }))
+    const analysis = await analyzePublish({ crate, rootFolder, archiveId })
+    const plan = summarizePlan(analysis, archiveId)
+    const images = [...analysis.diff.added, ...analysis.diff.changed].map(
+      (entry) => ({ path: entry.path, originalSha512: entry.sha512 }),
+    )
     const { entries, failures } = await materializeDerivatives({
       rootFolder,
       images,
     })
+    // Published image set = freshly built derivatives plus unchanged ones carried
+    // over from the prior manifest, so the public crate links every live image.
+    const unchanged = analysis.diff.unchanged
+      .map((entry) => analysis.prior[entry.path])
+      .filter((entry): entry is NonNullable<typeof entry> => Boolean(entry))
+    const derivatives = [...entries, ...unchanged]
+
     const depositBaseUrl = String(
       settingsStore.get('publish.depositBaseUrl', '') ?? '',
     )
+    const publicCrate = buildPublicCrate({
+      view: analysis.hashedView,
+      derivatives,
+      depositBaseUrl,
+    })
+    const publicCratePath = path.join(
+      rootFolder,
+      '.publish',
+      'ro-crate-metadata.json',
+    )
+    await fs.promises.mkdir(path.dirname(publicCratePath), { recursive: true })
+    await fs.promises.writeFile(
+      publicCratePath,
+      JSON.stringify(publicCrate, null, 2) + '\n',
+    )
+
     return {
       plan,
       derivativesWritten: entries.length,
       failures,
       derivativesDir: path.join(rootFolder, '.publish', 'derivatives'),
+      publicCratePath,
       hasDepositUrl: depositBaseUrl !== '',
     }
   },
