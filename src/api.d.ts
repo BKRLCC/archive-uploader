@@ -84,6 +84,15 @@ export interface Api {
   reconcileFilesTabs: (
     rootFolder: string,
   ) => Promise<{ collections: number; files: number }>
+  uploadArchive: (
+    rootFolder: string,
+  ) => Promise<{
+    fileCount: number
+    entityCount: number
+    warningCount: number
+    cratePath: string
+    warningsPath: string
+  }>
   createArchive: (
     folderPath: string,
     meta: {

@@ -1,0 +1,70 @@
+[
+  {
+    "source": "repair",
+    "level": "warning",
+    "message": "Unbracketed reference list in Resources!M2: \"#Person_salomeNabarlambarl_579, #Person_jillNganjmirra_574\" → \"[#Person_salomeNabarlambarl_579, #Person_jillNganjmirra_574]\"",
+    "repair": "reference-list-unbracketed",
+    "cell": "Resources!M2",
+    "before": "#Person_salomeNabarlambarl_579, #Person_jillNganjmirra_574",
+    "after": "[#Person_salomeNabarlambarl_579, #Person_jillNganjmirra_574]"
+  },
+  {
+    "source": "repair",
+    "level": "warning",
+    "message": "Unbracketed reference list in Resources!O2: \"#Person_jillNganjmirra_574, #Person_murrayGarde_426\" → \"[#Person_jillNganjmirra_574, #Person_murrayGarde_426]\"",
+    "repair": "reference-list-unbracketed",
+    "cell": "Resources!O2",
+    "before": "#Person_jillNganjmirra_574, #Person_murrayGarde_426",
+    "after": "[#Person_jillNganjmirra_574, #Person_murrayGarde_426]"
+  },
+  {
+    "source": "repair",
+    "level": "warning",
+    "message": "Unbracketed reference list in Resources!M3: \"#Person_salomeNabarlambarl_579, #Person_jillNganjmirra_574\" → \"[#Person_salomeNabarlambarl_579, #Person_jillNganjmirra_574]\"",
+    "repair": "reference-list-unbracketed",
+    "cell": "Resources!M3",
+    "before": "#Person_salomeNabarlambarl_579, #Person_jillNganjmirra_574",
+    "after": "[#Person_salomeNabarlambarl_579, #Person_jillNganjmirra_574]"
+  },
+  {
+    "source": "repair",
+    "level": "warning",
+    "message": "Unbracketed reference list in Resources!M4: \"#Person_salomeNabarlambarl_579, #Person_jillNganjmirra_574\" → \"[#Person_salomeNabarlambarl_579, #Person_jillNganjmirra_574]\"",
+    "repair": "reference-list-unbracketed",
+    "cell": "Resources!M4",
+    "before": "#Person_salomeNabarlambarl_579, #Person_jillNganjmirra_574",
+    "after": "[#Person_salomeNabarlambarl_579, #Person_jillNganjmirra_574]"
+  },
+  {
+    "source": "repair",
+    "level": "warning",
+    "message": "Unbracketed reference list in Resources!O4: \"#Person_jillNganjmirra_574, #Person_murrayGarde_426\" → \"[#Person_jillNganjmirra_574, #Person_murrayGarde_426]\"",
+    "repair": "reference-list-unbracketed",
+    "cell": "Resources!O4",
+    "before": "#Person_jillNganjmirra_574, #Person_murrayGarde_426",
+    "after": "[#Person_jillNganjmirra_574, #Person_murrayGarde_426]"
+  },
+  {
+    "source": "repair",
+    "level": "warning",
+    "message": "Unbracketed reference list in Resources!L2: \"#Person_kayeNamundja_304, #Person_murrayGarde_426\" → \"[#Person_kayeNamundja_304, #Person_murrayGarde_426]\"",
+    "repair": "reference-list-unbracketed",
+    "cell": "Resources!L2",
+    "before": "#Person_kayeNamundja_304, #Person_murrayGarde_426",
+    "after": "[#Person_kayeNamundja_304, #Person_murrayGarde_426]"
+  },
+  {
+    "source": "check",
+    "level": "warning",
+    "message": "Reference to \"License files/all-rights-reserved.txt\" is not defined in this crate (used 4 times, e.g. from ./ (license)). It may be defined in another sheet or workbook.",
+    "reference": "License files/all-rights-reserved.txt",
+    "count": 4
+  },
+  {
+    "source": "check",
+    "level": "warning",
+    "message": "Reference to \"License files/GN-LEX (1).txt\" is not defined in this crate (used once, e.g. from arcp://uuid,0ab3dc28-9f57-4728-bedf-4480edce3fbf/ (license)). It may be defined in another sheet or workbook.",
+    "reference": "License files/GN-LEX (1).txt",
+    "count": 1
+  }
+]

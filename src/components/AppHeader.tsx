@@ -16,18 +16,20 @@ export default function AppHeader() {
     }
     if (
       !window.confirm(
-        'Upload this archive? This refreshes the Files tab in every collection.',
+        'Upload this archive? This refreshes the Files tab in every collection, then builds the RO-Crate.',
       )
     ) {
       return
     }
     try {
-      const { collections, files } =
-        await window.api.reconcileFilesTabs(rootFolder)
+      await window.api.reconcileFilesTabs(rootFolder)
+      const { fileCount, entityCount, warningCount } =
+        await window.api.uploadArchive(rootFolder)
       window.alert(
-        `Files tabs updated in ${collections} collection${
-          collections === 1 ? '' : 's'
-        } (${files} file${files === 1 ? '' : 's'}).`,
+        `Uploaded ${fileCount} workbook${fileCount === 1 ? '' : 's'} → ` +
+          `${entityCount} entit${entityCount === 1 ? 'y' : 'ies'}, ` +
+          `${warningCount} warning${warningCount === 1 ? '' : 's'}.\n` +
+          'Saved ro-crate-metadata.json and ro-crate-warnings.json to the archive root.',
       )
     } catch (err) {
       window.alert(`Upload failed: ${(err as Error).message}`)

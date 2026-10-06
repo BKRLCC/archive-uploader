@@ -111,6 +111,15 @@ contextBridge.exposeInMainWorld('api', {
     rootFolder: string,
   ): Promise<{ collections: number; files: number }> =>
     ipcRenderer.invoke('reconcile-files-tabs', rootFolder),
+  uploadArchive: (
+    rootFolder: string,
+  ): Promise<{
+    fileCount: number
+    entityCount: number
+    warningCount: number
+    cratePath: string
+    warningsPath: string
+  }> => ipcRenderer.invoke('upload-archive', rootFolder),
   createArchive: (
     folderPath: string,
     meta: {

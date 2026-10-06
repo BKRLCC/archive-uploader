@@ -1,0 +1,1283 @@
+{
+  "@context": [
+    "https://w3id.org/ro/crate/1.2/context",
+    {
+      "@vocab": "http://schema.org/",
+      "ldac": "https://w3id.org/ldac/terms#",
+      "csvw": "http://www.w3.org/ns/csvw#",
+      "custom": "arcp://name,custom/terms#",
+      "dcterms": "http://purl.org/dc/terms/"
+    }
+  ],
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "identifier": "ro-crate-metadata.json",
+      "about": {
+        "@id": "./"
+      },
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.2"
+      }
+    },
+    {
+      "@id": "./",
+      "@type": [
+        "Dataset",
+        "RepositoryCollection"
+      ],
+      "name": "West Arnhem Archive",
+      "description": "An archive of West Arnhem resources, created by the Bininj Kunwok Regional Language & Culture Centre.",
+      "identifier": "arcp://uuid,7072b05b-b35c-416d-a131-88661bec8129/",
+      "datePublished": "2026-09-15",
+      "ldac:metadataIsPublic": "FALSE",
+      "license": {
+        "@id": "License files/all-rights-reserved.txt"
+      },
+      "publisher": {
+        "@id": "#Organization_bkrlcc_842"
+      },
+      "inLanguage": [
+        {
+          "@id": "#Language_kuninjku_043"
+        },
+        {
+          "@id": "#Language_kunwinjku_390"
+        },
+        {
+          "@id": "#Language_kune_746"
+        },
+        {
+          "@id": "#Language_bininjKunwok_216"
+        }
+      ],
+      "pcdm:hasMember": [
+        {
+          "@id": "arcp://uuid,ee034bd3-b498-465e-ab15-d58e10464d4f/"
+        },
+        {
+          "@id": "arcp://uuid,e4dbe373-ad35-4b41-bf03-db5e83f93f54/"
+        },
+        {
+          "@id": "arcp://uuid,0ab3dc28-9f57-4728-bedf-4480edce3fbf/"
+        },
+        {
+          "@id": "arcp://uuid,d51535d9-541c-47c8-8c8c-757fbd2163d4/"
+        },
+        {
+          "@id": "arcp://uuid,1bd6742f-bcd2-4c37-b7d5-677143a6821f/"
+        },
+        {
+          "@id": "arcp://uuid,80d691a3-fc6f-4b3f-a9a0-daa50efb2550/"
+        },
+        {
+          "@id": "arcp://uuid,ac618a04-4bad-4d95-8cea-17ae972bced8/"
+        },
+        {
+          "@id": "arcp://uuid,c9bbe4b6-0375-4978-92d9-863cb1b61539/"
+        }
+      ]
+    },
+    {
+      "@id": "#Language_bininjKunwok_216",
+      "@type": "Language",
+      "name": "Bininj Kunwok",
+      "description": "Bininj Kunwok, dialect unknown.",
+      "custom:dateAdded": "2026-07-09",
+      "custom:enteredBy": {
+        "@id": "#Person_dannyKennedy_625"
+      },
+      "custom:isPublishable": "FALSE",
+      "custom:languageCode": "N186",
+      "sameAs": "https://aiatsis.gov.au/austlang/language/N186"
+    },
+    {
+      "@id": "#Language_kune_746",
+      "@type": "Language",
+      "name": "Kune",
+      "custom:dateAdded": "2026-07-09",
+      "custom:enteredBy": {
+        "@id": "#Person_dannyKennedy_625"
+      },
+      "custom:isPublishable": "FALSE",
+      "custom:languageCode": "N70",
+      "sameAs": "https://aiatsis.gov.au/austlang/language/N70"
+    },
+    {
+      "@id": "#Language_kuninjku_043",
+      "@type": "Language",
+      "name": "Kuninjku",
+      "description": "Eastern Bininj Kunwok dialect",
+      "custom:dateAdded": "2026-07-09",
+      "custom:enteredBy": {
+        "@id": "#Person_dannyKennedy_625"
+      },
+      "custom:isPublishable": "FALSE",
+      "custom:languageCode": "N173",
+      "sameAs": "https://aiatsis.gov.au/austlang/language/N173"
+    },
+    {
+      "@id": "#Language_kunwinjku_390",
+      "@type": "Language",
+      "name": "Kunwinjku",
+      "description": "Dialect of Bininj Kunwok spoken in Gunbalanya and surrounding outstations.",
+      "custom:dateAdded": "2026-06-09",
+      "custom:enteredBy": {
+        "@id": "#Person_dannyKennedy_625"
+      },
+      "custom:isPublishable": "FALSE",
+      "custom:languageCode": "N65",
+      "sameAs": "https://aiatsis.gov.au/austlang/language/N65"
+    },
+    {
+      "@id": "#Organization_bkrlcc_842",
+      "@type": "Organization",
+      "name": "BKRLCC",
+      "custom:dateAdded": "2026-09-15",
+      "custom:isPublishable": "FALSE"
+    },
+    {
+      "@id": "#Organization_museumDerKulturenBasel_928",
+      "@type": "Organization",
+      "name": "Museum der Kulturen Basel",
+      "custom:dateAdded": "2026-07-11",
+      "custom:enteredBy": {
+        "@id": "#Person_dannyKennedy_625"
+      },
+      "image": {
+        "@id": "Organisations/_images/Museum_der_Kulturen_Basel-103331.jpg"
+      },
+      "url": "https://www.mkb.ch/en.html",
+      "sameAs": "https://www.mkb.ch/en.html",
+      "custom:isPublishable": "FALSE"
+    },
+    {
+      "@id": "#Person_andyPeart_384",
+      "@type": "Person",
+      "name": "Andy Peart",
+      "custom:dateAdded": "2026-06-04",
+      "custom:isPublishable": "FALSE"
+    },
+    {
+      "@id": "#Person_claudiaCialone_528",
+      "@type": "Person",
+      "name": "Claudia Cialone",
+      "custom:dateAdded": "2026-06-16",
+      "image": {
+        "@id": "People/images/claudia.webp"
+      },
+      "custom:isPublishable": "FALSE"
+    },
+    {
+      "@id": "#Person_dannyKennedy_625",
+      "@type": "Person",
+      "name": "Danny Kennedy",
+      "description": "Programmer & Bininj Kunwok lexicography",
+      "custom:dateAdded": "2026-07-09",
+      "birthDate": "1985-05-14",
+      "custom:isPublishable": "FALSE"
+    },
+    {
+      "@id": "#Person_jeanetteBurrunali_102",
+      "@type": "Person",
+      "name": "Jeanette Burrunali",
+      "custom:dateAdded": "2026-06-16",
+      "custom:enteredBy": {
+        "@id": "#Person_salomeNabarlambarl_579"
+      },
+      "custom:isPublishable": "FALSE"
+    },
+    {
+      "@id": "#Person_jennyManmurulu_410",
+      "@type": "Person",
+      "name": "Jenny Manmurulu",
+      "custom:dateAdded": "2026-06-16",
+      "custom:enteredBy": {
+        "@id": "#Person_salomeNabarlambarl_579"
+      },
+      "custom:isPublishable": "FALSE"
+    },
+    {
+      "@id": "#Person_jillNganjmirra_574",
+      "@type": "Person",
+      "name": "Jill Nganjmirra",
+      "custom:dateAdded": "2026-06-04",
+      "image": {
+        "@id": "People/images/jill.webp"
+      },
+      "custom:isPublishable": "FALSE"
+    },
+    {
+      "@id": "#Person_jonAltman_974",
+      "@type": "Person",
+      "name": "Jon Altman",
+      "custom:dateAdded": "2026-06-04",
+      "custom:isPublishable": "FALSE"
+    },
+    {
+      "@id": "#Person_kayeNamundja_304",
+      "@type": "Person",
+      "name": "Kaye Namundja",
+      "custom:dateAdded": "2026-06-16",
+      "custom:enteredBy": {
+        "@id": "#Person_salomeNabarlambarl_579"
+      },
+      "custom:isPublishable": "FALSE"
+    },
+    {
+      "@id": "#Person_murrayGarde_426",
+      "@type": "Person",
+      "name": "Murray Garde",
+      "custom:dateAdded": "2026-06-04",
+      "image": {
+        "@id": "People/images/murray.webp"
+      },
+      "custom:isPublishable": "FALSE"
+    },
+    {
+      "@id": "#Person_salomeNabarlambarl_579",
+      "@type": "Person",
+      "name": "Salome Nabarlambarl",
+      "custom:dateAdded": "2026-06-16",
+      "custom:enteredBy": {
+        "@id": "#Person_claudiaCialone_528"
+      },
+      "custom:isPublishable": "FALSE"
+    },
+    {
+      "@id": "#Person_seraineNamundja_511",
+      "@type": "Person",
+      "name": "Seraine Namundja",
+      "custom:dateAdded": "2026-06-16",
+      "custom:enteredBy": {
+        "@id": "#Person_salomeNabarlambarl_579"
+      },
+      "image": {
+        "@id": "People/images/seraine.webp"
+      },
+      "custom:isPublishable": "FALSE"
+    },
+    {
+      "@id": "#Person_sheduerGondarra_973",
+      "@type": "Person",
+      "name": "Sheduer Gondarra",
+      "custom:dateAdded": "2026-06-16",
+      "custom:enteredBy": {
+        "@id": "#Person_salomeNabarlambarl_579"
+      },
+      "custom:isPublishable": "FALSE"
+    },
+    {
+      "@id": "#Place_gunbalanya_579",
+      "@type": "Place",
+      "name": "Gunbalanya",
+      "custom:dateAdded": "2026-06-09",
+      "custom:enteredBy": {
+        "@id": "#Person_dannyKennedy_625"
+      },
+      "image": {
+        "@id": "Places/_images/Oenpelli-from-Injalak.JPG"
+      },
+      "custom:isPublishable": "FALSE",
+      "latitude": "-12.323499",
+      "longitude": "133.053264"
+    },
+    {
+      "@id": "#Place_injalakGunbalanya_388",
+      "@type": "Place",
+      "name": "Injalak",
+      "description": "The art centre",
+      "custom:dateAdded": "2026-07-01",
+      "custom:enteredBy": {
+        "@id": "#Person_dannyKennedy_625"
+      },
+      "image": {
+        "@id": "Places/_images/Injalak_Hill_April_2014.jpg"
+      },
+      "custom:isPublishable": "FALSE",
+      "latitude": "-12.327445",
+      "longitude": "133.056258"
+    },
+    {
+      "@id": "#Place_kabulwarnamyo_029",
+      "@type": "Place",
+      "name": "Kabulwarnamyo",
+      "description": "Outstation on Mok clan country",
+      "custom:dateAdded": "2026-07-09",
+      "custom:enteredBy": {
+        "@id": "#Person_dannyKennedy_625"
+      },
+      "custom:isPublishable": "FALSE",
+      "latitude": "-12.764807",
+      "longitude": "133.844980"
+    },
+    {
+      "@id": "#Place_magntMuseumDarwin_216",
+      "@type": "Place",
+      "name": "MAGNT museum, Darwin",
+      "custom:dateAdded": "2026-06-16",
+      "custom:enteredBy": {
+        "@id": "#Person_claudiaCialone_528"
+      },
+      "image": {
+        "@id": "Places/_images/MAGNT_Darwin,_2023_(01).jpg"
+      },
+      "custom:isPublishable": "TRUE",
+      "latitude": "-12.437290",
+      "longitude": "130.833707"
+    },
+    {
+      "@id": "#RepositoryObject_20260604BkwworkshopJennyManmuruluLowres",
+      "@type": "RepositoryObject",
+      "name": "20260604_BkwWorkshop_Jenny Manmurulu_LowRes",
+      "description": "BKRLCC strategic workshop promotional videos. These videos were shot at the Museum and Art Gallery of the Northern Territory, Darwin.",
+      "dateCreated": "2026-06-04",
+      "custom:dateAdded": "2026-06-16",
+      "custom:enteredBy": {
+        "@id": "#Person_salomeNabarlambarl_579"
+      },
+      "custom:isPublishable": "FALSE",
+      "contentLocation": {
+        "@id": "#Place_magntMuseumDarwin_216"
+      },
+      "inLanguage": {
+        "@id": "#Language_kunwinjku_390"
+      },
+      "creator": {
+        "@id": "#Person_claudiaCialone_528"
+      },
+      "contributor": [
+        {
+          "@id": "#Person_salomeNabarlambarl_579"
+        },
+        {
+          "@id": "#Person_jillNganjmirra_574"
+        }
+      ],
+      "hasPart": {
+        "@id": "Data/BKRLCC Promotional videos/20260604_BkwWorkshop_Jenny Manmurulu_LowRes.mov"
+      },
+      "mentions": {
+        "@id": "#Person_jennyManmurulu_410"
+      },
+      "pcdm:memberOf": {
+        "@id": "arcp://uuid,ee034bd3-b498-465e-ab15-d58e10464d4f/"
+      }
+    },
+    {
+      "@id": "#RepositoryObject_20260604BkwworkshopJillNganjmirraLowres",
+      "@type": "RepositoryObject",
+      "name": "20260604_BkwWorkshop_Jill Nganjmirra_LowRes",
+      "description": "BKRLCC strategic workshop promotional videos. These videos were shot at the Museum and Art Gallery of the Northern Territory, Darwin.",
+      "dateCreated": "2026-06-04",
+      "custom:dateAdded": "2026-06-16",
+      "custom:enteredBy": {
+        "@id": "#Person_salomeNabarlambarl_579"
+      },
+      "custom:isPublishable": "FALSE",
+      "image": {
+        "@id": "Data/BKRLCC Promotional videos/Depictions/20260604_BkwWorkshop_Jill Nganjmirra.png"
+      },
+      "contentLocation": {
+        "@id": "#Place_magntMuseumDarwin_216"
+      },
+      "inLanguage": {
+        "@id": "#Language_kunwinjku_390"
+      },
+      "creator": {
+        "@id": "#Person_claudiaCialone_528"
+      },
+      "contributor": [
+        {
+          "@id": "#Person_salomeNabarlambarl_579"
+        },
+        {
+          "@id": "#Person_jillNganjmirra_574"
+        }
+      ],
+      "hasPart": [
+        {
+          "@id": "Data/BKRLCC Promotional videos/20260604_BkwWorkshop_Jill Nganjmirra_LowRes.mov"
+        },
+        {
+          "@id": "Data/BKRLCC Promotional videos/Depictions/20260604_BkwWorkshop_Jill Nganjmirra.png"
+        }
+      ],
+      "mentions": [
+        {
+          "@id": "#Person_jillNganjmirra_574"
+        },
+        {
+          "@id": "#Person_murrayGarde_426"
+        }
+      ],
+      "pcdm:memberOf": {
+        "@id": "arcp://uuid,ee034bd3-b498-465e-ab15-d58e10464d4f/"
+      }
+    },
+    {
+      "@id": "#RepositoryObject_20260604BkwworkshopMurrayGardeLowres",
+      "@type": "RepositoryObject",
+      "name": "20260604_BkwWorkshop_Murray Garde_LowRes",
+      "description": "BKRLCC strategic workshop promotional videos. These videos were shot at the Museum and Art Gallery of the Northern Territory, Darwin.",
+      "dateCreated": "2026-06-04",
+      "custom:dateAdded": "2026-06-16",
+      "custom:enteredBy": {
+        "@id": "#Person_salomeNabarlambarl_579"
+      },
+      "custom:isPublishable": "FALSE",
+      "contentLocation": {
+        "@id": "#Place_magntMuseumDarwin_216"
+      },
+      "inLanguage": {
+        "@id": "#Language_kunwinjku_390"
+      },
+      "creator": {
+        "@id": "#Person_claudiaCialone_528"
+      },
+      "contributor": [
+        {
+          "@id": "#Person_salomeNabarlambarl_579"
+        },
+        {
+          "@id": "#Person_jillNganjmirra_574"
+        }
+      ],
+      "hasPart": {
+        "@id": "Data/BKRLCC Promotional videos/20260604_BkwWorkshop_Murray Garde_LowRes.mov"
+      },
+      "mentions": [
+        {
+          "@id": "#Person_jillNganjmirra_574"
+        },
+        {
+          "@id": "#Person_murrayGarde_426"
+        }
+      ],
+      "pcdm:memberOf": {
+        "@id": "arcp://uuid,ee034bd3-b498-465e-ab15-d58e10464d4f/"
+      }
+    },
+    {
+      "@id": "#RepositoryObject_20260605BkwworkshopJeanetteBurrunaliLowres",
+      "@type": "RepositoryObject",
+      "name": "20260605_BkwWorkshop_Jeanette Burrunali_LowRes",
+      "description": "bkrlcc strategic workshop promotional videos were shot at the magnt museum",
+      "dateCreated": "2026-06-05",
+      "custom:dateAdded": "2026-06-16",
+      "custom:enteredBy": {
+        "@id": "#Person_salomeNabarlambarl_579"
+      },
+      "custom:isPublishable": "FALSE",
+      "contentLocation": {
+        "@id": "#Place_magntMuseumDarwin_216"
+      },
+      "inLanguage": {
+        "@id": "#Language_kunwinjku_390"
+      },
+      "creator": {
+        "@id": "#Person_claudiaCialone_528"
+      },
+      "hasPart": {
+        "@id": "Data/BKRLCC Promotional videos/20260605_BkwWorkshop_Jeanette Burrunali_LowRes.mov"
+      },
+      "mentions": {
+        "@id": "#Person_jeanetteBurrunali_102"
+      },
+      "pcdm:memberOf": {
+        "@id": "arcp://uuid,ee034bd3-b498-465e-ab15-d58e10464d4f/"
+      }
+    },
+    {
+      "@id": "#RepositoryObject_20260605BkwworkshopKayeNamundjaLowres",
+      "@type": "RepositoryObject",
+      "name": "20260605_BkwWorkshop_Kaye Namundja_LowRes",
+      "description": "bkrlcc strategic workshop promotional videos were shot at the magnt museum",
+      "dateCreated": "2026-06-05",
+      "custom:dateAdded": "2026-06-16",
+      "custom:enteredBy": {
+        "@id": "#Person_salomeNabarlambarl_579"
+      },
+      "custom:isPublishable": "FALSE",
+      "contentLocation": {
+        "@id": "#Place_magntMuseumDarwin_216"
+      },
+      "inLanguage": {
+        "@id": "#Language_kunwinjku_390"
+      },
+      "creator": {
+        "@id": "#Person_claudiaCialone_528"
+      },
+      "hasPart": {
+        "@id": "Data/BKRLCC Promotional videos/20260605_BkwWorkshop_Kaye Namundja_LowRes.mov"
+      },
+      "mentions": {
+        "@id": "#Person_kayeNamundja_304"
+      },
+      "pcdm:memberOf": {
+        "@id": "arcp://uuid,ee034bd3-b498-465e-ab15-d58e10464d4f/"
+      }
+    },
+    {
+      "@id": "#RepositoryObject_20260605BkwworkshopSalomeNabarlambarlLowres",
+      "@type": "RepositoryObject",
+      "name": "20260605_BkwWorkshop_Salome Nabarlambarl_LowRes",
+      "description": "bkrlcc strategic workshop promotional videos were shot at the magnt museum!",
+      "dateCreated": "2026-06-05",
+      "custom:dateAdded": "2026-06-16",
+      "custom:enteredBy": {
+        "@id": "#Person_salomeNabarlambarl_579"
+      },
+      "custom:isPublishable": "FALSE",
+      "contentLocation": {
+        "@id": "#Place_magntMuseumDarwin_216"
+      },
+      "inLanguage": {
+        "@id": "#Language_kunwinjku_390"
+      },
+      "creator": {
+        "@id": "#Person_claudiaCialone_528"
+      },
+      "hasPart": {
+        "@id": "Data/BKRLCC Promotional videos/20260605_BkwWorkshop_Salome Nabarlambarl_LowRes.mov"
+      },
+      "pcdm:memberOf": {
+        "@id": "arcp://uuid,ee034bd3-b498-465e-ab15-d58e10464d4f/"
+      }
+    },
+    {
+      "@id": "#RepositoryObject_scholl714aJoeyNganjmirra63569",
+      "@type": "RepositoryObject",
+      "name": "SCHOLL7-1-4a-Joey Nganjmirra_63569",
+      "dateCreated": "2026-07-03",
+      "custom:dateAdded": "2026-07-14",
+      "custom:enteredBy": {
+        "@id": "#Person_dannyKennedy_625"
+      },
+      "custom:isPublishable": "FALSE",
+      "image": {
+        "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4a-Joey Nganjmirra_63569.jpg"
+      },
+      "creator": {
+        "@id": "#Person_kayeNamundja_304"
+      },
+      "hasPart": {
+        "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4a-Joey Nganjmirra_63569.jpg"
+      },
+      "pcdm:memberOf": {
+        "@id": "arcp://uuid,e4dbe373-ad35-4b41-bf03-db5e83f93f54/"
+      }
+    },
+    {
+      "@id": "#RepositoryObject_scholl714aJoeyNganjmirra63572",
+      "@type": "RepositoryObject",
+      "name": "SCHOLL7-1-4a-Joey Nganjmirra_63572",
+      "dateCreated": "2026-07-03",
+      "custom:dateAdded": "2026-07-14",
+      "custom:enteredBy": {
+        "@id": "#Person_dannyKennedy_625"
+      },
+      "custom:isPublishable": "FALSE",
+      "image": {
+        "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4a-Joey Nganjmirra_63572.jpg"
+      },
+      "creator": {
+        "@id": "#Person_kayeNamundja_304"
+      },
+      "hasPart": {
+        "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4a-Joey Nganjmirra_63572.jpg"
+      },
+      "pcdm:memberOf": {
+        "@id": "arcp://uuid,e4dbe373-ad35-4b41-bf03-db5e83f93f54/"
+      }
+    },
+    {
+      "@id": "#RepositoryObject_scholl714aJoeyNganjmirra63576",
+      "@type": "RepositoryObject",
+      "name": "SCHOLL7-1-4a-Joey Nganjmirra_63576",
+      "dateCreated": "2026-07-03",
+      "custom:dateAdded": "2026-07-14",
+      "custom:enteredBy": {
+        "@id": "#Person_dannyKennedy_625"
+      },
+      "custom:isPublishable": "FALSE",
+      "image": {
+        "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4a-Joey Nganjmirra_63576.jpg"
+      },
+      "creator": {
+        "@id": "#Person_kayeNamundja_304"
+      },
+      "hasPart": {
+        "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4a-Joey Nganjmirra_63576.jpg"
+      },
+      "pcdm:memberOf": {
+        "@id": "arcp://uuid,e4dbe373-ad35-4b41-bf03-db5e83f93f54/"
+      }
+    },
+    {
+      "@id": "#RepositoryObject_scholl714aJoeyNganjmirra63577",
+      "@type": "RepositoryObject",
+      "name": "SCHOLL7-1-4a-Joey Nganjmirra_63577",
+      "dateCreated": "2026-07-03",
+      "custom:dateAdded": "2026-07-14",
+      "custom:enteredBy": {
+        "@id": "#Person_dannyKennedy_625"
+      },
+      "custom:isPublishable": "FALSE",
+      "image": {
+        "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4a-Joey Nganjmirra_63577.jpg"
+      },
+      "creator": {
+        "@id": "#Person_kayeNamundja_304"
+      },
+      "hasPart": {
+        "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4a-Joey Nganjmirra_63577.jpg"
+      },
+      "pcdm:memberOf": {
+        "@id": "arcp://uuid,e4dbe373-ad35-4b41-bf03-db5e83f93f54/"
+      }
+    },
+    {
+      "@id": "#RepositoryObject_scholl714aJoeyNganjmirra63578",
+      "@type": "RepositoryObject",
+      "name": "SCHOLL7-1-4a-Joey Nganjmirra_63578",
+      "dateCreated": "2026-07-03",
+      "custom:dateAdded": "2026-07-14",
+      "custom:enteredBy": {
+        "@id": "#Person_dannyKennedy_625"
+      },
+      "custom:isPublishable": "FALSE",
+      "image": {
+        "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4a-Joey Nganjmirra_63578.jpg"
+      },
+      "creator": {
+        "@id": "#Person_kayeNamundja_304"
+      },
+      "hasPart": {
+        "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4a-Joey Nganjmirra_63578.jpg"
+      },
+      "pcdm:memberOf": {
+        "@id": "arcp://uuid,e4dbe373-ad35-4b41-bf03-db5e83f93f54/"
+      }
+    },
+    {
+      "@id": "#RepositoryObject_scholl714aJoeyNganjmirra63579",
+      "@type": "RepositoryObject",
+      "name": "SCHOLL7-1-4a-Joey Nganjmirra_63579",
+      "dateCreated": "2026-07-03",
+      "custom:dateAdded": "2026-07-14",
+      "custom:enteredBy": {
+        "@id": "#Person_dannyKennedy_625"
+      },
+      "custom:isPublishable": "FALSE",
+      "image": {
+        "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4a-Joey Nganjmirra_63579.jpg"
+      },
+      "creator": {
+        "@id": "#Person_kayeNamundja_304"
+      },
+      "hasPart": {
+        "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4a-Joey Nganjmirra_63579.jpg"
+      },
+      "pcdm:memberOf": {
+        "@id": "arcp://uuid,e4dbe373-ad35-4b41-bf03-db5e83f93f54/"
+      }
+    },
+    {
+      "@id": "#RepositoryObject_scholl714aJoeyNganjmirra63580",
+      "@type": "RepositoryObject",
+      "name": "SCHOLL7-1-4a-Joey Nganjmirra_63580",
+      "description": "Painting",
+      "dateCreated": "2026-07-03",
+      "custom:dateAdded": "2026-07-14",
+      "custom:enteredBy": {
+        "@id": "#Person_dannyKennedy_625"
+      },
+      "custom:isPublishable": "FALSE",
+      "image": {
+        "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4a-Joey Nganjmirra_63580.jpg"
+      },
+      "creator": {
+        "@id": "#Person_kayeNamundja_304"
+      },
+      "hasPart": {
+        "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4a-Joey Nganjmirra_63580.jpg"
+      },
+      "pcdm:memberOf": {
+        "@id": "arcp://uuid,e4dbe373-ad35-4b41-bf03-db5e83f93f54/"
+      }
+    },
+    {
+      "@id": "#RepositoryObject_scholl714aJoeyNganjmirra63581",
+      "@type": "RepositoryObject",
+      "name": "SCHOLL7-1-4a-Joey Nganjmirra_63581",
+      "dateCreated": "2026-07-03",
+      "custom:dateAdded": "2026-07-14",
+      "custom:enteredBy": {
+        "@id": "#Person_dannyKennedy_625"
+      },
+      "custom:isPublishable": "FALSE",
+      "image": {
+        "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4a-Joey Nganjmirra_63581.jpg"
+      },
+      "creator": {
+        "@id": "#Person_kayeNamundja_304"
+      },
+      "hasPart": {
+        "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4a-Joey Nganjmirra_63581.jpg"
+      },
+      "pcdm:memberOf": {
+        "@id": "arcp://uuid,e4dbe373-ad35-4b41-bf03-db5e83f93f54/"
+      }
+    },
+    {
+      "@id": "#RepositoryObject_scholl714aJoeyNganjmirra63583",
+      "@type": "RepositoryObject",
+      "name": "SCHOLL7-1-4a-Joey Nganjmirra_63583",
+      "dateCreated": "2026-07-03",
+      "custom:dateAdded": "2026-07-14",
+      "custom:enteredBy": {
+        "@id": "#Person_dannyKennedy_625"
+      },
+      "custom:isPublishable": "FALSE",
+      "image": {
+        "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4a-Joey Nganjmirra_63583.jpg"
+      },
+      "creator": {
+        "@id": "#Person_kayeNamundja_304"
+      },
+      "hasPart": {
+        "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4a-Joey Nganjmirra_63583.jpg"
+      },
+      "pcdm:memberOf": {
+        "@id": "arcp://uuid,e4dbe373-ad35-4b41-bf03-db5e83f93f54/"
+      }
+    },
+    {
+      "@id": "#RepositoryObject_scholl714aJoeyNganjmirra63585",
+      "@type": "RepositoryObject",
+      "name": "SCHOLL7-1-4a-Joey Nganjmirra_63585",
+      "dateCreated": "2026-07-03",
+      "custom:dateAdded": "2026-07-14",
+      "custom:enteredBy": {
+        "@id": "#Person_dannyKennedy_625"
+      },
+      "custom:isPublishable": "FALSE",
+      "image": {
+        "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4a-Joey Nganjmirra_63585.jpg"
+      },
+      "creator": {
+        "@id": "#Person_kayeNamundja_304"
+      },
+      "hasPart": {
+        "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4a-Joey Nganjmirra_63585.jpg"
+      },
+      "pcdm:memberOf": {
+        "@id": "arcp://uuid,e4dbe373-ad35-4b41-bf03-db5e83f93f54/"
+      }
+    },
+    {
+      "@id": "#RepositoryObject_scholl714aJoeyNganjmirra63587",
+      "@type": "RepositoryObject",
+      "name": "SCHOLL7-1-4a-_Joey Nganjmirra_63587",
+      "description": "Another Painting",
+      "dateCreated": "2026-07-03",
+      "custom:dateAdded": "2026-07-14",
+      "custom:enteredBy": {
+        "@id": "#Person_dannyKennedy_625"
+      },
+      "custom:isPublishable": "TRUE",
+      "image": {
+        "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4a-_Joey Nganjmirra_63587.jpg"
+      },
+      "creator": {
+        "@id": "#Person_kayeNamundja_304"
+      },
+      "hasPart": {
+        "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4a-_Joey Nganjmirra_63587.jpg"
+      },
+      "pcdm:memberOf": {
+        "@id": "arcp://uuid,e4dbe373-ad35-4b41-bf03-db5e83f93f54/"
+      }
+    },
+    {
+      "@id": "#RepositoryObject_scholl714b63592",
+      "@type": "RepositoryObject",
+      "name": "SCHOLL7-1-4b-63592",
+      "dateCreated": "2026-07-03",
+      "custom:dateAdded": "2026-07-14",
+      "custom:enteredBy": {
+        "@id": "#Person_dannyKennedy_625"
+      },
+      "custom:isPublishable": "FALSE",
+      "image": {
+        "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4b-63592.jpg"
+      },
+      "creator": {
+        "@id": "#Person_kayeNamundja_304"
+      },
+      "hasPart": {
+        "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4b-63592.jpg"
+      },
+      "pcdm:memberOf": {
+        "@id": "arcp://uuid,e4dbe373-ad35-4b41-bf03-db5e83f93f54/"
+      }
+    },
+    {
+      "@id": "#RepositoryObject_va9024282ddb",
+      "@type": "RepositoryObject",
+      "name": "Va-902_4282DDB",
+      "description": "Painting",
+      "dateCreated": "2026-07-03",
+      "custom:dateAdded": "2026-07-14",
+      "custom:enteredBy": {
+        "@id": "#Person_dannyKennedy_625"
+      },
+      "custom:isPublishable": "FALSE",
+      "image": {
+        "@id": "Data/Injalak_Joey Nganjmirra/Va-902_4282DDB.jpg"
+      },
+      "creator": [
+        {
+          "@id": "#Person_kayeNamundja_304"
+        },
+        {
+          "@id": "#Person_murrayGarde_426"
+        }
+      ],
+      "hasPart": {
+        "@id": "Data/Injalak_Joey Nganjmirra/Va-902_4282DDB.jpg"
+      },
+      "pcdm:memberOf": {
+        "@id": "arcp://uuid,e4dbe373-ad35-4b41-bf03-db5e83f93f54/"
+      }
+    },
+    {
+      "@id": "arcp://uuid,0ab3dc28-9f57-4728-bedf-4480edce3fbf/",
+      "@type": [
+        "Dataset",
+        "RepositoryCollection"
+      ],
+      "name": "Altman Sign Language collection",
+      "description": "Collection of photos by Jon Altman",
+      "identifier": "arcp://uuid,0ab3dc28-9f57-4728-bedf-4480edce3fbf/",
+      "datePublished": "2026-09-16",
+      "ldac:metadataIsPublic": "FALSE",
+      "license": {
+        "@id": "License files/GN-LEX (1).txt"
+      },
+      "author": {
+        "@id": "#Person_dannyKennedy_625"
+      },
+      "publisher": {
+        "@id": "#Organization_bkrlcc_842"
+      },
+      "pcdm:memberOf": {
+        "@id": "./"
+      }
+    },
+    {
+      "@id": "arcp://uuid,1bd6742f-bcd2-4c37-b7d5-677143a6821f/",
+      "@type": [
+        "Dataset",
+        "RepositoryCollection"
+      ],
+      "name": "Licenses",
+      "description": "Licenses for the West Arnhem Archive",
+      "identifier": "arcp://uuid,1bd6742f-bcd2-4c37-b7d5-677143a6821f/",
+      "datePublished": "2026-09-17",
+      "ldac:metadataIsPublic": "",
+      "pcdm:memberOf": {
+        "@id": "./"
+      }
+    },
+    {
+      "@id": "arcp://uuid,80d691a3-fc6f-4b3f-a9a0-daa50efb2550/",
+      "@type": [
+        "Dataset",
+        "RepositoryCollection"
+      ],
+      "name": "Organisations",
+      "description": "Organisations connected to BKRLCC",
+      "identifier": "arcp://uuid,80d691a3-fc6f-4b3f-a9a0-daa50efb2550/",
+      "datePublished": "2026-09-17",
+      "ldac:metadataIsPublic": "",
+      "pcdm:memberOf": {
+        "@id": "./"
+      }
+    },
+    {
+      "@id": "arcp://uuid,ac618a04-4bad-4d95-8cea-17ae972bced8/",
+      "@type": [
+        "Dataset",
+        "RepositoryCollection"
+      ],
+      "name": "People",
+      "description": "People in West Arnhem Land",
+      "identifier": "arcp://uuid,ac618a04-4bad-4d95-8cea-17ae972bced8/",
+      "datePublished": "2026-09-17",
+      "ldac:metadataIsPublic": "",
+      "pcdm:memberOf": {
+        "@id": "./"
+      },
+      "license": {
+        "@id": "License files/all-rights-reserved.txt"
+      }
+    },
+    {
+      "@id": "arcp://uuid,c9bbe4b6-0375-4978-92d9-863cb1b61539/",
+      "@type": [
+        "Dataset",
+        "RepositoryCollection"
+      ],
+      "name": "Places",
+      "description": "Places in West Arnhem Land and beyond.",
+      "identifier": "arcp://uuid,c9bbe4b6-0375-4978-92d9-863cb1b61539/",
+      "datePublished": "2026-09-17",
+      "ldac:metadataIsPublic": "",
+      "pcdm:memberOf": {
+        "@id": "./"
+      },
+      "publisher": {
+        "@id": "#Organization_bkrlcc_842"
+      }
+    },
+    {
+      "@id": "arcp://uuid,d51535d9-541c-47c8-8c8c-757fbd2163d4/",
+      "@type": [
+        "Dataset",
+        "RepositoryCollection"
+      ],
+      "name": "Languages",
+      "description": "Languages of West Arnhem and beyond.",
+      "identifier": "arcp://uuid,d51535d9-541c-47c8-8c8c-757fbd2163d4/",
+      "datePublished": "2026-09-17",
+      "ldac:metadataIsPublic": "",
+      "pcdm:memberOf": {
+        "@id": "./"
+      }
+    },
+    {
+      "@id": "arcp://uuid,e4dbe373-ad35-4b41-bf03-db5e83f93f54/",
+      "@type": [
+        "Dataset",
+        "RepositoryCollection"
+      ],
+      "name": "Injalak Joey Nganjmirra test",
+      "description": "Describing a physical work",
+      "identifier": "arcp://uuid,e4dbe373-ad35-4b41-bf03-db5e83f93f54/",
+      "datePublished": "2026-07-24",
+      "ldac:metadataIsPublic": "",
+      "license": {
+        "@id": "License files/all-rights-reserved.txt"
+      },
+      "pcdm:memberOf": {
+        "@id": "./"
+      },
+      "inLanguage": [
+        {
+          "@id": "#Language_kunwinjku_390"
+        },
+        {
+          "@id": "#Language_bininjKunwok_216"
+        }
+      ],
+      "pcdm:hasMember": [
+        {
+          "@id": "#RepositoryObject_va9024282ddb"
+        },
+        {
+          "@id": "#RepositoryObject_scholl714aJoeyNganjmirra63587"
+        },
+        {
+          "@id": "#RepositoryObject_scholl714aJoeyNganjmirra63569"
+        },
+        {
+          "@id": "#RepositoryObject_scholl714aJoeyNganjmirra63572"
+        },
+        {
+          "@id": "#RepositoryObject_scholl714aJoeyNganjmirra63576"
+        },
+        {
+          "@id": "#RepositoryObject_scholl714aJoeyNganjmirra63577"
+        },
+        {
+          "@id": "#RepositoryObject_scholl714aJoeyNganjmirra63578"
+        },
+        {
+          "@id": "#RepositoryObject_scholl714aJoeyNganjmirra63579"
+        },
+        {
+          "@id": "#RepositoryObject_scholl714aJoeyNganjmirra63580"
+        },
+        {
+          "@id": "#RepositoryObject_scholl714aJoeyNganjmirra63581"
+        },
+        {
+          "@id": "#RepositoryObject_scholl714aJoeyNganjmirra63583"
+        },
+        {
+          "@id": "#RepositoryObject_scholl714aJoeyNganjmirra63585"
+        },
+        {
+          "@id": "#RepositoryObject_scholl714b63592"
+        }
+      ]
+    },
+    {
+      "@id": "arcp://uuid,ee034bd3-b498-465e-ab15-d58e10464d4f/",
+      "@type": [
+        "Dataset",
+        "RepositoryCollection"
+      ],
+      "name": "BKRLCC PROMOTIONAL VIDEOS",
+      "description": "TEST",
+      "identifier": "arcp://uuid,ee034bd3-b498-465e-ab15-d58e10464d4f/",
+      "datePublished": "2026-07-14",
+      "ldac:metadataIsPublic": "",
+      "license": {
+        "@id": "License files/all-rights-reserved.txt"
+      },
+      "author": {
+        "@id": "#Person_claudiaCialone_528"
+      },
+      "inLanguage": {
+        "@id": "#Language_kunwinjku_390"
+      },
+      "pcdm:memberOf": {
+        "@id": "./"
+      },
+      "pcdm:hasMember": [
+        {
+          "@id": "#RepositoryObject_20260604BkwworkshopJillNganjmirraLowres"
+        },
+        {
+          "@id": "#RepositoryObject_20260604BkwworkshopJennyManmuruluLowres"
+        },
+        {
+          "@id": "#RepositoryObject_20260604BkwworkshopMurrayGardeLowres"
+        },
+        {
+          "@id": "#RepositoryObject_20260605BkwworkshopJeanetteBurrunaliLowres"
+        },
+        {
+          "@id": "#RepositoryObject_20260605BkwworkshopKayeNamundjaLowres"
+        },
+        {
+          "@id": "#RepositoryObject_20260605BkwworkshopSalomeNabarlambarlLowres"
+        }
+      ]
+    },
+    {
+      "@id": "Data/BKRLCC Promotional videos/20260604_BkwWorkshop_Jenny Manmurulu_LowRes.mov",
+      "@type": "File",
+      "isPartOf": {
+        "@id": "#RepositoryObject_20260604BkwworkshopJennyManmuruluLowres"
+      }
+    },
+    {
+      "@id": "Data/BKRLCC Promotional videos/20260604_BkwWorkshop_Jill Nganjmirra_LowRes.mov",
+      "@type": "File",
+      "isPartOf": {
+        "@id": "#RepositoryObject_20260604BkwworkshopJillNganjmirraLowres"
+      }
+    },
+    {
+      "@id": "Data/BKRLCC Promotional videos/20260604_BkwWorkshop_Murray Garde_LowRes.mov",
+      "@type": "File",
+      "isPartOf": {
+        "@id": "#RepositoryObject_20260604BkwworkshopMurrayGardeLowres"
+      }
+    },
+    {
+      "@id": "Data/BKRLCC Promotional videos/20260605_BkwWorkshop_Jeanette Burrunali_LowRes.mov",
+      "@type": "File",
+      "isPartOf": {
+        "@id": "#RepositoryObject_20260605BkwworkshopJeanetteBurrunaliLowres"
+      }
+    },
+    {
+      "@id": "Data/BKRLCC Promotional videos/20260605_BkwWorkshop_Kaye Namundja_LowRes.mov",
+      "@type": "File",
+      "isPartOf": {
+        "@id": "#RepositoryObject_20260605BkwworkshopKayeNamundjaLowres"
+      }
+    },
+    {
+      "@id": "Data/BKRLCC Promotional videos/20260605_BkwWorkshop_Salome Nabarlambarl_LowRes.mov",
+      "@type": "File",
+      "isPartOf": {
+        "@id": "#RepositoryObject_20260605BkwworkshopSalomeNabarlambarlLowres"
+      }
+    },
+    {
+      "@id": "Data/BKRLCC Promotional videos/Depictions/20260604_BkwWorkshop_Jill Nganjmirra.png",
+      "@type": "File",
+      "isPartOf": {
+        "@id": "#RepositoryObject_20260604BkwworkshopJillNganjmirraLowres"
+      }
+    },
+    {
+      "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4a-_Joey Nganjmirra_63587.jpg",
+      "@type": "File",
+      "isPartOf": {
+        "@id": "#RepositoryObject_scholl714aJoeyNganjmirra63587"
+      }
+    },
+    {
+      "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4a-Joey Nganjmirra_63569.jpg",
+      "@type": "File",
+      "isPartOf": {
+        "@id": "#RepositoryObject_scholl714aJoeyNganjmirra63569"
+      }
+    },
+    {
+      "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4a-Joey Nganjmirra_63572.jpg",
+      "@type": "File",
+      "isPartOf": {
+        "@id": "#RepositoryObject_scholl714aJoeyNganjmirra63572"
+      }
+    },
+    {
+      "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4a-Joey Nganjmirra_63576.jpg",
+      "@type": "File",
+      "isPartOf": {
+        "@id": "#RepositoryObject_scholl714aJoeyNganjmirra63576"
+      }
+    },
+    {
+      "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4a-Joey Nganjmirra_63577.jpg",
+      "@type": "File",
+      "isPartOf": {
+        "@id": "#RepositoryObject_scholl714aJoeyNganjmirra63577"
+      }
+    },
+    {
+      "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4a-Joey Nganjmirra_63578.jpg",
+      "@type": "File",
+      "isPartOf": {
+        "@id": "#RepositoryObject_scholl714aJoeyNganjmirra63578"
+      }
+    },
+    {
+      "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4a-Joey Nganjmirra_63579.jpg",
+      "@type": "File",
+      "isPartOf": {
+        "@id": "#RepositoryObject_scholl714aJoeyNganjmirra63579"
+      }
+    },
+    {
+      "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4a-Joey Nganjmirra_63580.jpg",
+      "@type": "File",
+      "isPartOf": {
+        "@id": "#RepositoryObject_scholl714aJoeyNganjmirra63580"
+      }
+    },
+    {
+      "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4a-Joey Nganjmirra_63581.jpg",
+      "@type": "File",
+      "isPartOf": {
+        "@id": "#RepositoryObject_scholl714aJoeyNganjmirra63581"
+      }
+    },
+    {
+      "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4a-Joey Nganjmirra_63583.jpg",
+      "@type": "File",
+      "isPartOf": {
+        "@id": "#RepositoryObject_scholl714aJoeyNganjmirra63583"
+      }
+    },
+    {
+      "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4a-Joey Nganjmirra_63585.jpg",
+      "@type": "File",
+      "isPartOf": {
+        "@id": "#RepositoryObject_scholl714aJoeyNganjmirra63585"
+      }
+    },
+    {
+      "@id": "Data/Injalak_Joey Nganjmirra/SCHOLL7-1-4b-63592.jpg",
+      "@type": "File",
+      "isPartOf": {
+        "@id": "#RepositoryObject_scholl714b63592"
+      }
+    },
+    {
+      "@id": "Data/Injalak_Joey Nganjmirra/Va-902_4282DDB.jpg",
+      "@type": "File",
+      "isPartOf": {
+        "@id": "#RepositoryObject_va9024282ddb"
+      }
+    },
+    {
+      "@id": "Licenses/License files/all-rights-reserved.txt",
+      "@type": [
+        "ldac:DataReuseLicense",
+        "File"
+      ],
+      "name": "All Rights Reserved",
+      "description": "See license file",
+      "custom:dateAdded": "2026-09-30",
+      "custom:enteredBy": {
+        "@id": "#Person_dannyKennedy_625"
+      },
+      "custom:isPublishable": "FALSE"
+    },
+    {
+      "@id": "Organisations/_images/Museum_der_Kulturen_Basel-103331.jpg",
+      "@type": "File",
+      "isPartOf": {
+        "@id": "#Organization_museumDerKulturenBasel_928"
+      }
+    },
+    {
+      "@id": "People/images/claudia.webp",
+      "@type": "File",
+      "isPartOf": {
+        "@id": "#Person_claudiaCialone_528"
+      }
+    },
+    {
+      "@id": "People/images/jill.webp",
+      "@type": "File",
+      "isPartOf": {
+        "@id": "#Person_jillNganjmirra_574"
+      }
+    },
+    {
+      "@id": "People/images/murray.webp",
+      "@type": "File",
+      "isPartOf": {
+        "@id": "#Person_murrayGarde_426"
+      }
+    },
+    {
+      "@id": "People/images/seraine.webp",
+      "@type": "File",
+      "isPartOf": {
+        "@id": "#Person_seraineNamundja_511"
+      }
+    },
+    {
+      "@id": "Places/_images/Injalak_Hill_April_2014.jpg",
+      "@type": "File",
+      "isPartOf": {
+        "@id": "#Place_injalakGunbalanya_388"
+      }
+    },
+    {
+      "@id": "Places/_images/MAGNT_Darwin,_2023_(01).jpg",
+      "@type": "File",
+      "isPartOf": {
+        "@id": "#Place_magntMuseumDarwin_216"
+      }
+    },
+    {
+      "@id": "Places/_images/Oenpelli-from-Injalak.JPG",
+      "@type": "File",
+      "isPartOf": {
+        "@id": "#Place_gunbalanya_579"
+      }
+    }
+  ]
+}

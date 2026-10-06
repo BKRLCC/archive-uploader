@@ -832,6 +832,9 @@ async function ensureFilesTab(xlsxPath: string): Promise<boolean> {
   return true
 }
 
+// Base URL of the RO-Crate excel conversion service.
+const RO_CRATE_API_BASE = 'https://ro-crate-excel-api.light.garden'
+
 // Recursively collects every metadata.xlsx under a folder. A collection is any
 // folder holding a metadata.xlsx at any depth (the app browses folders freely),
 // so a flat scan is not enough. Non-content workbooks are filtered downstream by
@@ -880,6 +883,62 @@ ipcMain.handle('reconcile-files-tabs', async (_event, rootFolder: string) => {
     }
   }
   return { collections, files }
+})
+
+// Converts the archive into an RO-Crate via the external excel API. Every
+// metadata.xlsx is uploaded with its archive-root-relative path as the part
+// filename, which the server uses to rebase File @ids. The returned crate and
+// warnings are written to the archive root. This is the convert step; hosting
+// the result comes later but is presented to the user as part of "upload".
+ipcMain.handle('upload-archive', async (_event, rootFolder: string) => {
+  const metadataFiles = await collectMetadataFiles(rootFolder)
+  if (metadataFiles.length === 0) {
+    throw new Error('No metadata.xlsx files found in this archive.')
+  }
+
+  const form = new FormData()
+  for (const xlsxPath of metadataFiles) {
+    const relativePath = path
+      .relative(rootFolder, xlsxPath)
+      .split(path.sep)
+      .join('/')
+    const buffer = await fs.promises.readFile(xlsxPath)
+    form.append('file', new Blob([buffer]), relativePath)
+  }
+
+  const response = await fetch(`${RO_CRATE_API_BASE}/convert?report=1`, {
+    method: 'POST',
+    body: form,
+  })
+  if (!response.ok) {
+    const body = await response.text()
+    throw new Error(`Convert failed (HTTP ${response.status}): ${body}`)
+  }
+
+  const { crate, warnings } = (await response.json()) as {
+    crate: unknown
+    warnings?: unknown[]
+  }
+
+  const cratePath = path.join(rootFolder, 'ro-crate-metadata.json')
+  const warningsPath = path.join(rootFolder, 'ro-crate-warnings.json')
+  await fs.promises.writeFile(cratePath, JSON.stringify(crate, null, 2))
+  await fs.promises.writeFile(
+    warningsPath,
+    JSON.stringify(warnings ?? [], null, 2),
+  )
+
+  const graph = (crate as { '@graph'?: unknown[] })['@graph']
+  const entityCount = Array.isArray(graph) ? graph.length : 0
+  const warningCount = Array.isArray(warnings) ? warnings.length : 0
+
+  return {
+    fileCount: metadataFiles.length,
+    entityCount,
+    warningCount,
+    cratePath,
+    warningsPath,
+  }
 })
 
 ipcMain.handle(
