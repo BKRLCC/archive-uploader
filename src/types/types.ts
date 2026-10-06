@@ -110,6 +110,7 @@ export type RepositoryCollection = BaseItem & {
   isRef_inLanguage?: string // References to language entities the collection is in (schema:inLanguage)
   'isRef_ldac:subjectLanguage'?: string // References to language entities the collection is about (ldac:subjectLanguage)
   'ldac:metadataIsPublic'?: boolean // Whether this collection's metadata may be shown publicly (ldac:metadataIsPublic)
+  'custom:isPublishable'?: boolean // Whether this collection may be published to the web app (custom publishing flag)
 }
 
 export type Place = BaseItem & {
@@ -133,6 +134,8 @@ export type File = {
   '@type': 'File'
   '.folder': string // Relative path to the folder containing the file, e.g. "images"
   '.filename': string // Filename with extension, e.g. "photo.jpg"
+  name?: string
+  encodingFormat?: string // schema.org MIME type, e.g. "image/jpeg"
   isRef_isPartOf?: string
 }
 
@@ -255,6 +258,7 @@ export const ENTITY_FIELD_REGISTRY: {
     'isRef_inLanguage',
     'isRef_ldac:subjectLanguage',
     'ldac:metadataIsPublic',
+    'custom:isPublishable',
   ]),
   'ldac:DataReuseLicense': defineEntityFields<License>()([
     '@id',
@@ -293,6 +297,8 @@ export const ENTITY_FIELD_REGISTRY: {
     '@type',
     '.folder',
     '.filename',
+    'name',
+    'encodingFormat',
     'isRef_isPartOf',
   ]),
   DefinedTerm: defineEntityFields<DefinedTerm>()([
@@ -452,7 +458,15 @@ export const TypeColumns: { [K in ItemDataType]: (keyof ItemTypeMap[K])[] } = {
     '.longitude',
     'asWKT',
   ],
-  File: ['@id', '@type', '.folder', '.filename', 'isRef_isPartOf'],
+  File: [
+    '@id',
+    '@type',
+    '.folder',
+    '.filename',
+    'name',
+    'encodingFormat',
+    'isRef_isPartOf',
+  ],
 }
 
 export type SpreadsheetTab = {

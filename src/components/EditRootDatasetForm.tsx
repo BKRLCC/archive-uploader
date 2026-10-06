@@ -25,6 +25,7 @@ const EDITABLE_ROWS = [
   'isRef_inLanguage',
   'isRef_ldac:subjectLanguage',
   'ldac:metadataIsPublic',
+  'custom:isPublishable',
 ]
 // Required by the RO-Crate spec for the Root Data Entity.
 const REQUIRED_ROWS = ['name', 'description', 'datePublished']
@@ -234,7 +235,8 @@ export default function EditRootDatasetForm({
                     setValues((prev) => ({ ...prev, [key]: value }))
                   }
                 />
-              ) : key === 'ldac:metadataIsPublic' ? (
+              ) : key === 'ldac:metadataIsPublic' ||
+                key === 'custom:isPublishable' ? (
                 <input
                   type="checkbox"
                   checked={values[key] === 'TRUE'}

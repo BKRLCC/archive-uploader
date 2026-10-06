@@ -120,6 +120,7 @@ export function buildWorkbook(
     isRef_inLanguage?: string
     'isRef_ldac:subjectLanguage'?: string
     'ldac:metadataIsPublic'?: string
+    'custom:isPublishable'?: string
   },
   fullHeaders = false,
   includeSamples = false,
@@ -152,6 +153,7 @@ export function buildWorkbook(
     ['isRef_inLanguage', ref(meta.isRef_inLanguage)],
     ['isRef_ldac:subjectLanguage', ref(meta['isRef_ldac:subjectLanguage'])],
     ['ldac:metadataIsPublic', meta['ldac:metadataIsPublic'] ?? 'FALSE'],
+    ['custom:isPublishable', meta['custom:isPublishable'] ?? 'FALSE'],
   ]
   const rootDataset = XLSX.utils.aoa_to_sheet(rootDatasetRows)
   rootDataset['!cols'] = columnWidths(rootDatasetRows)

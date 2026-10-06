@@ -957,6 +957,7 @@ ipcMain.handle(
       isRef_inLanguage?: string
       'isRef_ldac:subjectLanguage'?: string
       'ldac:metadataIsPublic'?: string
+      'custom:isPublishable'?: string
     },
   ) => {
     const identifier = meta.identifier?.trim()

@@ -1,8 +1,12 @@
+import { encodingFormatForPath } from '../config/mime-types'
+
 export type DerivedFileRow = {
   '@id': string
   '@type': 'File'
   '.folder': string
   '.filename': string
+  name: string
+  encodingFormat: string
   isRef_isPartOf: string
 }
 
@@ -63,6 +67,8 @@ export function deriveFileRowsFromItems(
       '@type': 'File',
       '.folder': folder,
       '.filename': filename,
+      name: filename,
+      encodingFormat: encodingFormatForPath(relativePath),
       isRef_isPartOf: itemId,
     })
     order.push(relativePath)

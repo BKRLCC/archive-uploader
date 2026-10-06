@@ -32,6 +32,7 @@ export default function CreateArchiveForm({
   const [inLanguage, setInLanguage] = useState('')
   const [subjectLanguage, setSubjectLanguage] = useState('')
   const [metadataIsPublic, setMetadataIsPublic] = useState(false)
+  const [isPublishable, setIsPublishable] = useState(false)
   const [busy, setBusy] = useState(false)
   const [feedback, setFeedback] = useState('')
 
@@ -68,6 +69,7 @@ export default function CreateArchiveForm({
         isRef_inLanguage: inLanguage,
         'isRef_ldac:subjectLanguage': subjectLanguage,
         'ldac:metadataIsPublic': metadataIsPublic ? 'TRUE' : 'FALSE',
+        'custom:isPublishable': isPublishable ? 'TRUE' : 'FALSE',
       })
       onCreated()
     } catch (err) {
@@ -189,6 +191,16 @@ export default function CreateArchiveForm({
               type="checkbox"
               checked={metadataIsPublic}
               onChange={(e) => setMetadataIsPublic(e.target.checked)}
+            />
+          </label>
+          <label className="edit-field">
+            <span className="edit-field-key">
+              {getFieldDisplayLabel('custom:isPublishable', COLLECTION_TYPE)}
+            </span>
+            <input
+              type="checkbox"
+              checked={isPublishable}
+              onChange={(e) => setIsPublishable(e.target.checked)}
             />
           </label>
         </div>
