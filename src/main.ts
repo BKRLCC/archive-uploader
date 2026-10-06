@@ -6,6 +6,7 @@ import {
   ipcMain,
   net,
   protocol,
+  safeStorage,
   shell,
 } from 'electron'
 import path from 'node:path'
@@ -21,6 +22,9 @@ import {
 } from './types/types'
 import { buildWorkbook } from './helpers/workbook-builder'
 import { deriveFileRowsFromItems } from './helpers/file-linkage'
+import { planPublish } from './helpers/publish-planner'
+import { materializeDerivatives } from './helpers/publish-derivatives'
+import type { Crate } from './helpers/publication-view'
 import { isMultiSelectField } from './config/field-vocabularies'
 import { applyFieldRules } from './config/field-rules'
 import {
@@ -50,6 +54,50 @@ protocol.registerSchemesAsPrivileged([
 import Store from 'electron-store'
 
 const store = new Store()
+
+// electron-store's bundled types don't surface get/set/delete here; this narrow
+// wrapper keeps the publish-settings code type-clean without `as` casts.
+const settingsStore = store as unknown as {
+  get: (key: string, defaultValue?: unknown) => unknown
+  set: (key: string, value: unknown) => void
+  delete: (key: string) => void
+}
+
+// Reads the deposit bearer token, decrypting it when OS encryption is available.
+// The token never leaves the main process; the renderer only learns whether one
+// is set.
+function getStoredPublishToken(): string {
+  const encrypted = settingsStore.get('publish.bearerTokenEnc', null)
+  if (typeof encrypted === 'string' && safeStorage.isEncryptionAvailable()) {
+    try {
+      return safeStorage.decryptString(Buffer.from(encrypted, 'base64'))
+    } catch {
+      return ''
+    }
+  }
+  const plain = settingsStore.get('publish.bearerTokenPlain', null)
+  return typeof plain === 'string' ? plain : ''
+}
+
+// Stores (or, for an empty token, clears) the deposit bearer token. Prefers OS
+// encryption; falls back to plaintext only where encryption is unavailable.
+function setStoredPublishToken(token: string): void {
+  if (!token) {
+    settingsStore.delete('publish.bearerTokenEnc')
+    settingsStore.delete('publish.bearerTokenPlain')
+    return
+  }
+  if (safeStorage.isEncryptionAvailable()) {
+    settingsStore.set(
+      'publish.bearerTokenEnc',
+      safeStorage.encryptString(token).toString('base64'),
+    )
+    settingsStore.delete('publish.bearerTokenPlain')
+  } else {
+    settingsStore.set('publish.bearerTokenPlain', token)
+    settingsStore.delete('publish.bearerTokenEnc')
+  }
+}
 
 // Stable, location-independent identifier (RO-Crate arcp scheme) for a crate
 // with no registered PID.
@@ -940,6 +988,92 @@ ipcMain.handle('upload-archive', async (_event, rootFolder: string) => {
     warningsPath,
   }
 })
+
+// Dry-run of a publish: reads the crate written by the convert step, then reports
+// which images are new/changed/removed/unchanged, which non-images are metadata
+// only, and which files could not be read. Writes nothing; drives the preview UI.
+ipcMain.handle(
+  'plan-publish',
+  async (_event, rootFolder: string, archiveId: string) => {
+    const cratePath = path.join(rootFolder, 'ro-crate-metadata.json')
+    let raw: string
+    try {
+      raw = await fs.promises.readFile(cratePath, 'utf8')
+    } catch {
+      throw new Error(
+        'No ro-crate-metadata.json found. Run upload first to generate the crate.',
+      )
+    }
+    const crate = JSON.parse(raw) as Crate
+    return planPublish({ crate, rootFolder, archiveId })
+  },
+)
+
+// Publish settings: deposit URL + archiveId are stored plainly; the bearer token
+// is handled separately and never returned to the renderer (only `hasToken`).
+ipcMain.handle('get-publish-settings', async () => {
+  return {
+    depositBaseUrl: String(settingsStore.get('publish.depositBaseUrl', '') ?? ''),
+    archiveId: String(settingsStore.get('publish.archiveId', '') ?? ''),
+    hasToken: getStoredPublishToken() !== '',
+  }
+})
+
+ipcMain.handle(
+  'set-publish-settings',
+  async (_event, settings: { depositBaseUrl: string; archiveId: string }) => {
+    settingsStore.set('publish.depositBaseUrl', settings.depositBaseUrl.trim())
+    settingsStore.set('publish.archiveId', settings.archiveId.trim())
+    return {
+      depositBaseUrl: settings.depositBaseUrl.trim(),
+      archiveId: settings.archiveId.trim(),
+      hasToken: getStoredPublishToken() !== '',
+    }
+  },
+)
+
+ipcMain.handle('set-publish-token', async (_event, token: string) => {
+  setStoredPublishToken(token)
+  return { hasToken: getStoredPublishToken() !== '' }
+})
+
+// Builds the .publish/derivatives/ folder for the new/changed images in the plan
+// — purely local, no upload. Reports what was written, any failures, and whether
+// a deposit URL is configured so the UI can warn that nothing was uploaded.
+ipcMain.handle(
+  'build-publish-derivatives',
+  async (_event, rootFolder: string, archiveId: string) => {
+    const cratePath = path.join(rootFolder, 'ro-crate-metadata.json')
+    let raw: string
+    try {
+      raw = await fs.promises.readFile(cratePath, 'utf8')
+    } catch {
+      throw new Error(
+        'No ro-crate-metadata.json found. Run upload first to generate the crate.',
+      )
+    }
+    const crate = JSON.parse(raw) as Crate
+    const plan = await planPublish({ crate, rootFolder, archiveId })
+    const images = [...plan.diff.added, ...plan.diff.changed].map((entry) => ({
+      path: entry.path,
+      originalSha512: entry.sha512,
+    }))
+    const { entries, failures } = await materializeDerivatives({
+      rootFolder,
+      images,
+    })
+    const depositBaseUrl = String(
+      settingsStore.get('publish.depositBaseUrl', '') ?? '',
+    )
+    return {
+      plan,
+      derivativesWritten: entries.length,
+      failures,
+      derivativesDir: path.join(rootFolder, '.publish', 'derivatives'),
+      hasDepositUrl: depositBaseUrl !== '',
+    }
+  },
+)
 
 ipcMain.handle(
   'create-archive',

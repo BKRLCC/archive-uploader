@@ -1,4 +1,6 @@
 // Type declarations for window.api (exposed via preload contextBridge)
+import type { PublishPlan } from './helpers/publish-planner'
+
 export interface SavedFolder {
   name: string
   path: string
@@ -20,6 +22,23 @@ export interface FileInfo {
 export interface SheetData {
   headers: string[]
   rows: string[][]
+}
+
+// Publish/deposit settings surfaced to the renderer. The bearer token is never
+// returned; `hasToken` only reports whether one is stored.
+export interface PublishSettings {
+  depositBaseUrl: string
+  archiveId: string
+  hasToken: boolean
+}
+
+// Result of locally building the .publish derivatives (no upload performed).
+export interface PublishBuildResult {
+  plan: PublishPlan
+  derivativesWritten: number
+  failures: { path: string; error: string }[]
+  derivativesDir: string
+  hasDepositUrl: boolean
 }
 
 export interface UpdateStatus {
@@ -84,9 +103,7 @@ export interface Api {
   reconcileFilesTabs: (
     rootFolder: string,
   ) => Promise<{ collections: number; files: number }>
-  uploadArchive: (
-    rootFolder: string,
-  ) => Promise<{
+  uploadArchive: (rootFolder: string) => Promise<{
     fileCount: number
     entityCount: number
     warningCount: number
@@ -130,6 +147,20 @@ export interface Api {
   openFile: (filePath: string) => Promise<string>
   showInFinder: (filePath: string) => Promise<void>
   deleteFile: (filePath: string) => Promise<void>
+  planPublish: (
+    rootFolder: string,
+    archiveId: string,
+  ) => Promise<PublishPlan>
+  getPublishSettings: () => Promise<PublishSettings>
+  setPublishSettings: (settings: {
+    depositBaseUrl: string
+    archiveId: string
+  }) => Promise<PublishSettings>
+  setPublishToken: (token: string) => Promise<{ hasToken: boolean }>
+  buildPublishDerivatives: (
+    rootFolder: string,
+    archiveId: string,
+  ) => Promise<PublishBuildResult>
 }
 
 declare global {

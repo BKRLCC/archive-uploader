@@ -1077,6 +1077,7 @@ textarea {
 
 .settings-section-header h2 {
   margin: 0;
+  margin-top: 2rem;
 }
 
 .folders-table {
@@ -1132,6 +1133,41 @@ textarea {
 .settings-update-status {
   font-size: 0.85em;
   color: #555;
+}
+
+.publish-settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75em;
+  max-width: 480px;
+}
+
+.publish-settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25em;
+  font-size: 0.85em;
+  color: #555;
+}
+
+.publish-settings-field input {
+  padding: 0.5em 0.6em;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.publish-settings-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+  margin-top: 0.25em;
+}
+
+.publish-settings-saved {
+  font-size: 0.85em;
+  color: hsl(140, 45%, 35%);
 }
 
 .folder-active-mark {

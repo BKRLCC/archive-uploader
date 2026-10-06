@@ -76,6 +76,25 @@ contextBridge.exposeInMainWorld('api', {
     ipcRenderer.invoke('get-file-info', filePath),
   getSheetNames: (xlsxPath: string): Promise<string[]> =>
     ipcRenderer.invoke('get-sheet-names', xlsxPath),
+  planPublish: (
+    rootFolder: string,
+    archiveId: string,
+  ): Promise<import('./helpers/publish-planner').PublishPlan> =>
+    ipcRenderer.invoke('plan-publish', rootFolder, archiveId),
+  getPublishSettings: (): Promise<import('./api').PublishSettings> =>
+    ipcRenderer.invoke('get-publish-settings'),
+  setPublishSettings: (settings: {
+    depositBaseUrl: string
+    archiveId: string
+  }): Promise<import('./api').PublishSettings> =>
+    ipcRenderer.invoke('set-publish-settings', settings),
+  setPublishToken: (token: string): Promise<{ hasToken: boolean }> =>
+    ipcRenderer.invoke('set-publish-token', token),
+  buildPublishDerivatives: (
+    rootFolder: string,
+    archiveId: string,
+  ): Promise<import('./api').PublishBuildResult> =>
+    ipcRenderer.invoke('build-publish-derivatives', rootFolder, archiveId),
   readSheet: (
     xlsxPath: string,
     sheetName: string,

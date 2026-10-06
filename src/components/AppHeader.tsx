@@ -36,6 +36,65 @@ export default function AppHeader() {
     }
   }
 
+  async function handlePublish() {
+    const rootFolder = await window.api.getRootFolder()
+    if (!rootFolder) {
+      window.alert('Set an archive root folder before publishing.')
+      return
+    }
+    const settings = await window.api.getPublishSettings()
+    if (!settings.archiveId) {
+      window.alert('Set an Archive ID in Settings → Publishing before publishing.')
+      return
+    }
+    let plan
+    try {
+      plan = await window.api.planPublish(rootFolder, settings.archiveId)
+    } catch (err) {
+      window.alert(`Could not prepare publish: ${(err as Error).message}`)
+      return
+    }
+    const t = plan.totals
+    const toCompress = t.imagesAdded + t.imagesChanged
+    const summary =
+      `Publish preview for "${settings.archiveId}":\n\n` +
+      `• ${t.imagesAdded} new image${t.imagesAdded === 1 ? '' : 's'}\n` +
+      `• ${t.imagesChanged} changed\n` +
+      `• ${t.imagesRemoved} removed\n` +
+      `• ${t.imagesUnchanged} unchanged (skipped)\n` +
+      `• ${t.nonImageCount} non-image file${t.nonImageCount === 1 ? '' : 's'} (metadata only)\n` +
+      (t.missingCount
+        ? `• ${t.missingCount} missing/unreadable image${t.missingCount === 1 ? '' : 's'}\n`
+        : '') +
+      `\nCompress ${toCompress} image${toCompress === 1 ? '' : 's'} into .publish/derivatives/ now?`
+    if (!window.confirm(summary)) return
+    try {
+      const result = await window.api.buildPublishDerivatives(
+        rootFolder,
+        settings.archiveId,
+      )
+      let msg = `Wrote ${result.derivativesWritten} derivative${
+        result.derivativesWritten === 1 ? '' : 's'
+      } to .publish/derivatives/.`
+      if (result.failures.length) {
+        const names = result.failures
+          .slice(0, 5)
+          .map((f) => f.path)
+          .join(', ')
+        msg += `\n\n${result.failures.length} failed: ${names}${
+          result.failures.length > 5 ? '…' : ''
+        }`
+      }
+      if (!result.hasDepositUrl) {
+        msg +=
+          '\n\n⚠️ No deposit URL set in Settings → Publishing. Images were compressed locally but nothing was uploaded.'
+      }
+      window.alert(msg)
+    } catch (err) {
+      window.alert(`Publish failed: ${(err as Error).message}`)
+    }
+  }
+
   return (
     <header className="app-header">
       {!isHome && (
@@ -59,6 +118,13 @@ export default function AppHeader() {
           title="Upload archive"
         >
           {UiIcons.upload}
+        </button>
+        <button
+          className="header-nav-btn"
+          onClick={() => void handlePublish()}
+          title="Publish (compress images into .publish)"
+        >
+          {UiIcons.publish}
         </button>
         <button
           className="header-nav-btn"
