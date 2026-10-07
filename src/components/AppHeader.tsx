@@ -78,20 +78,21 @@ export default function AppHeader() {
 
   return (
     <header className="app-header">
-      {!isHome && (
-        <div className="app-header-back">
-          <button className="back-btn" onClick={() => navigate(-1)}>
-            ← Back
-          </button>
-        </div>
-      )}
-      <span
-        className="app-header-title"
-        style={{ display: 'flex', alignItems: 'center', gap: 8 }}
-      >
-        <img src={logo} alt="" style={{ height: 28, width: 28 }} />
-        Balachi
-      </span>
+      {/* HEADER LEFT (BACK BUTTON / LOGO) */}
+      <div className="app-header-left">
+        {!isHome && (
+          <div className="app-header-back">
+            <button className="back-btn" onClick={() => navigate(-1)}>
+              ← Back
+            </button>
+          </div>
+        )}
+        <span className="app-header-title">
+          <img src={logo} alt="" style={{ height: 28, width: 28 }} />
+          Balachi
+        </span>
+      </div>
+      {/* HEADER RIGHT (BUTTONS) */}
       <div className="app-header-nav no-drag">
         <button
           className="header-nav-btn"

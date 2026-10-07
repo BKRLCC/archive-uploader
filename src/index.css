@@ -35,6 +35,7 @@
   flex-shrink: 0;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 0 1em;
   background: #a62b2b;
   color: #fff;
@@ -43,8 +44,8 @@
 }
 
 .app-header-back {
-  width: 160px;
   -webkit-app-region: no-drag;
+  margin-right: 1em;
 }
 
 .back-btn {
@@ -70,6 +71,13 @@
   font-size: 1.05em;
   font-weight: 600;
   letter-spacing: 0.03em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.app-header-left {
+  display: flex;
 }
 
 .app-header-nav {
