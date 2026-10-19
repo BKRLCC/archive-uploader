@@ -90,6 +90,21 @@ contextBridge.exposeInMainWorld('api', {
     ipcRenderer.invoke('set-publish-settings', settings),
   setPublishToken: (token: string): Promise<{ hasToken: boolean }> =>
     ipcRenderer.invoke('set-publish-token', token),
+  getStaticSiteSettings: (): Promise<import('./api').StaticSiteSettings> =>
+    ipcRenderer.invoke('get-static-site-settings'),
+  setStaticSiteSettings: (settings: {
+    repoUrl: string
+    branch: string
+    authorName: string
+    authorEmail: string
+  }): Promise<import('./api').StaticSiteSettings> =>
+    ipcRenderer.invoke('set-static-site-settings', settings),
+  setStaticSiteToken: (token: string): Promise<{ hasToken: boolean }> =>
+    ipcRenderer.invoke('set-static-site-token', token),
+  pushStaticSite: (
+    rootFolder: string,
+  ): Promise<import('./api').StaticSitePushResult> =>
+    ipcRenderer.invoke('push-static-site', rootFolder),
   buildPublishDerivatives: (
     rootFolder: string,
     archiveId: string,

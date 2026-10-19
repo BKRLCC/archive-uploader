@@ -29,7 +29,11 @@ import {
 } from './helpers/publish-planner'
 import { materializeDerivatives } from './helpers/publish-derivatives'
 import { buildPublicCrate } from './helpers/public-crate'
-import { exportStaticSite } from './helpers/static-site-export'
+import {
+  exportStaticSite,
+  STATIC_SITE_DIR_NAME,
+} from './helpers/static-site-export'
+import { pushStaticSite } from './helpers/static-site-push'
 import type { Crate } from './helpers/publication-view'
 import { isMultiSelectField } from './config/field-vocabularies'
 import { applyFieldRules } from './config/field-rules'
@@ -102,6 +106,40 @@ function setStoredPublishToken(token: string): void {
   } else {
     settingsStore.set('publish.bearerTokenPlain', token)
     settingsStore.delete('publish.bearerTokenEnc')
+  }
+}
+
+// Reads the static-site deploy PAT, decrypting it when OS encryption is
+// available. Kept separate from the deposit bearer token above.
+function getStoredStaticToken(): string {
+  const encrypted = settingsStore.get('staticSite.tokenEnc', null)
+  if (typeof encrypted === 'string' && safeStorage.isEncryptionAvailable()) {
+    try {
+      return safeStorage.decryptString(Buffer.from(encrypted, 'base64'))
+    } catch {
+      return ''
+    }
+  }
+  const plain = settingsStore.get('staticSite.tokenPlain', null)
+  return typeof plain === 'string' ? plain : ''
+}
+
+// Stores (or, for an empty token, clears) the static-site deploy PAT.
+function setStoredStaticToken(token: string): void {
+  if (!token) {
+    settingsStore.delete('staticSite.tokenEnc')
+    settingsStore.delete('staticSite.tokenPlain')
+    return
+  }
+  if (safeStorage.isEncryptionAvailable()) {
+    settingsStore.set(
+      'staticSite.tokenEnc',
+      safeStorage.encryptString(token).toString('base64'),
+    )
+    settingsStore.delete('staticSite.tokenPlain')
+  } else {
+    settingsStore.set('staticSite.tokenPlain', token)
+    settingsStore.delete('staticSite.tokenEnc')
   }
 }
 
@@ -1043,6 +1081,82 @@ ipcMain.handle(
 ipcMain.handle('set-publish-token', async (_event, token: string) => {
   setStoredPublishToken(token)
   return { hasToken: getStoredPublishToken() !== '' }
+})
+
+// Static-site (Netlify) deploy settings: repo URL, branch and commit author are
+// stored plainly; the deploy PAT is handled separately and never returned to the
+// renderer (only `hasToken`).
+ipcMain.handle('get-static-site-settings', async () => {
+  return {
+    repoUrl: String(settingsStore.get('staticSite.repoUrl', '') ?? ''),
+    branch: String(settingsStore.get('staticSite.branch', 'main') ?? 'main'),
+    authorName: String(settingsStore.get('staticSite.authorName', '') ?? ''),
+    authorEmail: String(settingsStore.get('staticSite.authorEmail', '') ?? ''),
+    hasToken: getStoredStaticToken() !== '',
+  }
+})
+
+ipcMain.handle(
+  'set-static-site-settings',
+  async (
+    _event,
+    settings: {
+      repoUrl: string
+      branch: string
+      authorName: string
+      authorEmail: string
+    },
+  ) => {
+    const repoUrl = settings.repoUrl.trim()
+    const branch = settings.branch.trim() || 'main'
+    const authorName = settings.authorName.trim()
+    const authorEmail = settings.authorEmail.trim()
+    settingsStore.set('staticSite.repoUrl', repoUrl)
+    settingsStore.set('staticSite.branch', branch)
+    settingsStore.set('staticSite.authorName', authorName)
+    settingsStore.set('staticSite.authorEmail', authorEmail)
+    return {
+      repoUrl,
+      branch,
+      authorName,
+      authorEmail,
+      hasToken: getStoredStaticToken() !== '',
+    }
+  },
+)
+
+ipcMain.handle('set-static-site-token', async (_event, token: string) => {
+  setStoredStaticToken(token)
+  return { hasToken: getStoredStaticToken() !== '' }
+})
+
+// Force-pushes the already-built <root>/.static-site/ tree to the configured
+// deploy repo. Requires a repo URL and a saved PAT; Netlify rebuilds on push.
+ipcMain.handle('push-static-site', async (_event, rootFolder: string) => {
+  const repoUrl = String(settingsStore.get('staticSite.repoUrl', '') ?? '')
+  const token = getStoredStaticToken()
+  if (!repoUrl) {
+    throw new Error('No deploy repo URL set. Add one in Settings → Static site.')
+  }
+  if (!token) {
+    throw new Error('No deploy token saved. Add one in Settings → Static site.')
+  }
+  const branch = String(settingsStore.get('staticSite.branch', 'main') ?? 'main')
+  const authorName =
+    String(settingsStore.get('staticSite.authorName', '') ?? '') ||
+    'Balachi Publisher'
+  const authorEmail =
+    String(settingsStore.get('staticSite.authorEmail', '') ?? '') ||
+    'noreply@balachi.local'
+  const outputDir = path.join(rootFolder, STATIC_SITE_DIR_NAME)
+  return pushStaticSite({
+    outputDir,
+    repoUrl,
+    branch,
+    token,
+    authorName,
+    authorEmail,
+  })
 })
 
 // Builds the .publish/derivatives/ folder for the new/changed images in the plan

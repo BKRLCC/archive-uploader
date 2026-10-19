@@ -85,8 +85,9 @@ export default function AppHeader() {
     if (
       !window.confirm(
         'Build the static site? This refreshes the Files tab in every collection, ' +
-          'rebuilds the RO-Crate from the spreadsheets, then wipes and rebuilds ' +
-          'the .static-site folder with compressed images.',
+          'rebuilds the RO-Crate from the spreadsheets, wipes and rebuilds the ' +
+          '.static-site folder with compressed images, then (if a deploy repo is ' +
+          'configured) pushes it live.',
       )
     ) {
       return
@@ -122,7 +123,25 @@ export default function AppHeader() {
           result.failures.length > 5 ? '…' : ''
         }`
       }
-      msg += `\n\nRun Bowerbird over ${result.dataDir} to preview.`
+      const { repoUrl, hasToken } = await window.api.getStaticSiteSettings()
+      if (repoUrl && hasToken) {
+        try {
+          const push = await window.api.pushStaticSite(rootFolder)
+          msg +=
+            `\n\nPushed ${push.filesPushed} file${
+              push.filesPushed === 1 ? '' : 's'
+            } to ${push.repoUrl} (${push.branch}). ` +
+            'Netlify will rebuild the site shortly.'
+        } catch (pushErr) {
+          msg += `\n\nBuilt locally, but the push failed: ${
+            (pushErr as Error).message
+          }`
+        }
+      } else {
+        msg +=
+          '\n\nBuilt locally only. Add a deploy repo and token in ' +
+          'Settings → Static site to publish.'
+      }
       window.alert(msg)
     } catch (err) {
       window.alert(`Static site build failed: ${(err as Error).message}`)

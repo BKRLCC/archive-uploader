@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import type { PublishSettings, SavedFolder, UpdateStatus } from '../api'
+import type {
+  PublishSettings,
+  SavedFolder,
+  StaticSiteSettings,
+  UpdateStatus,
+} from '../api'
 import { version } from '../../package.json'
 
 function getUpdateMessage(status: UpdateStatus): string {
@@ -37,6 +42,15 @@ export default function SettingsPage() {
   const [tokenInput, setTokenInput] = useState('')
   const [publishSaving, setPublishSaving] = useState(false)
   const [publishSaved, setPublishSaved] = useState(false)
+
+  const [repoUrl, setRepoUrl] = useState('')
+  const [branch, setBranch] = useState('main')
+  const [authorName, setAuthorName] = useState('')
+  const [authorEmail, setAuthorEmail] = useState('')
+  const [hasStaticToken, setHasStaticToken] = useState(false)
+  const [staticTokenInput, setStaticTokenInput] = useState('')
+  const [staticSaving, setStaticSaving] = useState(false)
+  const [staticSaved, setStaticSaved] = useState(false)
 
   useEffect(() => {
     const unsubscribe = window.api.onUpdateStatus((status) => {
@@ -95,6 +109,48 @@ export default function SettingsPage() {
     const { hasToken: nextHasToken } = await window.api.setPublishToken('')
     setHasToken(nextHasToken)
     setTokenInput('')
+  }
+
+  useEffect(() => {
+    window.api.getStaticSiteSettings().then((settings: StaticSiteSettings) => {
+      setRepoUrl(settings.repoUrl)
+      setBranch(settings.branch)
+      setAuthorName(settings.authorName)
+      setAuthorEmail(settings.authorEmail)
+      setHasStaticToken(settings.hasToken)
+    })
+  }, [])
+
+  async function handleSaveStaticSettings() {
+    setStaticSaving(true)
+    setStaticSaved(false)
+    try {
+      const saved = await window.api.setStaticSiteSettings({
+        repoUrl,
+        branch,
+        authorName,
+        authorEmail,
+      })
+      setRepoUrl(saved.repoUrl)
+      setBranch(saved.branch)
+      setAuthorName(saved.authorName)
+      setAuthorEmail(saved.authorEmail)
+      if (staticTokenInput) {
+        const { hasToken: nextHasToken } =
+          await window.api.setStaticSiteToken(staticTokenInput)
+        setHasStaticToken(nextHasToken)
+        setStaticTokenInput('')
+      }
+      setStaticSaved(true)
+    } finally {
+      setStaticSaving(false)
+    }
+  }
+
+  async function handleClearStaticToken() {
+    const { hasToken: nextHasToken } = await window.api.setStaticSiteToken('')
+    setHasStaticToken(nextHasToken)
+    setStaticTokenInput('')
   }
 
   useEffect(() => {
@@ -283,6 +339,91 @@ export default function SettingsPage() {
             </button>
           )}
           {publishSaved && (
+            <span className="publish-settings-saved">Saved.</span>
+          )}
+        </div>
+      </div>
+      <div className="settings-section-header">
+        <h2>Static site (Netlify)</h2>
+      </div>
+      <p>
+        The stopgap Bowerbird site. On publish the app force-pushes the built{' '}
+        <code>.static-site</code> folder to this repo, and Netlify rebuilds it.
+        The deploy token is stored encrypted on this computer and is never shown
+        again once saved.
+      </p>
+      <div className="publish-settings-form">
+        <label className="publish-settings-field">
+          <span>Deploy repo URL</span>
+          <input
+            type="url"
+            value={repoUrl}
+            placeholder="https://github.com/your-bot/your-site.git"
+            onChange={(e) => {
+              setRepoUrl(e.target.value)
+              setStaticSaved(false)
+            }}
+          />
+        </label>
+        <label className="publish-settings-field">
+          <span>Branch</span>
+          <input
+            type="text"
+            value={branch}
+            placeholder="main"
+            onChange={(e) => {
+              setBranch(e.target.value)
+              setStaticSaved(false)
+            }}
+          />
+        </label>
+        <label className="publish-settings-field">
+          <span>Commit author name</span>
+          <input
+            type="text"
+            value={authorName}
+            placeholder="Balachi Publisher"
+            onChange={(e) => {
+              setAuthorName(e.target.value)
+              setStaticSaved(false)
+            }}
+          />
+        </label>
+        <label className="publish-settings-field">
+          <span>Commit author email</span>
+          <input
+            type="email"
+            value={authorEmail}
+            placeholder="noreply@example.org"
+            onChange={(e) => {
+              setAuthorEmail(e.target.value)
+              setStaticSaved(false)
+            }}
+          />
+        </label>
+        <label className="publish-settings-field">
+          <span>Deploy token</span>
+          <input
+            type="password"
+            value={staticTokenInput}
+            placeholder={hasStaticToken ? '•••••••• (saved)' : 'Paste token…'}
+            autoComplete="off"
+            onChange={(e) => {
+              setStaticTokenInput(e.target.value)
+              setStaticSaved(false)
+            }}
+          />
+        </label>
+        <div className="publish-settings-actions">
+          <button onClick={handleSaveStaticSettings} disabled={staticSaving}>
+            {staticSaving ? 'Saving…' : 'Save'}
+          </button>
+          {hasStaticToken && (
+            <button className="btn-secondary" onClick={handleClearStaticToken}>
+              Clear token
+            </button>
+          )}
+          {staticSaved && (
             <span className="publish-settings-saved">Saved.</span>
           )}
         </div>

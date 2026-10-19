@@ -51,6 +51,21 @@ export interface StaticSiteResult {
   failures: { path: string; error: string }[]
 }
 
+export interface StaticSiteSettings {
+  repoUrl: string
+  branch: string
+  authorName: string
+  authorEmail: string
+  hasToken: boolean
+}
+
+export interface StaticSitePushResult {
+  commitOid: string
+  branch: string
+  repoUrl: string
+  filesPushed: number
+}
+
 export interface UpdateStatus {
   state:
     | 'checking'
@@ -164,6 +179,15 @@ export interface Api {
     archiveId: string
   }) => Promise<PublishSettings>
   setPublishToken: (token: string) => Promise<{ hasToken: boolean }>
+  getStaticSiteSettings: () => Promise<StaticSiteSettings>
+  setStaticSiteSettings: (settings: {
+    repoUrl: string
+    branch: string
+    authorName: string
+    authorEmail: string
+  }) => Promise<StaticSiteSettings>
+  setStaticSiteToken: (token: string) => Promise<{ hasToken: boolean }>
+  pushStaticSite: (rootFolder: string) => Promise<StaticSitePushResult>
   buildPublishDerivatives: (
     rootFolder: string,
     archiveId: string,
