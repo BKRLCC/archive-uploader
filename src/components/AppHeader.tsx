@@ -76,6 +76,59 @@ export default function AppHeader() {
     }
   }
 
+  async function handleStaticPublish() {
+    const rootFolder = await window.api.getRootFolder()
+    if (!rootFolder) {
+      window.alert('Set an archive root folder before publishing.')
+      return
+    }
+    if (
+      !window.confirm(
+        'Build the static site? This refreshes the Files tab in every collection, ' +
+          'rebuilds the RO-Crate from the spreadsheets, then wipes and rebuilds ' +
+          'the .static-site folder with compressed images.',
+      )
+    ) {
+      return
+    }
+    let crateSummary: string
+    try {
+      await window.api.reconcileFilesTabs(rootFolder)
+      const { fileCount, entityCount, warningCount } =
+        await window.api.uploadArchive(rootFolder)
+      crateSummary =
+        `Built the RO-Crate from ${fileCount} workbook${fileCount === 1 ? '' : 's'} → ` +
+        `${entityCount} entit${entityCount === 1 ? 'y' : 'ies'}, ` +
+        `${warningCount} warning${warningCount === 1 ? '' : 's'}.`
+    } catch (err) {
+      window.alert(`Build failed: ${(err as Error).message}`)
+      return
+    }
+    try {
+      const result = await window.api.buildStaticSite(rootFolder)
+      let msg =
+        `${crateSummary}\n\n` +
+        `Wrote ${result.imagesWritten} image${
+          result.imagesWritten === 1 ? '' : 's'
+        } ` +
+        `(${result.nonImageCount} non-image metadata-only) to the static site.\n` +
+        `Data folder: ${result.dataDir}`
+      if (result.failures.length) {
+        const names = result.failures
+          .slice(0, 5)
+          .map((f) => f.path)
+          .join(', ')
+        msg += `\n\n${result.failures.length} failed: ${names}${
+          result.failures.length > 5 ? '…' : ''
+        }`
+      }
+      msg += `\n\nRun Bowerbird over ${result.dataDir} to preview.`
+      window.alert(msg)
+    } catch (err) {
+      window.alert(`Static site build failed: ${(err as Error).message}`)
+    }
+  }
+
   return (
     <header className="app-header">
       {/* HEADER LEFT (BACK BUTTON / LOGO) */}
@@ -100,6 +153,13 @@ export default function AppHeader() {
           title="Publish archive"
         >
           {UiIcons.publish}
+        </button>
+        <button
+          className="header-nav-btn"
+          onClick={() => void handleStaticPublish()}
+          title="Static publish (Bowerbird)"
+        >
+          {UiIcons.upload}
         </button>
         <button
           className="header-nav-btn"

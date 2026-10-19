@@ -42,6 +42,15 @@ export interface PublishBuildResult {
   hasDepositUrl: boolean
 }
 
+export interface StaticSiteResult {
+  outputDir: string
+  dataDir: string
+  cratePath: string
+  imagesWritten: number
+  nonImageCount: number
+  failures: { path: string; error: string }[]
+}
+
 export interface UpdateStatus {
   state:
     | 'checking'
@@ -159,6 +168,7 @@ export interface Api {
     rootFolder: string,
     archiveId: string,
   ) => Promise<PublishBuildResult>
+  buildStaticSite: (rootFolder: string) => Promise<StaticSiteResult>
 }
 
 declare global {

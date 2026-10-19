@@ -29,6 +29,7 @@ import {
 } from './helpers/publish-planner'
 import { materializeDerivatives } from './helpers/publish-derivatives'
 import { buildPublicCrate } from './helpers/public-crate'
+import { exportStaticSite } from './helpers/static-site-export'
 import type { Crate } from './helpers/publication-view'
 import { isMultiSelectField } from './config/field-vocabularies'
 import { applyFieldRules } from './config/field-rules'
@@ -1105,6 +1106,30 @@ ipcMain.handle(
     }
   },
 )
+
+// Builds the self-contained Bowerbird static site under <root>/.static-site/ from
+// the current crate on disk — wipes and rebuilds every run, no .publish/ reliance.
+ipcMain.handle('build-static-site', async (_event, rootFolder: string) => {
+  const cratePath = path.join(rootFolder, 'ro-crate-metadata.json')
+  let raw: string
+  try {
+    raw = await fs.promises.readFile(cratePath, 'utf8')
+  } catch {
+    throw new Error(
+      'No ro-crate-metadata.json found. Run upload first to generate the crate.',
+    )
+  }
+  const crate = JSON.parse(raw) as Crate
+  const root = (crate['@graph'] ?? []).find((node) => node['@id'] === './')
+  const rootName =
+    typeof root?.['name'] === 'string' ? (root['name'] as string) : ''
+  const rootIdentifier =
+    typeof root?.['identifier'] === 'string'
+      ? (root['identifier'] as string)
+      : ''
+  const collectionId = rootName || rootIdentifier || path.basename(rootFolder)
+  return exportStaticSite({ crate, rootFolder, collectionId })
+})
 
 ipcMain.handle(
   'create-archive',

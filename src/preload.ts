@@ -95,6 +95,10 @@ contextBridge.exposeInMainWorld('api', {
     archiveId: string,
   ): Promise<import('./api').PublishBuildResult> =>
     ipcRenderer.invoke('build-publish-derivatives', rootFolder, archiveId),
+  buildStaticSite: (
+    rootFolder: string,
+  ): Promise<import('./api').StaticSiteResult> =>
+    ipcRenderer.invoke('build-static-site', rootFolder),
   readSheet: (
     xlsxPath: string,
     sheetName: string,
