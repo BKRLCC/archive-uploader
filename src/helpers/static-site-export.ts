@@ -1,8 +1,8 @@
 // Builds a standalone, Bowerbird-ready static site tree under
 // <rootFolder>/.static-site/ straight from the archive's main assets — no
 // dependence on the .publish/ deposit flow. The folder is wiped and rebuilt
-// every run: each published image is compressed to webp and the RO-Crate's image
-// File @ids are rewritten to point at those webp files (Bowerbird resolves media
+// every run: each published image is compressed to jpeg and the RO-Crate's image
+// File @ids are rewritten to point at those jpeg files (Bowerbird resolves media
 // by the path the crate states, relative to the crate folder), with every
 // reference to a rewritten @id updated to match. Non-image files are kept as
 // metadata only (no bytes published). Images that fail are dropped from the crate

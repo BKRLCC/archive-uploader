@@ -56,6 +56,7 @@ export interface StaticSiteSettings {
   branch: string
   authorName: string
   authorEmail: string
+  buildHookUrl: string
   hasToken: boolean
 }
 
@@ -64,6 +65,7 @@ export interface StaticSitePushResult {
   branch: string
   repoUrl: string
   filesPushed: number
+  buildHookTriggered: boolean
 }
 
 export interface UpdateStatus {
@@ -185,6 +187,7 @@ export interface Api {
     branch: string
     authorName: string
     authorEmail: string
+    buildHookUrl: string
   }) => Promise<StaticSiteSettings>
   setStaticSiteToken: (token: string) => Promise<{ hasToken: boolean }>
   pushStaticSite: (rootFolder: string) => Promise<StaticSitePushResult>

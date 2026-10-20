@@ -25,6 +25,9 @@ export type StaticSitePushInput = {
   token: string
   authorName: string
   authorEmail: string
+  // When set, POSTed after a successful push to trigger a trusted Netlify
+  // deploy (exempt from the Deploy Request Policy, so no approval prompt).
+  buildHookUrl?: string
 }
 
 export type StaticSitePushResult = {
@@ -32,12 +35,14 @@ export type StaticSitePushResult = {
   branch: string
   repoUrl: string
   filesPushed: number
+  buildHookTriggered: boolean
 }
 
 export async function pushStaticSite(
   input: StaticSitePushInput,
 ): Promise<StaticSitePushResult> {
   const { outputDir, repoUrl, branch, token, authorName, authorEmail } = input
+  const buildHookUrl = input.buildHookUrl?.trim() ?? ''
   const dir = outputDir
 
   // Discard any prior git state so every push is a clean single commit.
@@ -69,5 +74,16 @@ export async function pushStaticSite(
     onAuth: () => ({ username: 'x-access-token', password: token }),
   })
 
-  return { commitOid, branch, repoUrl, filesPushed }
+  let buildHookTriggered = false
+  if (buildHookUrl) {
+    const res = await fetch(buildHookUrl, { method: 'POST' })
+    if (!res.ok) {
+      throw new Error(
+        `Pushed successfully, but the Netlify build hook returned ${res.status}. The deploy was not triggered — check the build hook URL in Settings.`,
+      )
+    }
+    buildHookTriggered = true
+  }
+
+  return { commitOid, branch, repoUrl, filesPushed, buildHookTriggered }
 }

@@ -1092,6 +1092,7 @@ ipcMain.handle('get-static-site-settings', async () => {
     branch: String(settingsStore.get('staticSite.branch', 'main') ?? 'main'),
     authorName: String(settingsStore.get('staticSite.authorName', '') ?? ''),
     authorEmail: String(settingsStore.get('staticSite.authorEmail', '') ?? ''),
+    buildHookUrl: String(settingsStore.get('staticSite.buildHookUrl', '') ?? ''),
     hasToken: getStoredStaticToken() !== '',
   }
 })
@@ -1105,21 +1106,25 @@ ipcMain.handle(
       branch: string
       authorName: string
       authorEmail: string
+      buildHookUrl: string
     },
   ) => {
     const repoUrl = settings.repoUrl.trim()
     const branch = settings.branch.trim() || 'main'
     const authorName = settings.authorName.trim()
     const authorEmail = settings.authorEmail.trim()
+    const buildHookUrl = settings.buildHookUrl.trim()
     settingsStore.set('staticSite.repoUrl', repoUrl)
     settingsStore.set('staticSite.branch', branch)
     settingsStore.set('staticSite.authorName', authorName)
     settingsStore.set('staticSite.authorEmail', authorEmail)
+    settingsStore.set('staticSite.buildHookUrl', buildHookUrl)
     return {
       repoUrl,
       branch,
       authorName,
       authorEmail,
+      buildHookUrl,
       hasToken: getStoredStaticToken() !== '',
     }
   },
@@ -1136,18 +1141,25 @@ ipcMain.handle('push-static-site', async (_event, rootFolder: string) => {
   const repoUrl = String(settingsStore.get('staticSite.repoUrl', '') ?? '')
   const token = getStoredStaticToken()
   if (!repoUrl) {
-    throw new Error('No deploy repo URL set. Add one in Settings → Static site.')
+    throw new Error(
+      'No deploy repo URL set. Add one in Settings → Static site.',
+    )
   }
   if (!token) {
     throw new Error('No deploy token saved. Add one in Settings → Static site.')
   }
-  const branch = String(settingsStore.get('staticSite.branch', 'main') ?? 'main')
+  const branch = String(
+    settingsStore.get('staticSite.branch', 'main') ?? 'main',
+  )
   const authorName =
     String(settingsStore.get('staticSite.authorName', '') ?? '') ||
     'Balachi Publisher'
   const authorEmail =
     String(settingsStore.get('staticSite.authorEmail', '') ?? '') ||
     'noreply@balachi.local'
+  const buildHookUrl = String(
+    settingsStore.get('staticSite.buildHookUrl', '') ?? '',
+  )
   const outputDir = path.join(rootFolder, STATIC_SITE_DIR_NAME)
   return pushStaticSite({
     outputDir,
@@ -1156,6 +1168,7 @@ ipcMain.handle('push-static-site', async (_event, rootFolder: string) => {
     token,
     authorName,
     authorEmail,
+    buildHookUrl,
   })
 })
 

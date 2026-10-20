@@ -47,6 +47,7 @@ export default function SettingsPage() {
   const [branch, setBranch] = useState('main')
   const [authorName, setAuthorName] = useState('')
   const [authorEmail, setAuthorEmail] = useState('')
+  const [buildHookUrl, setBuildHookUrl] = useState('')
   const [hasStaticToken, setHasStaticToken] = useState(false)
   const [staticTokenInput, setStaticTokenInput] = useState('')
   const [staticSaving, setStaticSaving] = useState(false)
@@ -117,6 +118,7 @@ export default function SettingsPage() {
       setBranch(settings.branch)
       setAuthorName(settings.authorName)
       setAuthorEmail(settings.authorEmail)
+      setBuildHookUrl(settings.buildHookUrl)
       setHasStaticToken(settings.hasToken)
     })
   }, [])
@@ -130,11 +132,13 @@ export default function SettingsPage() {
         branch,
         authorName,
         authorEmail,
+        buildHookUrl,
       })
       setRepoUrl(saved.repoUrl)
       setBranch(saved.branch)
       setAuthorName(saved.authorName)
       setAuthorEmail(saved.authorEmail)
+      setBuildHookUrl(saved.buildHookUrl)
       if (staticTokenInput) {
         const { hasToken: nextHasToken } =
           await window.api.setStaticSiteToken(staticTokenInput)
@@ -410,6 +414,19 @@ export default function SettingsPage() {
             autoComplete="off"
             onChange={(e) => {
               setStaticTokenInput(e.target.value)
+              setStaticSaved(false)
+            }}
+          />
+        </label>
+        <label className="publish-settings-field">
+          <span>Build hook URL</span>
+          <input
+            type="url"
+            value={buildHookUrl}
+            placeholder="https://api.netlify.com/build_hooks/…"
+            autoComplete="off"
+            onChange={(e) => {
+              setBuildHookUrl(e.target.value)
               setStaticSaved(false)
             }}
           />

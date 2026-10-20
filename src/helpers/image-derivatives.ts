@@ -26,7 +26,7 @@ export type DerivativeResult = {
 
 export const DEFAULT_DERIVATIVE_OPTIONS: Required<DerivativeOptions> = {
   maxDimension: 1600,
-  format: 'webp',
+  format: 'jpeg',
   quality: 80,
 }
 

@@ -1,12 +1,15 @@
 // Builds the public RO-Crate document that would be deposited. Starting from the
 // hashed publication view, each published image File node is pointed at its
-// derivative (contentUrl/url = derivative key, encodingFormat image/webp, and the
+// derivative (contentUrl/url = derivative key, encodingFormat image/jpeg, and the
 // derivative's size + sha512); every other File node keeps its metadata but has
 // no url/contentUrl, which is the standards-native "described but not retrievable
 // here" state. Pure over its inputs (clones the view). Without a deposit URL the
 // derivative key is used as-is so the document can be previewed offline.
 import type { Crate, CrateNode } from './publication-view'
-import type { DerivativeFormat } from './image-derivatives'
+import {
+  DEFAULT_DERIVATIVE_OPTIONS,
+  type DerivativeFormat,
+} from './image-derivatives'
 import { derivativeKey } from './publish-derivatives'
 import type { ManifestEntry } from './publish-manifest'
 
@@ -47,7 +50,7 @@ export function buildPublicCrate({
   format,
 }: BuildPublicCrateInput): Crate {
   const crate = structuredClone(view)
-  const fmt: DerivativeFormat = format ?? 'webp'
+  const fmt: DerivativeFormat = format ?? DEFAULT_DERIVATIVE_OPTIONS.format
   const mime = DERIVATIVE_MIME[fmt]
   const derivativeByPath = new Map(
     derivatives.map((entry) => [entry.path, entry]),
