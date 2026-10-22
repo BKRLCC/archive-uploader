@@ -26,6 +26,8 @@ export type MaterializeInput = {
   rootFolder: string
   images: MaterializeImage[]
   options?: DerivativeOptions
+  // Called once per image (1-based) before it is compressed, for UI progress.
+  onProgress?: (current: number, total: number) => void
 }
 
 export type MaterializeFailure = { path: string; error: string }
@@ -70,12 +72,15 @@ export async function materializeDerivatives({
   rootFolder,
   images,
   options,
+  onProgress,
 }: MaterializeInput): Promise<MaterializeResult> {
   const format = options?.format ?? DEFAULT_DERIVATIVE_OPTIONS.format
   const entries: ManifestEntry[] = []
   const failures: MaterializeFailure[] = []
 
+  let processed = 0
   for (const image of images) {
+    onProgress?.(++processed, images.length)
     const relative = image.path.replace(/^\.\//, '')
     const sourceAbsolute = path.resolve(rootFolder, relative)
     if (!isPathWithin(rootFolder, sourceAbsolute)) {

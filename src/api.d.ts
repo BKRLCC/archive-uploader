@@ -76,6 +76,11 @@ export interface UpdateStatus {
   message?: string
 }
 
+export interface PublishProgress {
+  current: number
+  total: number
+}
+
 export interface Api {
   getMapboxToken: () => Promise<string | null>
   getRootFolder: () => Promise<string | null>
@@ -88,6 +93,9 @@ export interface Api {
   checkForUpdates: () => Promise<UpdateStatus>
   quitAndInstallUpdate: () => Promise<void>
   onUpdateStatus: (callback: (status: UpdateStatus) => void) => () => void
+  onPublishProgress: (
+    callback: (progress: PublishProgress) => void,
+  ) => () => void
   pickDepictionFile: (archiveFolderPath: string) => Promise<string | null>
   pickFiles: (archiveFolderPath: string) => Promise<string[] | null>
   pickLicenseFile: (archiveFolderPath: string) => Promise<string | null>

@@ -1178,6 +1178,8 @@ ipcMain.handle(
     const { entries, failures } = await materializeDerivatives({
       rootFolder,
       images,
+      onProgress: (current, total) =>
+        mainWindow?.webContents.send('publish-progress', { current, total }),
     })
     // Published image set = freshly built derivatives plus unchanged ones carried
     // over from the prior manifest, so the public crate links every live image.
@@ -1237,7 +1239,13 @@ ipcMain.handle('build-static-site', async (_event, rootFolder: string) => {
       ? (root['identifier'] as string)
       : ''
   const collectionId = rootName || rootIdentifier || path.basename(rootFolder)
-  return exportStaticSite({ crate, rootFolder, collectionId })
+  return exportStaticSite({
+    crate,
+    rootFolder,
+    collectionId,
+    onProgress: (current, total) =>
+      mainWindow?.webContents.send('publish-progress', { current, total }),
+  })
 })
 
 ipcMain.handle(

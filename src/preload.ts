@@ -36,6 +36,18 @@ contextBridge.exposeInMainWorld('api', {
       ipcRenderer.removeListener('update-status', listener)
     }
   },
+  onPublishProgress: (
+    callback: (progress: import('./api').PublishProgress) => void,
+  ): (() => void) => {
+    const listener = (
+      _event: unknown,
+      progress: import('./api').PublishProgress,
+    ) => callback(progress)
+    ipcRenderer.on('publish-progress', listener)
+    return () => {
+      ipcRenderer.removeListener('publish-progress', listener)
+    }
+  },
   pickDepictionFile: (archiveFolderPath: string): Promise<string | null> =>
     ipcRenderer.invoke('pick-depiction-file', archiveFolderPath),
   pickFiles: (archiveFolderPath: string): Promise<string[] | null> =>

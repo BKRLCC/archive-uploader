@@ -37,6 +37,8 @@ export type StaticExportInput = {
   rootFolder: string
   collectionId: string
   options?: DerivativeOptions
+  // Called once per image (1-based) before it is compressed, for UI progress.
+  onProgress?: (current: number, total: number) => void
 }
 
 export type StaticExportFailure = { path: string; error: string }
@@ -88,6 +90,7 @@ export async function exportStaticSite({
   rootFolder,
   collectionId,
   options,
+  onProgress,
 }: StaticExportInput): Promise<StaticExportResult> {
   const format = options?.format ?? DEFAULT_DERIVATIVE_OPTIONS.format
   const outputDir = path.join(rootFolder, STATIC_SITE_DIR_NAME)
@@ -106,8 +109,10 @@ export async function exportStaticSite({
   const idMap = new Map<string, string>()
   const removeIds = new Set<string>()
   let imagesWritten = 0
+  let processed = 0
 
   for (const node of images) {
+    onProgress?.(++processed, images.length)
     const originalId = asString(node['@id'])
     if (!originalId) continue
 
