@@ -53,9 +53,6 @@ export interface StaticSiteResult {
 
 export interface StaticSiteSettings {
   repoUrl: string
-  branch: string
-  authorName: string
-  authorEmail: string
   buildHookUrl: string
   hasToken: boolean
 }
@@ -184,9 +181,6 @@ export interface Api {
   getStaticSiteSettings: () => Promise<StaticSiteSettings>
   setStaticSiteSettings: (settings: {
     repoUrl: string
-    branch: string
-    authorName: string
-    authorEmail: string
     buildHookUrl: string
   }) => Promise<StaticSiteSettings>
   setStaticSiteToken: (token: string) => Promise<{ hasToken: boolean }>

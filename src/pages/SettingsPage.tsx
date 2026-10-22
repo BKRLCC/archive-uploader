@@ -44,9 +44,6 @@ export default function SettingsPage() {
   const [publishSaved, setPublishSaved] = useState(false)
 
   const [repoUrl, setRepoUrl] = useState('')
-  const [branch, setBranch] = useState('main')
-  const [authorName, setAuthorName] = useState('')
-  const [authorEmail, setAuthorEmail] = useState('')
   const [buildHookUrl, setBuildHookUrl] = useState('')
   const [hasStaticToken, setHasStaticToken] = useState(false)
   const [staticTokenInput, setStaticTokenInput] = useState('')
@@ -115,9 +112,6 @@ export default function SettingsPage() {
   useEffect(() => {
     window.api.getStaticSiteSettings().then((settings: StaticSiteSettings) => {
       setRepoUrl(settings.repoUrl)
-      setBranch(settings.branch)
-      setAuthorName(settings.authorName)
-      setAuthorEmail(settings.authorEmail)
       setBuildHookUrl(settings.buildHookUrl)
       setHasStaticToken(settings.hasToken)
     })
@@ -129,15 +123,9 @@ export default function SettingsPage() {
     try {
       const saved = await window.api.setStaticSiteSettings({
         repoUrl,
-        branch,
-        authorName,
-        authorEmail,
         buildHookUrl,
       })
       setRepoUrl(saved.repoUrl)
-      setBranch(saved.branch)
-      setAuthorName(saved.authorName)
-      setAuthorEmail(saved.authorEmail)
       setBuildHookUrl(saved.buildHookUrl)
       if (staticTokenInput) {
         const { hasToken: nextHasToken } =
@@ -365,42 +353,6 @@ export default function SettingsPage() {
             placeholder="https://github.com/your-bot/your-site.git"
             onChange={(e) => {
               setRepoUrl(e.target.value)
-              setStaticSaved(false)
-            }}
-          />
-        </label>
-        <label className="publish-settings-field">
-          <span>Branch</span>
-          <input
-            type="text"
-            value={branch}
-            placeholder="main"
-            onChange={(e) => {
-              setBranch(e.target.value)
-              setStaticSaved(false)
-            }}
-          />
-        </label>
-        <label className="publish-settings-field">
-          <span>Commit author name</span>
-          <input
-            type="text"
-            value={authorName}
-            placeholder="Balachi Publisher"
-            onChange={(e) => {
-              setAuthorName(e.target.value)
-              setStaticSaved(false)
-            }}
-          />
-        </label>
-        <label className="publish-settings-field">
-          <span>Commit author email</span>
-          <input
-            type="email"
-            value={authorEmail}
-            placeholder="noreply@example.org"
-            onChange={(e) => {
-              setAuthorEmail(e.target.value)
               setStaticSaved(false)
             }}
           />

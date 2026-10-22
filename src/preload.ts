@@ -94,9 +94,6 @@ contextBridge.exposeInMainWorld('api', {
     ipcRenderer.invoke('get-static-site-settings'),
   setStaticSiteSettings: (settings: {
     repoUrl: string
-    branch: string
-    authorName: string
-    authorEmail: string
     buildHookUrl: string
   }): Promise<import('./api').StaticSiteSettings> =>
     ipcRenderer.invoke('set-static-site-settings', settings),
