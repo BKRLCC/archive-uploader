@@ -43,11 +43,13 @@ export function buildDownload(outDir: string, helpDir: string): void {
 
   const tag = `v${version}`
   const macUrl = `${RELEASES_BASE}/${tag}/${productName}-darwin-arm64-${version}.zip`
+  const macIntelUrl = `${RELEASES_BASE}/${tag}/${productName}-darwin-x64-${version}.zip`
   const winUrl = `${RELEASES_BASE}/${tag}/${productName}-${version}.Setup.exe`
 
   const replacements: Record<string, string> = {
     '<!--APP_VERSION-->': version,
     '<!--MAC_URL-->': macUrl,
+    '<!--MAC_INTEL_URL-->': macIntelUrl,
     '<!--WIN_URL-->': winUrl,
   }
 

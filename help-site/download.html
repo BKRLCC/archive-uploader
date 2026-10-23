@@ -12,7 +12,8 @@
       This is the hand-editable download page. Edit the prose freely.
       The version number and download links are filled in by the build script
       (download.ts) from package.json — do not edit the placeholder tokens
-      below (<!==APP_VERSION==>, <!==MAC_URL==>, <!==WIN_URL==>).
+      below (<!==APP_VERSION==>, <!==MAC_URL==>, <!==MAC_INTEL_URL==>,
+      <!==WIN_URL==>).
     -->
     <header class="site-header">
       <div class="wrap">
@@ -40,10 +41,19 @@
         <article class="download-card">
           <h3>macOS (Apple Silicon)</h3>
           <p class="download-card-lead">
-            For Macs with an Apple Silicon chip (M1, M2, M3 or newer). If you
-            need the Intel version for older Macs, ask Danny.
+            For Macs with an Apple Silicon chip (M1, M2, M3 or newer).
           </p>
           <a class="button-link" href="<!--MAC_URL-->">
+            Download for macOS (.zip)
+          </a>
+        </article>
+
+        <article class="download-card">
+          <h3>macOS (Intel)</h3>
+          <p class="download-card-lead">
+            For older Macs with an Intel processor.
+          </p>
+          <a class="button-link" href="<!--MAC_INTEL_URL-->">
             Download for macOS (.zip)
           </a>
         </article>
