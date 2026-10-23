@@ -1095,7 +1095,9 @@ const STATIC_SITE_AUTHOR_EMAIL = 'noreply@archive.local'
 ipcMain.handle('get-static-site-settings', async () => {
   return {
     repoUrl: String(settingsStore.get('staticSite.repoUrl', '') ?? ''),
-    buildHookUrl: String(settingsStore.get('staticSite.buildHookUrl', '') ?? ''),
+    buildHookUrl: String(
+      settingsStore.get('staticSite.buildHookUrl', '') ?? '',
+    ),
     hasToken: getStoredStaticToken() !== '',
   }
 })
