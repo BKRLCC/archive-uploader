@@ -15,6 +15,10 @@ import {
 import { resolveEditableEntityType } from '../types/types'
 import { getItemTypeForSheetName } from '../helpers/item-types'
 import { useReferenceLookups } from '../helpers/use-reference-lookups'
+import {
+  useColumnResize,
+  type ResizableColumn,
+} from '../helpers/use-column-resize'
 import './VirtualizedSheetTable.css'
 
 const VIRTUAL_ROW_HEIGHT_PX = 72
@@ -109,6 +113,33 @@ export default function VirtualizedSheetTable({
     (visibleRows.length - windowEnd) * VIRTUAL_ROW_HEIGHT_PX
   const columnCount = 2 + (hasDepiction ? 1 : 0) + visibleIndices.length
 
+  const columns: ResizableColumn[] = [
+    { id: 'edit' },
+    { id: 'select' },
+    ...(hasDepiction
+      ? [{ id: 'depiction', resizable: true, minWidth: 72 }]
+      : []),
+    ...visibleIndices.map((i) => ({ id: `col-${i}`, resizable: true })),
+  ]
+  const { widths, tableWidth, activeColumnId, registerHeader, getHandleProps } =
+    useColumnResize(columns)
+
+  const renderResizeHandle = (column: ResizableColumn) => (
+    <span
+      className={[
+        'col-resize-handle',
+        activeColumnId === column.id ? 'is-active' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      role="separator"
+      aria-orientation="vertical"
+      aria-label="Resize column"
+      tabIndex={0}
+      {...getHandleProps(column)}
+    />
+  )
+
   return (
     <div
       className="table-scroll virtualized-table-scroll"
@@ -123,11 +154,30 @@ export default function VirtualizedSheetTable({
         setViewportHeight(event.currentTarget.clientHeight)
       }}
     >
-      <table className="sheet-table virtualized-table">
+      <table
+        className={[
+          'sheet-table virtualized-table',
+          activeColumnId ? 'is-resizing' : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
+        style={tableWidth ? { width: tableWidth } : undefined}
+      >
+        <colgroup>
+          {columns.map((column) => (
+            <col
+              key={column.id}
+              style={widths ? { width: widths[column.id] } : undefined}
+            />
+          ))}
+        </colgroup>
         <thead>
           <tr>
-            <th className="edit-btn-cell edit-btn-header"></th>
-            <th className="select-row-cell">
+            <th
+              ref={registerHeader('edit')}
+              className="edit-btn-cell edit-btn-header"
+            ></th>
+            <th ref={registerHeader('select')} className="select-row-cell">
               <input
                 type="checkbox"
                 checked={allRowsSelected}
@@ -139,6 +189,7 @@ export default function VirtualizedSheetTable({
             </th>
             {hasDepiction && (
               <th
+                ref={registerHeader('depiction')}
                 className={[
                   'depiction-thumb-header',
                   depictionLayout?.widthClassName,
@@ -147,15 +198,22 @@ export default function VirtualizedSheetTable({
                   .join(' ')}
               >
                 {getFieldDisplayLabel('isRef_image', resolvedSheetType)}
+                {renderResizeHandle(columns[2])}
               </th>
             )}
-            {visibleIndices.map((i) => {
+            {visibleIndices.map((i, position) => {
               const headerName = sheet.headers[i] ?? ''
               const layout = getTableColumnLayout(headerName)
               const className = layout.widthClassName ?? 'col-width-default'
+              const column = columns[2 + (hasDepiction ? 1 : 0) + position]
               return (
-                <th key={i} className={className}>
+                <th
+                  key={i}
+                  ref={registerHeader(column.id)}
+                  className={className}
+                >
                   {getFieldDisplayLabel(headerName, resolvedSheetType)}
+                  {renderResizeHandle(column)}
                 </th>
               )
             })}

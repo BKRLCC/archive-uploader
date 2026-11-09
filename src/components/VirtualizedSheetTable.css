@@ -6,6 +6,49 @@
   table-layout: fixed;
 }
 
+/* Columns can be resized wider than the default 400px cell cap. */
+.sheet-table.virtualized-table th,
+.sheet-table.virtualized-table td {
+  max-width: none;
+}
+
+.sheet-table.virtualized-table.is-resizing {
+  cursor: col-resize;
+  user-select: none;
+}
+
+.col-resize-handle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 8px;
+  cursor: col-resize;
+  touch-action: none;
+  user-select: none;
+}
+
+.col-resize-handle::after {
+  content: '';
+  position: absolute;
+  top: 20%;
+  bottom: 20%;
+  right: 3px;
+  width: 2px;
+  border-radius: 1px;
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.col-resize-handle:hover::after,
+.col-resize-handle:focus-visible::after,
+.col-resize-handle.is-active::after {
+  background: #a62b2b;
+}
+
+.col-resize-handle:focus {
+  outline: none;
+}
+
 .sheet-table.virtualized-table thead th {
   position: sticky;
   top: 0;
