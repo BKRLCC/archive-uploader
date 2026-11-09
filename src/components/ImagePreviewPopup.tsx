@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import React from 'react'
 import PopupOverlay from './PopupOverlay'
-import './ImagePreviewPopup.css'
+import ZoomableImage from './ZoomableImage'
 
 interface ImagePreviewPopupProps {
   isOpen: boolean
@@ -17,11 +17,7 @@ const ImagePreviewPopup: React.FC<ImagePreviewPopupProps> = ({
 }) => {
   return (
     <PopupOverlay isOpen={isOpen} onClose={onClose}>
-      <img
-        src={imageUrl}
-        alt={altText || 'Image preview'}
-        className="image-preview"
-      />
+      <ZoomableImage src={imageUrl} alt={altText} />
     </PopupOverlay>
   )
 }
