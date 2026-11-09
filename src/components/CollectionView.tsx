@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import type { SheetData } from '../api'
 import BulkAddPopup from './BulkAddPopup'
 import BulkAddListPopup from './BulkAddListPopup'
@@ -7,38 +7,20 @@ import EditDrawer from './EditDrawer'
 import EditRootDatasetForm from './EditRootDatasetForm'
 import Drawer from './Drawer'
 import OverflowMenu from './OverflowMenu'
-import ClickableImagePreview from './ClickableImagePreview'
 import InfoButtonWithTooltip from './InfoButtonWithTooltip'
-import ReferenceCell, {
-  normalizeReferenceId,
-  type ReferenceEntity,
-} from './ReferenceCell'
-import { getDepictionThumbnailRelativePath } from '../config/depiction-config'
-import { useAppDispatch, useAppSelector } from '../ducks/hooks'
-import { removePeopleByIds, upsertPerson, selectPeople } from '../ducks/people'
+import VirtualizedSheetTable from './VirtualizedSheetTable'
+import { useAppDispatch } from '../ducks/hooks'
+import { removePeopleByIds, upsertPerson } from '../ducks/people'
 import {
   removeOrganizationsByIds,
   upsertOrganization,
-  selectOrganizations,
 } from '../ducks/organizations'
-import { selectPlaces } from '../ducks/places'
-import { selectLanguages } from '../ducks/languages'
 import { loadTagVocabulariesFromFolder } from '../ducks/tags-loader'
 import { setTagVocabularies } from '../ducks/tags'
 import { getFieldDisplayLabel } from '../config/field-labels'
 import { parseHasPartPaths } from '../helpers/file-linkage'
 import { UiIcons } from '../config/icons'
-import {
-  getControlledVocabularyForField,
-  isMultiSelectField,
-} from '../config/field-vocabularies'
 import type { Person, Organization } from '../types/types'
-import { resolveEditableEntityType } from '../types/types'
-import { getItemTypeForSheetName } from '../helpers/item-types'
-import {
-  getTableColumnLayout,
-  isHiddenTableColumn,
-} from '../config/table-column-layout'
 import { DRAWER_WIDTH } from '../config/ui-config'
 
 type SheetState = SheetData | null | 'empty' | 'missing'
@@ -188,9 +170,6 @@ interface Props {
   xlsxPath: string
 }
 
-const VIRTUAL_ROW_HEIGHT_PX = 72
-const VIRTUAL_OVERSCAN_ROWS = 10
-
 export default function CollectionView({ xlsxPath }: Props) {
   const dispatch = useAppDispatch()
   const [sheetNames, setSheetNames] = useState<string[]>([])
@@ -214,68 +193,13 @@ export default function CollectionView({ xlsxPath }: Props) {
   const [populateBusy, setPopulateBusy] = useState(false)
   const [bulkFeedback, setBulkFeedback] = useState('')
   const [bulkActionFeedback, setBulkActionFeedback] = useState('')
-  const [tableScrollTop, setTableScrollTop] = useState(0)
-  const [tableViewportHeight, setTableViewportHeight] = useState(420)
 
-  const tableScrollRef = useRef<HTMLDivElement | null>(null)
   const loadRequestRef = useRef(0)
   // Tracks whether a pointer interaction began inside the drawer, so a text
   // selection that drags past the drawer edge doesn't count as a backdrop click.
   const pointerDownInsideDrawerRef = useRef(false)
 
   const folder = xlsxPath.replace(/[/\\][^/\\]+$/, '')
-
-  const [rootFolder, setRootFolder] = useState<string | null>(null)
-
-  useEffect(() => {
-    let cancelled = false
-    window.api.getRootFolder().then((value) => {
-      if (!cancelled) setRootFolder(value)
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  const people = useAppSelector(selectPeople)
-  const places = useAppSelector(selectPlaces)
-  const languages = useAppSelector(selectLanguages)
-  const organizations = useAppSelector(selectOrganizations)
-  const referenceLookups = useMemo(() => {
-    const build = (
-      items: Array<{ '@id': string; name?: string; isRef_image?: string }>,
-    ): Map<string, ReferenceEntity> => {
-      const map = new Map<string, ReferenceEntity>()
-      for (const item of items) {
-        const id = String(item['@id'] ?? '').trim()
-        if (!id) continue
-        map.set(normalizeReferenceId(id), {
-          id,
-          name: String(item.name ?? ''),
-          depiction: item.isRef_image,
-        })
-      }
-      return map
-    }
-    return {
-      People: build(people),
-      Places: build(places),
-      Languages: build(languages),
-      Organization: build(organizations),
-    } as Record<string, Map<string, ReferenceEntity>>
-  }, [people, places, languages, organizations])
-
-  // Referenced entities are global metadata stored under fixed root subfolders;
-  // their depiction/thumbnail paths are relative to those folders, not the archive.
-  const referenceFolders = useMemo((): Record<string, string | null> => {
-    const base = rootFolder ? rootFolder.replace(/[/\\]+$/, '') : null
-    return {
-      People: base ? `${base}/People` : null,
-      Places: base ? `${base}/Places` : null,
-      Languages: base ? `${base}/Languages` : null,
-      Organization: base ? `${base}/Organisations` : null,
-    }
-  }, [rootFolder])
 
   const clearSelection = useCallback(() => {
     setSelectedRows(new Set())
@@ -390,13 +314,11 @@ export default function CollectionView({ xlsxPath }: Props) {
     setPopulateFeedback('')
     setBulkFeedback('')
     setBulkActionFeedback('')
-    setTableScrollTop(0)
     loadAll()
   }, [closeDrawer, loadAll])
 
   useEffect(() => {
     clearSelection()
-    setTableScrollTop(0)
   }, [activeTab, clearSelection])
 
   // ── Populate Files tab ──────────────────────────────────────────────────────
@@ -542,231 +464,22 @@ export default function CollectionView({ xlsxPath }: Props) {
       return <p className="items-state">This tab is empty.</p>
     if (!sheet) return <p className="items-state">Loading…</p>
 
-    const resolvedSheetType = resolveEditableEntityType(
-      getItemTypeForSheetName(sheetName),
-    )
-
-    const depictionIndex = sheet.headers.indexOf('isRef_image')
-    const hasDepiction = depictionIndex !== -1
-    const idIndex = sheet.headers.findIndex((header) => header === '@id')
-    const visibleRows = sheet.rows
-      .map((row, rowIndex) => ({ row, rowIndex }))
-      .filter(({ row }) => {
-        const hasAnyValue = row.some((cell) => String(cell ?? '').trim() !== '')
-        if (!hasAnyValue) return false
-
-        // For entity-style sheets, @id is required. Hide partial rows that have
-        // no identifier so stale/invalid rows from prior bugs do not appear.
-        if (idIndex >= 0) {
-          return String(row[idIndex] ?? '').trim() !== ''
-        }
-
-        return true
-      })
-    const visibleRowIndices = visibleRows.map(({ rowIndex }) => rowIndex)
-    const visibleRowIndexSet = new Set(visibleRowIndices)
-    const selectedVisibleRowIndices = Array.from(selectedRows)
-      .filter((rowIndex) => visibleRowIndexSet.has(rowIndex))
-      .sort((a, b) => a - b)
-    const selectedCount = selectedVisibleRowIndices.length
-    const allRowsSelected =
-      visibleRows.length > 0 && selectedCount === visibleRows.length
-
-    const visibleIndices = sheet.headers
-      .map((h, i) => ({ h, i }))
-      .filter(({ h }) => !isHiddenTableColumn(h) && h !== 'isRef_image')
-      .map(({ i }) => i)
-    const depictionLayout = hasDepiction
-      ? getTableColumnLayout('isRef_image')
-      : null
-
-    const visibleCount = Math.ceil(tableViewportHeight / VIRTUAL_ROW_HEIGHT_PX)
-    const windowStart = Math.max(
-      0,
-      Math.floor(tableScrollTop / VIRTUAL_ROW_HEIGHT_PX) -
-        VIRTUAL_OVERSCAN_ROWS,
-    )
-    const windowEnd = Math.min(
-      visibleRows.length,
-      windowStart + visibleCount + VIRTUAL_OVERSCAN_ROWS * 2,
-    )
-    const windowedRows = visibleRows.slice(windowStart, windowEnd)
-    const topSpacerHeight = windowStart * VIRTUAL_ROW_HEIGHT_PX
-    const bottomSpacerHeight =
-      (visibleRows.length - windowEnd) * VIRTUAL_ROW_HEIGHT_PX
-    const columnCount = 2 + (hasDepiction ? 1 : 0) + visibleIndices.length
-
     return (
-      <div
-        className="table-scroll virtualized-table-scroll"
-        ref={tableScrollRef}
-        onScroll={(event) => {
-          setTableScrollTop(event.currentTarget.scrollTop)
-          setTableViewportHeight(event.currentTarget.clientHeight)
+      <VirtualizedSheetTable
+        key={sheetName}
+        sheet={sheet}
+        sheetName={sheetName}
+        folder={folder}
+        selectedRows={selectedRows}
+        onToggleRow={toggleRowSelection}
+        onToggleAllRows={toggleAllRows}
+        onEditRow={(rowIndex, row) => {
+          if (!confirmDiscard()) return
+          setEditingRootDataset(false)
+          setAddingItem(false)
+          setEditingRow({ rowIndex, row, sheetName })
         }}
-      >
-        <table className="sheet-table virtualized-table">
-          <thead>
-            <tr>
-              <th className="edit-btn-cell edit-btn-header"></th>
-              <th className="select-row-cell">
-                <input
-                  type="checkbox"
-                  checked={allRowsSelected}
-                  onChange={(e) => {
-                    toggleAllRows(visibleRowIndices, e.target.checked)
-                  }}
-                  aria-label="Select all rows"
-                />
-              </th>
-              {hasDepiction && (
-                <th
-                  className={[
-                    'depiction-thumb-header',
-                    depictionLayout?.widthClassName,
-                  ]
-                    .filter(Boolean)
-                    .join(' ')}
-                >
-                  {getFieldDisplayLabel('isRef_image', resolvedSheetType)}
-                </th>
-              )}
-              {visibleIndices.map((i) => {
-                const headerName = sheet.headers[i] ?? ''
-                const layout = getTableColumnLayout(headerName)
-                const className = layout.widthClassName ?? 'col-width-default'
-                return (
-                  <th key={i} className={className}>
-                    {getFieldDisplayLabel(headerName, resolvedSheetType)}
-                  </th>
-                )
-              })}
-            </tr>
-          </thead>
-          <tbody>
-            {topSpacerHeight > 0 && (
-              <tr className="virtual-spacer-row" aria-hidden="true">
-                <td colSpan={columnCount} style={{ height: topSpacerHeight }} />
-              </tr>
-            )}
-
-            {windowedRows.map(({ row, rowIndex }) => (
-              <tr
-                key={rowIndex}
-                className={[
-                  selectedRows.has(rowIndex) ? 'selected-row' : '',
-                  rowIndex % 2 === 0 ? 'row-even' : 'row-odd',
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-              >
-                <td className="edit-btn-cell">
-                  <button
-                    type="button"
-                    className="row-edit-btn"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      if (!confirmDiscard()) return
-                      setEditingRootDataset(false)
-                      setAddingItem(false)
-                      setEditingRow({ rowIndex, row, sheetName })
-                    }}
-                    aria-label={`Edit row ${rowIndex + 1}`}
-                    title="Edit row"
-                  >
-                    ✏️
-                  </button>
-                </td>
-                <td className="select-row-cell">
-                  <input
-                    type="checkbox"
-                    checked={selectedRows.has(rowIndex)}
-                    onChange={(e) => {
-                      e.stopPropagation()
-                      toggleRowSelection(rowIndex, e.target.checked)
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                    aria-label={`Select row ${rowIndex + 1}`}
-                  />
-                </td>
-                {hasDepiction && (
-                  <td
-                    className={[
-                      'depiction-thumb-cell',
-                      depictionLayout?.widthClassName,
-                    ]
-                      .filter(Boolean)
-                      .join(' ')}
-                  >
-                    {(() => {
-                      const depictionPath = String(
-                        row[depictionIndex] ?? '',
-                      ).trim()
-                      const thumbnailPath =
-                        getDepictionThumbnailRelativePath(depictionPath)
-                      if (!thumbnailPath) return null
-
-                      const folderUrl = folder.replace(/\\/g, '/')
-                      const canonicalUrl = `localfile://${folderUrl}/${depictionPath.replace(/^[/\\]+/, '').replace(/\\/g, '/')}`
-                      return (
-                        <ClickableImagePreview
-                          imageUrl={`localfile://${folderUrl}/${thumbnailPath}`}
-                          popupImageUrl={canonicalUrl}
-                          altText="Depiction Thumbnail"
-                        />
-                      )
-                    })()}
-                  </td>
-                )}
-                {visibleIndices.map((i) => {
-                  const headerName = sheet.headers[i] ?? ''
-                  const layout = getTableColumnLayout(headerName)
-                  const className = [
-                    layout.widthClassName ?? 'col-width-default',
-                    layout.wrapMode === 'clamp-2'
-                      ? 'col-wrap-clamp-2'
-                      : 'col-wrap-nowrap',
-                  ]
-                    .filter(Boolean)
-                    .join(' ')
-                  const rawValue = row[i] ?? ''
-                  const vocab = getControlledVocabularyForField(headerName)
-                  const refMap = vocab ? referenceLookups[vocab] : undefined
-                  const refFolder = vocab ? referenceFolders[vocab] : undefined
-                  if (refMap && refFolder && rawValue.trim()) {
-                    const ids = isMultiSelectField(headerName)
-                      ? rawValue.split(/,\s*/).filter(Boolean)
-                      : [rawValue.trim()]
-                    return (
-                      <td key={i} className={className}>
-                        <ReferenceCell
-                          ids={ids}
-                          entities={refMap}
-                          folder={refFolder}
-                        />
-                      </td>
-                    )
-                  }
-                  return (
-                    <td key={i} className={className}>
-                      <span className="table-cell-text">{rawValue}</span>
-                    </td>
-                  )
-                })}
-              </tr>
-            ))}
-
-            {bottomSpacerHeight > 0 && (
-              <tr className="virtual-spacer-row" aria-hidden="true">
-                <td
-                  colSpan={columnCount}
-                  style={{ height: bottomSpacerHeight }}
-                />
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      />
     )
   }
 

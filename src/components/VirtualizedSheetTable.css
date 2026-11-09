@@ -1,0 +1,161 @@
+.virtualized-table-scroll {
+  height: min(62vh, 560px);
+}
+
+.sheet-table.virtualized-table {
+  table-layout: fixed;
+}
+
+.sheet-table.virtualized-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: #fff;
+  outline: 1px solid rgba(0, 0, 0, 0.12);
+  outline-offset: -1px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.sheet-table tr.selected-row {
+  background: rgba(166, 43, 43, 0.08);
+}
+
+.sheet-table tbody tr.row-even {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+/* Must match VIRTUAL_ROW_HEIGHT_PX, which the component sets inline. */
+.sheet-table.virtualized-table tbody tr {
+  height: var(--virtual-row-height, 72px);
+}
+
+.virtual-spacer-row td {
+  border: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+.edit-btn-cell {
+  width: 1.8em;
+  min-width: 1.8em;
+  text-align: center;
+  cursor: default;
+  padding-left: 0.3em !important;
+  padding-right: 0.3em !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+
+.edit-btn-header {
+  padding-top: 0.4em !important;
+  padding-bottom: 0.4em !important;
+}
+
+.row-edit-btn {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.95em;
+  line-height: 1;
+  padding: 0;
+  color: #4a4a4a;
+}
+
+.row-edit-btn:hover {
+  color: #a62b2b;
+}
+
+.select-row-cell {
+  width: 2em;
+  min-width: 2em;
+  text-align: center;
+  padding-left: 0.3em;
+  padding-right: 0.3em;
+}
+
+.select-row-cell input {
+  width: auto;
+  margin: 0;
+}
+
+.depiction-thumb-header {
+  min-width: 72px;
+}
+
+.depiction-thumb-cell {
+  min-width: 72px;
+  padding: 0.25em !important;
+}
+
+.depiction-thumb-cell .clickable-thumbnail {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  cursor: zoom-in;
+}
+
+.sheet-table .col-width-name {
+  width: 12rem;
+}
+
+.sheet-table .col-width-description {
+  width: 16rem;
+}
+
+.sheet-table .col-width-files {
+  width: 18rem;
+}
+
+.sheet-table .col-width-depiction {
+  width: 60px;
+}
+
+.sheet-table .col-width-date {
+  width: 9rem;
+}
+
+.sheet-table .col-width-xs {
+  width: 5rem;
+}
+
+.sheet-table .col-width-default {
+  width: 8rem;
+}
+
+.sheet-table .col-width-people {
+  width: 11rem;
+}
+
+.sheet-table .col-width-language {
+  width: 10rem;
+}
+
+.sheet-table .col-width-tag {
+  width: 10rem;
+}
+
+.sheet-table .col-width-medium {
+  width: 10rem;
+}
+
+.sheet-table .table-cell-text {
+  display: block;
+}
+
+.sheet-table td.col-wrap-nowrap .table-cell-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sheet-table td.col-wrap-clamp-2 .table-cell-text {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.25;
+  max-height: 3.75em;
+}
